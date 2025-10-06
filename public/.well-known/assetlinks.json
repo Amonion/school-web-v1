@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.schoolingsocial.schooling",
+      "sha256_cert_fingerprints": [
+        "81:C3:8E:DE:91:4F:5F:16:82:7E:01:41:F1:DE:FB:36:61:1F:9A:5D:1B:CB:96:7A:C0:28:E1:AE:19:A4:B2:AB"
+      ]
+    }
+  }
+]
