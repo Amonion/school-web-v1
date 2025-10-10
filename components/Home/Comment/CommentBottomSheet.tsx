@@ -143,7 +143,7 @@ const CommentBottomSheet = () => {
               className={`${
                 !isMobile
                   ? 'w-full bottom-0 justify-center flex'
-                  : 'right-0 w-full mb-[55px]'
+                  : 'right-0 w-full'
               } fixed bottom-0 z-40 left-0 flex flex-col max-h-[70%]`}
               initial={{ y: '100%' }}
               animate={{ y: 0 }}

@@ -12,6 +12,7 @@ import { useTheme } from '@/context/ThemeProvider'
 import PictureDisplay from '@/components/Home/Media/PictureDisplay'
 import ProfileBottomSheet from '@/components/Home/Profile/ProfileBottomSheet'
 import UserPostStore from '@/src/zustand/post/UserPost'
+import UserMediaHolder from '@/components/Home/Media/UserMediaHolder'
 
 const Profile = ({ children }: { children: React.ReactNode }) => {
   const { username } = useParams()
@@ -38,7 +39,7 @@ const Profile = ({ children }: { children: React.ReactNode }) => {
 
   const findPosts = async () => {
     getPosts(
-      `/posts/?username=${username}&myId=${user?._id}&ordering=-createdAt&postType=main&page_size=${page_size}&page=${currentPage}`,
+      `/posts/user/?username=${username}&myId=${user?._id}&ordering=-createdAt&postType=main&page_size=${page_size}&page=${currentPage}`,
       setMessage
     )
   }
@@ -259,6 +260,7 @@ const Profile = ({ children }: { children: React.ReactNode }) => {
           </div>
         </div>
       </div>
+      <UserMediaHolder />
     </div>
   )
 }

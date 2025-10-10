@@ -8,21 +8,38 @@ import { useTheme } from '@/context/ThemeProvider'
 export default function MobileNav() {
   const pathname = usePathname()
   const { theme } = useTheme()
-
   // const [unread, setUnread] = useState(0);
   const { totalUnread } = FriendStore()
 
   return (
     <div className="border-t-2 h-[55px] border-t-[var(--border-color)] flex bg-[var(--white)] justify-between items-center py-2 px-2 fixed bottom-0 w-full left-0 z-20 sm:hidden">
-      <Link href={`/home`} className="mobile_navs">
-        <i
-          className={`bi bi-house text-lg ${
-            !pathname.includes('question') && !pathname.includes('friends')
-              ? 'text-[var(--custom)]'
-              : 'text-[var(--text-primary)]'
-          }`}
-        ></i>
-      </Link>
+      {pathname === '/home' ? (
+        <div className="mobile_navs">
+          <i
+            onClick={() => {
+              window.scrollTo({
+                top: 0,
+                behavior: 'smooth',
+              })
+            }}
+            className={`bi bi-house text-lg ${
+              !pathname.includes('question') && !pathname.includes('friends')
+                ? 'text-[var(--custom)]'
+                : 'text-[var(--text-primary)]'
+            }`}
+          ></i>
+        </div>
+      ) : (
+        <Link href={`/home`} className="mobile_navs">
+          <i
+            className={`bi bi-house text-lg ${
+              !pathname.includes('question') && !pathname.includes('friends')
+                ? 'text-[var(--custom)]'
+                : 'text-[var(--text-primary)]'
+            }`}
+          ></i>
+        </Link>
+      )}
       {/* <span className="mobile_navs">
         <i className="bi bi-camera-video text-lg text-[var(--text-primary)]"></i>
       </span> */}

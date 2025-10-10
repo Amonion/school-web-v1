@@ -30,20 +30,21 @@ const OnboardingCarousel = () => {
   }, [])
 
   return (
-    <div className="card_body fixed h-[100vh] left-0 top-0 w-full overflow-hidden ">
+    <div className="fixed card_body left-0 top-0 w-full overflow-hidden ">
       <UserResponse />
 
-      <div className="max-w-[600px] mx-auto my-auto">
+      <div className="max-w-[600px]  relative mx-auto my-auto h-[100vh]">
         <Swiper
           modules={[Pagination, Navigation]}
           spaceBetween={50}
           slidesPerView={1}
           onSwiper={(swiper) => (swiperRef.current = swiper)}
           onSlideChange={(swiper) => setCurrentIndex(swiper.activeIndex)}
-          style={{ height: '100%', overflowY: 'auto' }}
+          style={{ overflowY: 'auto' }}
           allowTouchMove={false}
+          className="flex-1 h-full"
         >
-          <SwiperSlide>
+          <SwiperSlide className="h-full">
             <Welcome />
           </SwiperSlide>
 
@@ -56,7 +57,7 @@ const OnboardingCarousel = () => {
           </SwiperSlide>
         </Swiper>
 
-        <div className="flex justify-between items-center">
+        <div className="flex min-h-[100px] z-10 px-2 absolute bottom-0 w-full left-0 justify-between items-center">
           {currentIndex > 0 && (
             <button
               className="custom_btn"

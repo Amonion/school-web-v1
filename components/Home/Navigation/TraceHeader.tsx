@@ -43,7 +43,7 @@ export default function TraceHeader() {
   }
 
   return (
-    <div className="custom_container relative">
+    <div className="bg-[var(--primary)] w-full relative">
       <div className="flex items-center mb-1 w-full overflow-clip">
         <span onClick={toggleVNav} className="headerCircle hfs">
           <i className="bi bi-text-left text-lg text-[var(--text-primary)]"></i>
@@ -83,7 +83,7 @@ export default function TraceHeader() {
       </div>
       {!pathName.includes('/home/questions') && (
         <div className="overflow-auto w-full flex-1">
-          <div className="justify-center pl-2 flex pb-2">
+          <div className="justify-center pl-2 flex">
             <Link
               href={'/home/trace'}
               className={`${
@@ -130,7 +130,6 @@ export default function TraceHeader() {
       <PostDropList />
       <PeopleDropList />
       <AccountDropList />
-      {/* <SchoolDropList /> */}
     </div>
   )
 }

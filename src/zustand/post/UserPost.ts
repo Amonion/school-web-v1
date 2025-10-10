@@ -29,15 +29,15 @@ interface PostState {
   currentPage: number
   currentIndex: number
   postResults: Post[]
-  mediaResults: Media[]
-  selectedMedia: Media | null
+  userMediaResults: Media[]
+  selectedUserMedia: Media | null
   isMobile: boolean
   fitMode: boolean
   loading: boolean
   selectedPosts: Post[]
   searchResult: Post[]
   isAllChecked: boolean
-  postForm: Post
+  userPostForm: Post
   setForm: (key: keyof Post, value: Post[keyof Post]) => void
   resetForm: () => void
   getPosts: (
@@ -89,7 +89,7 @@ interface PostState {
   setIsMobile: (mobile: boolean) => void
   setFitMode: (mobile: boolean) => void
   setCurrentIndex: (index: number) => void
-  setSelectedMedia: (media: Media | null) => void
+  setSelectedUserMedia: (media: Media | null) => void
 }
 
 const UserPostStore = create<PostState>((set, get) => ({
@@ -99,8 +99,8 @@ const UserPostStore = create<PostState>((set, get) => ({
   currentIndex: 0,
   page_size: 20,
   postResults: [],
-  mediaResults: [],
-  selectedMedia: null,
+  userMediaResults: [],
+  selectedUserMedia: null,
   loading: false,
   error: null,
   selectedPosts: [],
@@ -108,25 +108,25 @@ const UserPostStore = create<PostState>((set, get) => ({
   isMobile: false,
   fitMode: false,
   isAllChecked: false,
-  postForm: PostEmpty,
+  userPostForm: PostEmpty,
   setForm: (key, value) =>
     set((state) => ({
-      postForm: {
-        ...state.postForm,
+      userPostForm: {
+        ...state.userPostForm,
         [key]: value,
       },
     })),
   resetForm: () =>
     set({
-      postForm: PostEmpty,
+      userPostForm: PostEmpty,
     }),
   setIsMobile: (mobile: boolean) =>
     set({
       isMobile: mobile,
     }),
-  setSelectedMedia: (media) =>
+  setSelectedUserMedia: (media) =>
     set({
-      selectedMedia: media,
+      selectedUserMedia: media,
     }),
   setFitMode: (mode: boolean) =>
     set({
@@ -143,11 +143,11 @@ const UserPostStore = create<PostState>((set, get) => ({
       isChecked: false,
       isActive: false,
     }))
-    const mediaResults: Media[] = []
+    const userMediaResults: Media[] = []
     updatedResults.forEach((post) => {
       if (Array.isArray(post.media) && post.media.length > 0) {
         post.media.forEach((mediaItem) => {
-          mediaResults.push({
+          userMediaResults.push({
             postId: post._id,
             src: mediaItem.source,
             preview: mediaItem.preview,
@@ -164,7 +164,7 @@ const UserPostStore = create<PostState>((set, get) => ({
       count,
       page_size,
       postResults: updatedResults,
-      mediaResults,
+      userMediaResults,
     })
   },
 
@@ -181,11 +181,11 @@ const UserPostStore = create<PostState>((set, get) => ({
         (post) => !existingIds.has(post._id)
       )
 
-      const mediaResults: Media[] = []
+      const userMediaResults: Media[] = []
       updatedResults.forEach((post) => {
         if (Array.isArray(post.media) && post.media.length > 0) {
           post.media.forEach((mediaItem) => {
-            mediaResults.push({
+            userMediaResults.push({
               postId: post._id,
               src: mediaItem.source,
               preview: mediaItem.preview,
@@ -201,7 +201,7 @@ const UserPostStore = create<PostState>((set, get) => ({
         count,
         page_size,
         postResults: [...state.postResults, ...uniqueResults],
-        mediaResults: [...state.mediaResults, ...mediaResults],
+        userMediaResults: [...state.userMediaResults, ...userMediaResults],
       }
     })
   },
@@ -227,7 +227,7 @@ const UserPostStore = create<PostState>((set, get) => ({
       const data = response?.data
       if (data) {
         set({
-          postForm: { ...UserPostStore.getState().postForm, ...data },
+          userPostForm: { ...UserPostStore.getState().userPostForm, ...data },
           loading: false,
         })
       }

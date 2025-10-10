@@ -417,24 +417,29 @@ export const formatRelativeDate = (dateInput: Date | string): string => {
   const hour = 3600
   const day = 86400
   const week = 604800
+  const month = 2592000 // ~30 days
+  const year = 31536000 // 365 days
 
   if (diffInSeconds < minute) {
     return 'now'
   } else if (diffInSeconds < hour) {
     const minutes = Math.floor(diffInSeconds / minute)
-    return minutes === 1 ? `${minutes} min` : `${minutes} mins`
+    return `${minutes} min${minutes !== 1 ? 's' : ''}`
   } else if (diffInSeconds < day) {
     const hours = Math.floor(diffInSeconds / hour)
-    return hours === 1 ? `${hours} hr` : `${hours} hrs`
+    return `${hours} hr${hours !== 1 ? 's' : ''}`
   } else if (diffInSeconds < week) {
     const days = Math.floor(diffInSeconds / day)
-    return days === 1 ? `${days} day` : `${days} days`
+    return `${days} day${days !== 1 ? 's' : ''}`
+  } else if (diffInSeconds < month) {
+    const weeks = Math.floor(diffInSeconds / week)
+    return `${weeks} wk${weeks !== 1 ? 's' : ''}`
+  } else if (diffInSeconds < year) {
+    const months = Math.floor(diffInSeconds / month)
+    return `${months} mo${months !== 1 ? 's' : ''}`
   } else {
-    // 7 days or more — return as dd/mm/yy
-    const dd = String(date.getDate()).padStart(2, '0')
-    const mm = String(date.getMonth() + 1).padStart(2, '0') // Month is 0-based
-    const yy = String(date.getFullYear()).slice(-2)
-    return `${dd}/${mm}/${yy}`
+    const years = Math.floor(diffInSeconds / year)
+    return `${years} yr${years !== 1 ? 's' : ''}`
   }
 }
 

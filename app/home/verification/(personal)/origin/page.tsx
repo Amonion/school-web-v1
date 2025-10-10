@@ -47,25 +47,6 @@ export default function Origin() {
     BioUserStore.setState({ bioUserForm: bioUser })
   }, [bioUser])
 
-  // useEffect(() => {
-  //   if (bioUserForm.homeCountry) {
-  //     getStates(
-  //       `/places/state/?country=${bioUserForm.homeCountry}&page_size=350&field=state&sort=state`,
-  //       setMessage
-  //     )
-  //   }
-  //   setForm('homeState', '')
-  // }, [bioUserForm.homeCountry])
-
-  // useEffect(() => {
-  //   if (bioUserForm.homeState) {
-  //     getArea(
-  //       `/places/area/?state=${bioUserForm.homeState}&page_size=350&field=area&sort=area`
-  //     )
-  //   }
-  //   setForm('homeArea', '')
-  // }, [bioUserForm.homeState])
-
   useEffect(() => {
     if (bioUser?.residentCountry) {
       getStates(

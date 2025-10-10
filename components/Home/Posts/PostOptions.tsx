@@ -90,7 +90,7 @@ const PostOptions: React.FC<PostProps> = ({ post }) => {
 
   return (
     <div className="relative ml-auto ">
-      <div className="cursor-pointer flex justify-center items-center w-8 h-8 rounded-full bg-[var(--white-gray)]">
+      <div className="cursor-pointer flex justify-center items-center">
         <i
           onClick={() => toggleActive(post._id)}
           className="bi bi-three-dots-vertical"

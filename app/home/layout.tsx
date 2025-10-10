@@ -12,7 +12,7 @@ import { NavStore } from '@/src/zustand/notification/Navigation'
 import PostBox from '@/components/Home/Posts/PostBox'
 import MainHeader from '@/components/Home/Navigation/MainHeader'
 import MobileNav from '@/components/Home/Navigation/MobileNav'
-import PostMediaHolder from '@/components/Home/Media/PostMediaHolder'
+import CommentBottomSheet from '@/components/Home/Comment/CommentBottomSheet'
 
 export default function RootLayout({
   children,
@@ -70,14 +70,14 @@ export default function RootLayout({
       <UserResponse />
       <UserAlert />
       {displayPostBox && <PostBox />}
-      <PostMediaHolder />
+      <CommentBottomSheet />
 
       <div className=" w-full flex justify-center">
         <div className="custom_container">
           <div className="flex w-full">
             <VerticalNavigation />
 
-            <div className="flex-1 overflow-x-auto sm:overflow-hidden relative sm:ml-5 md:mr-5 sm:border-l border-l-[var(--border)] md:border-r border-r-[var(--border)] flex flex-col">
+            <div className="flex-1 overflow-x-auto sm:overflow-hidden relative sm:ml-5 md:mr-5 flex flex-col">
               <MainHeader />
 
               <div

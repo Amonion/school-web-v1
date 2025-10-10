@@ -1,7 +1,7 @@
 'use client'
-import CommentBottomSheet from '@/components/Home/Comment/CommentBottomSheet'
-import HomeNews from '@/components/Home/News/HomeNews'
-import Stories from '@/components/Home/News/Stories'
+import HomeMediaHolder from '@/components/Home/Media/HomeMediaHolder'
+import HomeNews from '@/components/News/HomeNews'
+import Stories from '@/components/News/Stories'
 import Post from '@/components/Home/Posts/Post'
 import { NavStore } from '@/src/zustand/notification/Navigation'
 import { useEffect } from 'react'
@@ -22,17 +22,14 @@ const Home: React.FC = () => {
     const handleTouchMove = (e: TouchEvent) => {
       const currentY = e.touches[0].clientY
       const scrollY = window.scrollY
-
-      // At the very top, and dragging down
       if (scrollY === 0 && currentY > startY + 50) {
-        e.preventDefault() // stop Safari pull-to-refresh
+        e.preventDefault()
         runMyFunction()
       }
     }
 
     const runMyFunction = () => {
       console.log('✅ Custom pull-to-refresh triggered')
-      // e.g. refetch data
     }
 
     document.addEventListener('touchstart', handleTouchStart, {
@@ -47,11 +44,10 @@ const Home: React.FC = () => {
   }, [])
   return (
     <>
+      <HomeMediaHolder />
       <HomeNews />
       <Stories />
       <Post />
-
-      <CommentBottomSheet />
 
       <div
         onClick={togglePostBox}

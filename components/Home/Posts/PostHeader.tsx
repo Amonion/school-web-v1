@@ -42,12 +42,12 @@ const PostHeader: React.FC<PostProps> = ({ post }) => {
       onClick={(e) => {
         e.stopPropagation()
       }}
-      className="flex mb-[6px] cursor-default"
+      className="flex px-2 mb-[6px] cursor-default"
     >
       {
         <Link
           href={`/home/profile/${post.username}`}
-          className="w-12 h-12 rounded-full overflow-hidden mr-3 border border-[var(--border)]"
+          className="w-10 h-10 rounded-full overflow-hidden mr-3 border border-[var(--border)]"
         >
           <Image
             style={{ height: '100%', objectFit: 'cover' }}
@@ -63,7 +63,7 @@ const PostHeader: React.FC<PostProps> = ({ post }) => {
       }
       <div className="flex-1">
         <div className="flex items-start flex-wrap">
-          <div className="flex items-center">
+          <div className="flex items-center mb-2">
             <Link
               href={`/home/profile/${post.username}`}
               className="account_name mr-2"

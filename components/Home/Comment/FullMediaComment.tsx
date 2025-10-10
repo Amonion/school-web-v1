@@ -19,14 +19,14 @@ const MediaCommentSection: React.FC<MediaCommentSectionProps> = ({
   isDesktop,
 }) => {
   const {
-    showComments,
+    showGlassComments,
     commentForm,
     activeComment,
     mainPost,
     resetForm,
     postItem,
     setTempComment,
-    setShowComment,
+    setShowGlassComment,
   } = CommentStore()
   const [commentText, setCommentText] = useState('')
   const [commentImage, setCommentImage] = useState<string | null>(null)
@@ -130,16 +130,16 @@ const MediaCommentSection: React.FC<MediaCommentSectionProps> = ({
 
   return (
     <AnimatePresence>
-      {showComments && (
+      {showGlassComments && (
         <>
           <motion.div
-            className="fixed inset-0 bg-black/50"
+            className="fixed inset-0 z-50 bg-black/50"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={(e) => {
               e.stopPropagation()
-              setShowComment(false)
+              setShowGlassComment(false)
             }}
           />
 
@@ -147,7 +147,9 @@ const MediaCommentSection: React.FC<MediaCommentSectionProps> = ({
             onClick={(e) => e.stopPropagation()}
             className={`${
               isDesktop ? '-translate-x-1/2 w-[600px]' : 'left-0 right-0 w-full'
-            } fixed bottom-0 z-20 backdrop-blur-sm bg-[var(--secondary)]/50 border border-[var(--border)] rounded-t-2xl flex flex-col max-h-[70%]`}
+            } fixed bottom-0 z-50 backdrop-blur-sm bg-[var(--secondary)]/50 border ${
+              showGlassComments ? 'border-[#404040]' : 'border-[var(--border)]'
+            } rounded-t-2xl flex flex-col max-h-[70%]`}
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
@@ -155,14 +157,20 @@ const MediaCommentSection: React.FC<MediaCommentSectionProps> = ({
             drag="y"
             dragConstraints={{ top: 0, bottom: 0 }}
             onDragEnd={(_, info) => {
-              if (info.offset.y > 100) setShowComment(false)
+              if (info.offset.y > 100) setShowGlassComment(false)
             }}
           >
             <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mt-2 mb-3" />
 
             <CommentList />
 
-            <div className="border-t border-[var(--border)] p-2 sm:p-3 bg-[var(--secondary)]/60 backdrop-blur-md">
+            <div
+              className={`border-t ${
+                showGlassComments
+                  ? 'border-[#404040]'
+                  : 'border-[var(--border)]'
+              } p-2 sm:p-3 bg-[var(--secondary)]/60 backdrop-blur-md`}
+            >
               {activeComment.username && (
                 <div className="flex w-full flex-wrap items-center mb-1 px-2">
                   <div className="">Replying to</div>
@@ -185,7 +193,13 @@ const MediaCommentSection: React.FC<MediaCommentSectionProps> = ({
                   <ImageIcon size={22} className="text-[var(--custom)]" />
                 </label>
 
-                <div className="flex-1 border border-[var(--border)] flex items-end bg-black/30 rounded-[25px] px-2">
+                <div
+                  className={`flex-1 border ${
+                    showGlassComments
+                      ? 'border-[#404040]'
+                      : 'border-[var(--border)]'
+                  } flex items-end bg-black/30 rounded-[25px] px-2`}
+                >
                   <Smile
                     onClick={() => setShowEmojiPicker((prev) => !prev)}
                     className="text-[var(--custom)] mr-2 mb-2"

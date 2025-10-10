@@ -12,6 +12,7 @@
   --custom-dark: #851048;
   --text-primary: #6e6e6e;
   --text-secondary: #3c3c3c;
+  --textSecondary: #3c3c3c;
   --border: #d8d8d8;
   --scroll-bar: #636363;
   --success: #0cc042;
@@ -35,6 +36,7 @@
   --secondary: #121314;
   --text-primary: #bababa;
   --text-secondary: #e2e2e2;
+  --textSecondary: #e2e2e2;
   --border: #404040;
 
   --white: #1c1e21;

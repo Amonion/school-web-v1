@@ -20,6 +20,7 @@ import { SchoolSocialProvider } from '@/context/SchoolContext/SchoolSocialContex
 import { OfficialMessageProvider } from '@/context/HomeContext/OfficialMessageContext'
 import { PersonalNotificationProvider } from '@/context/HomeContext/PersonalNotificationContext'
 import { usePathname } from 'next/navigation'
+import CompanyStore from '@/src/zustand/app/Company'
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -39,7 +40,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   const [isMounted, setIsMounted] = useState(false)
-  const { setOnline, setBoxVisibility } = MessageStore()
+  const { setOnline, setBoxVisibility, setMessage } = MessageStore()
+  const { getCompany } = CompanyStore()
   const pathname = usePathname()
 
   useEffect(() => {
@@ -48,6 +50,7 @@ export default function RootLayout({
 
   useEffect(() => {
     setIsMounted(true)
+    // getCompany('/company', setMessage)
 
     if (navigator.onLine) {
       setOnline('', true)

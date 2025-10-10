@@ -1,5 +1,6 @@
 'use client'
 import Link from 'next/link'
+import Image from 'next/image'
 import { appendForm } from '@/lib/helpers'
 import { validateInputs } from '@/lib/validation'
 import { useState, useEffect } from 'react'
@@ -7,8 +8,10 @@ import QuillEditor from '@/components/Team/Editor/QuillEditor'
 import NewsStore from '@/src/zustand/news/News'
 import { AuthStore } from '@/src/zustand/user/AuthStore'
 import { MessageStore } from '@/src/zustand/notification/Message'
-import PlaceStore, { Place } from '@/src/zustand/place/Place'
 import { useParams, useRouter } from 'next/navigation'
+import StateStore from '@/src/zustand/place/StateOrigin'
+import CountryStore from '@/src/zustand/place/CountryOrigin'
+import PictureDisplay from '@/components/Home/Media/PictureDisplay'
 
 const CreateNews: React.FC = () => {
   const url = '/news'
@@ -18,23 +21,26 @@ const CreateNews: React.FC = () => {
     getANews,
     loading,
     postItem,
-    results,
+    news,
     resetForm,
     updateNews,
   } = NewsStore()
-  const { searchItem, searchedItems } = PlaceStore()
+  const { states, getStates } = StateStore()
+  const { countries, getCountries } = CountryStore()
   const [name, setName] = useState('')
   const [isStateList, setStateList] = useState(false)
+  const [isCountryList, setCountryList] = useState(false)
   const [isPriorityList, setPriorityList] = useState(false)
-  const { user } = AuthStore()
+  const { bioUser } = AuthStore()
   const { setMessage } = MessageStore()
   const [currentPage] = useState(1)
   const [page_size] = useState(20)
+  const [tag, setTag] = useState('')
   const [sort] = useState('-createdAt')
   const priorities = ['Local', 'National', 'International']
   const { id } = useParams()
   const router = useRouter()
-
+  const [preview, setPreview] = useState<string | null>(null)
   const [queryParams] = useState(
     `?page_size=${page_size}&page=${currentPage}&ordering=${sort}`
   )
@@ -43,7 +49,7 @@ const CreateNews: React.FC = () => {
     const initialize = async () => {
       if (id) {
         setName(String(name))
-        const existingItem = results.find((item) => item._id === String(id))
+        const existingItem = news.find((item) => item._id === String(id))
         if (existingItem) {
           NewsStore.setState({ newsForm: existingItem })
         } else {
@@ -58,17 +64,29 @@ const CreateNews: React.FC = () => {
     }
   }, [id])
 
-  const handleSearchPlace = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    setStateList(true)
-    searchItem(`/places/state/?state=${value}&page_size=50&field=state`)
+  useEffect(() => {
+    if (
+      (newsForm.priority === 'National' || newsForm.priority === 'Local') &&
+      countries.length === 0
+    ) {
+      getCountries(
+        `/places/countries/?country=&page_size=350&field=country&sort=country`,
+        setMessage
+      )
+    }
+  }, [newsForm.priority])
+
+  const selectCountry = (country: string) => {
+    setForm('country', country)
+    setCountryList(false)
+    getStates(
+      `/places/state/?country=${country}&page_size=350&field=state&sort=state`,
+      setMessage
+    )
   }
 
-  const selectPlace = (place: Place) => {
-    setForm('continent', place.continent)
-    setForm('country', place.country)
-    setForm('state', place.state)
-    setForm('placeId', place.id)
+  const selectState = (state: string) => {
+    setForm('state', state)
     setStateList(false)
   }
 
@@ -77,6 +95,10 @@ const CreateNews: React.FC = () => {
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files ? e.target.files[0] : null
       setForm(key, file)
+      if (key === 'picture' && file) {
+        const localUrl = URL.createObjectURL(file)
+        setPreview(localUrl)
+      }
     }
 
   const handleInputChange = (
@@ -84,6 +106,18 @@ const CreateNews: React.FC = () => {
   ) => {
     const { name, value } = e.target
     setForm(name as keyof typeof newsForm, value)
+  }
+
+  const handleTag = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const value = e.target.value
+    setTag(value)
+    if (value.includes(',')) {
+      newsForm.tags.push(value.replace(',', ''))
+      setForm('tags', newsForm.tags)
+      setTag('')
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -113,20 +147,8 @@ const CreateNews: React.FC = () => {
         field: 'Country field',
       },
       {
-        name: 'placeId',
-        value: newsForm.placeId,
-        rules: { blank: false, maxLength: 1000 },
-        field: 'Place Id',
-      },
-      {
-        name: 'level',
-        value: newsForm.level,
-        rules: { blank: false, maxLength: 1000 },
-        field: 'Level field',
-      },
-      {
         name: 'tags',
-        value: newsForm.tags,
+        value: JSON.stringify(newsForm.tags),
         rules: { blank: true, maxLength: 1000 },
         field: 'Tags field',
       },
@@ -135,12 +157,6 @@ const CreateNews: React.FC = () => {
         value: newsForm.video,
         rules: { blank: false, maxSize: 1000 },
         field: 'Video file',
-      },
-      {
-        name: 'videoUrl',
-        value: newsForm.videoUrl,
-        rules: { blank: false, maxLength: 1000 },
-        field: 'Video URL field',
       },
       {
         name: 'content',
@@ -161,22 +177,15 @@ const CreateNews: React.FC = () => {
         field: 'Category field',
       },
       {
-        name: 'publishedAt',
-        value: newsForm.publishedAt,
-        rules: { blank: true, maxLength: 1000 },
-        field: 'PublishedAt date field',
-      },
-      {
         name: 'author',
-        value: user ? user.username : `Schooling Social`,
+        value: bioUser ? bioUser.bioUserDisplayName : `Schooling Social`,
         rules: { blank: false },
         field: 'Author radio',
       },
-
       {
         name: 'state',
         value: newsForm.state,
-        rules: { blank: true, maxLength: 1000 },
+        rules: { blank: false, maxLength: 1000 },
         field: 'State field',
       },
       {
@@ -184,13 +193,6 @@ const CreateNews: React.FC = () => {
         value: newsForm.picture,
         rules: { blank: true, maxSize: 50 },
         field: 'Picture field',
-      },
-
-      {
-        name: 'continent',
-        value: newsForm.continent,
-        rules: { blank: true, maxLength: 1000 },
-        field: 'Continent field',
       },
     ]
     const { messages } = validateInputs(inputsToValidate)
@@ -262,53 +264,81 @@ const CreateNews: React.FC = () => {
               </div>
             )}
           </div>
-          <div className="flex flex-col relative">
-            <label className="label" htmlFor="">
-              State Name: {newsForm.state}
-            </label>
-            <input
-              className="form-input"
-              name="continent"
-              onChange={handleSearchPlace}
-              type="text"
-              placeholder="Search news state"
-            />
-            {isStateList && (
-              <div className="input_drop">
-                {searchedItems.map((item, index) => (
-                  <div
-                    onClick={() => selectPlace(item)}
-                    key={index}
-                    className="input_drop_list"
-                  >
-                    {item.state}, {item.country}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
 
-          {newsForm.state && (
+          {newsForm.priority && newsForm.priority !== 'International' && (
             <>
-              <div className="flex flex-col relative">
-                <label className="label" htmlFor="">
-                  Country Name
+              <div className="flex flex-col relative mb-4">
+                <label className="label flex items-center w-full" htmlFor="">
+                  Country of News{' '}
                 </label>
-                <div className="form-input">
-                  {newsForm.country ? newsForm.country : 'First enter state'}
+                <div
+                  onClick={() => {
+                    setCountryList(!isCountryList)
+                    setStateList(false)
+                  }}
+                  className="form-input cursor-pointer"
+                >
+                  {newsForm.country ? newsForm.country : 'Select Country'}
+                  <i className="ml-auto bi bi-caret-down-fill"></i>
                 </div>
+
+                {isCountryList && (
+                  <div className="w-full z-30 absolute left-0 top-[70px] border border-[var(--border)] bg-[var(--primary)] max-h-[300px] overflow-auto rounded-[5px] search">
+                    {countries.map((item, index) => (
+                      <div
+                        onClick={() => selectCountry(item.country)}
+                        key={index}
+                        className="input_drop_list"
+                      >
+                        {item.countryFlag && (
+                          <Image
+                            className="mr-3"
+                            src={String(item.countryFlag)}
+                            alt="Captured"
+                            sizes="100vw"
+                            width={0}
+                            height={0}
+                            style={{ width: '60px', maxWidth: '30px' }}
+                          />
+                        )}
+                        {item.country}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
-              <div className="flex flex-col relative">
-                <label className="label" htmlFor="">
-                  Continent Name
-                </label>
-                <div className="form-input">
-                  {newsForm.continent
-                    ? newsForm.continent
-                    : 'First enter news state'}
+              {newsForm.priority === 'Local' && (
+                <div className="flex flex-col relative mb-4">
+                  <label className="label flex items-center w-full" htmlFor="">
+                    State of News{' '}
+                  </label>
+                  <div
+                    onClick={() => {
+                      setStateList(!isStateList)
+                      setStateList(false)
+                    }}
+                    className="form-input cursor-pointer"
+                  >
+                    {newsForm.state ? newsForm.state : 'Select State'}
+                    <i className="ml-auto bi bi-caret-down-fill"></i>
+                  </div>
+
+                  {isStateList && (
+                    <div className="w-full z-30 absolute left-0 top-[70px] border border-[var(--border)] bg-[var(--primary)] max-h-[300px] overflow-auto rounded-[5px] search">
+                      {states.map((item, index) => (
+                        <div
+                          onClick={() => selectState(item.state)}
+                          key={index}
+                          className="input_drop_list"
+                        >
+                          {item.state}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              </div>
+              )}
             </>
           )}
 
@@ -361,11 +391,21 @@ const CreateNews: React.FC = () => {
             <input
               className="form-input"
               name="tags"
-              value={newsForm.tags}
-              onChange={handleInputChange}
+              value={tag}
+              onChange={handleTag}
               type="text"
-              placeholder="Enter tags"
+              placeholder="Enter tags: Maths, English, ..."
             />
+            <div className="flex flex-wrap">
+              {newsForm.tags?.map((item, index) => (
+                <span
+                  className="text-[12px] cursor-pointer px-2 mr-1 mb-1 border border-[var(--border)]"
+                  key={index}
+                >
+                  {item}
+                </span>
+              ))}
+            </div>
           </div>
 
           <div className="flex flex-col">
@@ -381,54 +421,16 @@ const CreateNews: React.FC = () => {
               placeholder="Enter category"
             />
           </div>
+        </div>
 
-          <div className="flex flex-col">
-            <label className="label" htmlFor="">
-              To Publish On
-            </label>
-            <div className="flex justify-between">
-              <div className="form-input sm w-input mr-6">
-                {newsForm.publishedAt
-                  ? `${newsForm.publishedAt}`
-                  : `Set Date & Time`}
-              </div>
-
-              <label
-                className="ml-auto rounded-[5px] relative cursor-pointer flex justify-center items-center px-4 h-10 bg-[var(--border-background)]"
-                htmlFor="date"
-              >
-                <i className="cursor-pointer bi bi-calendar-week absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]"></i>
-                <input
-                  id="date"
-                  className="sm opacity-0 w-8"
-                  name="publishedAt"
-                  type="datetime-local"
-                  onChange={handleInputChange}
-                />
-              </label>
-            </div>
-          </div>
-
-          <div className="flex flex-col">
-            <label className="label" htmlFor="">
-              Is Featured
-            </label>
-
-            <div
-              onClick={() => setForm('isFeatured', !newsForm.isFeatured)}
-              className="custom_btn line neutral w-14"
-            >
-              {' '}
-              <div
-                className={`checkbox ${newsForm.isFeatured ? 'active' : ''}`}
-                onClick={() => setForm('isFeatured', !newsForm.isFeatured)}
-              >
-                {newsForm.isFeatured && (
-                  <i className="bi bi-check text-white text-lg"></i>
-                )}
-              </div>
-            </div>
-          </div>
+        <div className="relative my-10 w-full h-[250px] rounded-xl  overflow-hidden">
+          {preview ? (
+            <PictureDisplay source={String(preview)} />
+          ) : newsForm?.picture ? (
+            <PictureDisplay source={String(newsForm.picture)} />
+          ) : (
+            <div className="bg-[var(--secondary)] h-full w-full" />
+          )}
         </div>
 
         <QuillEditor
@@ -444,7 +446,7 @@ const CreateNews: React.FC = () => {
             </button>
           ) : (
             <>
-              <label htmlFor="picture" className="custom_btn ">
+              <label htmlFor="picture" className="custom_btn mr-3">
                 <input
                   className="input-file"
                   type="file"
@@ -457,7 +459,7 @@ const CreateNews: React.FC = () => {
                 Picture
               </label>
 
-              <label htmlFor="video" className="custom_btn ">
+              <label htmlFor="video" className="custom_btn mr-3">
                 <input
                   className="input-file"
                   type="file"

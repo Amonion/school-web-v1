@@ -4,6 +4,8 @@ import { AuthStore } from './AuthStore'
 import { User } from './User'
 import apiRequest from '@/lib/axios'
 import { BioUserState } from './BioUserState'
+import { Post } from '../post/Post'
+import { News } from '../news/News'
 
 export interface IDDocs {
   name: string
@@ -23,6 +25,8 @@ export interface FetchUser {
   bioUser: BioUser
   bioUserState: BioUserState
   user: User
+  posts: Post[]
+  featuredNews: News[]
 }
 
 interface FetchUserResponse {

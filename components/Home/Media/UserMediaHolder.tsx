@@ -1,22 +1,22 @@
 'use client'
 import React, { useRef, useEffect } from 'react'
 import PostStore from '@/src/zustand/post/UserPost'
-import MediaViewer from '@/components/Home/Media/MobileMediaViewer'
 import CommentStore from '@/src/zustand/post/Comment'
 import { Post } from '@/src/zustand/post/Post'
-import MediaReactions from '@/components/Home/Media/MediaReactions'
-import MediaCommentSection from '@/components/Home/Comment/FullMediaComment'
 import UserPostStore from '@/src/zustand/post/UserPost'
+import MobileMediaViewer from './MobileMediaViewer'
+import DesktopMediaViewer from './DesktopMediaViewer'
 
-const MediaHolder: React.FC = () => {
+const UserMediaHolder: React.FC = () => {
   const { currentPage, page_size, showComments, setShowActions, getComments } =
     CommentStore()
   const {
-    mediaResults,
+    userMediaResults,
     isMobile,
     currentIndex,
-    selectedMedia,
-    setSelectedMedia,
+    userPostForm,
+    selectedUserMedia,
+    setSelectedUserMedia,
     setCurrentIndex,
     setFitMode,
     setIsMobile,
@@ -34,7 +34,7 @@ const MediaHolder: React.FC = () => {
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
-      if (!selectedMedia || isMobile) return
+      if (!selectedUserMedia || isMobile) return
       if (e.key === 'ArrowLeft') {
         goToPrevious()
       } else if (e.key === 'ArrowRight') {
@@ -45,7 +45,7 @@ const MediaHolder: React.FC = () => {
     }
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
-  }, [selectedMedia, isMobile])
+  }, [selectedUserMedia, isMobile])
 
   useEffect(() => {
     if (!isMobile) {
@@ -63,41 +63,41 @@ const MediaHolder: React.FC = () => {
     let comment: Post | undefined
     PostStore.setState((prev) => {
       comment = prev.postResults.find(
-        (item) => item._id === mediaResults[index].postId
+        (item) => item._id === userMediaResults[index].postId
       )
       return {
-        postForm: prev.postResults.find(
-          (item) => item._id === mediaResults[index].postId
+        userPostForm: prev.postResults.find(
+          (item) => item._id === userMediaResults[index].postId
         ),
       }
     })
     CommentStore.setState({ mainPost: comment })
-    if (mediaResults[index].postId) {
+    if (userMediaResults[index].postId) {
       getComments(
-        `/posts/comments?page=${currentPage}&page_size=${page_size}&postType=comment&postId=${mediaResults[index].postId}&level=1`
+        `/posts/comments?page=${currentPage}&page_size=${page_size}&postType=comment&postId=${userMediaResults[index].postId}&level=1`
       )
     }
   }
 
   const closeFullScreen = () => {
-    setSelectedMedia(null)
+    setSelectedUserMedia(null)
     setFitMode(false)
   }
 
   const goToPrevious = () => {
     const newIndex =
-      (currentIndex - 1 + mediaResults.length) % mediaResults.length
+      (currentIndex - 1 + userMediaResults.length) % userMediaResults.length
 
     setMainPost(newIndex)
-    setSelectedMedia(mediaResults[newIndex])
+    setSelectedUserMedia(userMediaResults[newIndex])
     setCurrentIndex(newIndex)
     setFitMode(false)
   }
 
   const goToNext = () => {
-    const newIndex = (currentIndex + 1) % mediaResults.length
+    const newIndex = (currentIndex + 1) % userMediaResults.length
     setMainPost(newIndex)
-    setSelectedMedia(mediaResults[newIndex])
+    setSelectedUserMedia(userMediaResults[newIndex])
     setCurrentIndex(newIndex)
     setFitMode(false)
   }
@@ -121,74 +121,26 @@ const MediaHolder: React.FC = () => {
 
   return (
     <>
-      {selectedMedia && isMobile && (
-        <MediaViewer
-          media={selectedMedia}
+      {selectedUserMedia && isMobile && (
+        <MobileMediaViewer
+          media={selectedUserMedia}
+          postForm={userPostForm}
           onClose={closeFullScreen}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
         />
       )}
 
-      {selectedMedia && !isMobile && (
-        <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 flex items-center justify-center p-4"
-          onClick={closeFullScreen}
-        >
-          <div
-            className="relative max-w-5xl max-h-[90vh] w-full flex items-center justify-center"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {selectedMedia.type.includes('image') ? (
-              <img
-                src={selectedMedia.src}
-                alt={selectedMedia.content}
-                className="w-full max-h-full object-contain"
-              />
-            ) : (
-              <video
-                src={selectedMedia.src}
-                poster={selectedMedia.preview}
-                className="w-full max-h-full object-contain"
-                autoPlay
-                loop
-                controls
-              />
-            )}
-
-            <button
-              onClick={closeFullScreen}
-              className="absolute top-4 right-4 font-bold text-white w-10 h-10 bg-black/50 rounded-full p-2 hover:bg-black/70 transition"
-            >
-              ✕
-            </button>
-
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                goToPrevious()
-              }}
-              className="absolute left-4 top-[30%] w-12 h-12 flex justify-center items-center text-white text-4xl bg-black/40 hover:bg-black/60 rounded-full p-2 transition"
-            >
-              &#10094;
-            </button>
-
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                goToNext()
-              }}
-              className="absolute right-4 top-[30%] w-12 h-12 flex justify-center items-center text-white text-4xl bg-black/40 hover:bg-black/60 rounded-full p-2 transition"
-            >
-              &#10095;
-            </button>
-            <MediaReactions media={selectedMedia} isDesktop={true} />
-          </div>
-          <MediaCommentSection isDesktop={true} />
-        </div>
+      {selectedUserMedia && !isMobile && (
+        <DesktopMediaViewer
+          media={selectedUserMedia}
+          onClose={closeFullScreen}
+          goToPrevious={goToPrevious}
+          goToNext={goToNext}
+        />
       )}
     </>
   )
 }
 
-export default MediaHolder
+export default UserMediaHolder

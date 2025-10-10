@@ -86,7 +86,7 @@ const PostStat: React.FC<PostProps> = ({ post }) => {
 
   const fetchComments = async () => {
     getComments(
-      `/posts/?postId=${post._id}&level=1&myId=${user?._id}&page_size=30&page=1&ordering=-createdAt`
+      `/posts/comments/?postId=${post._id}&level=1&myId=${user?._id}&page_size=30&page=1&ordering=-createdAt`
     )
   }
 
@@ -102,7 +102,7 @@ const PostStat: React.FC<PostProps> = ({ post }) => {
       onClick={(e) => {
         e.stopPropagation()
       }}
-      className="py-[4px] cursor-default px-[7px] flex items-center rounded-[10px] justify-between border border-[var(--border-color)]"
+      className="py-[4px] cursor-default px-2 flex items-center justify-between"
     >
       <div className="post_stat cursor-pointer flex items-center space-x-1 transition-all duration-300">
         {loading && isLiked ? (

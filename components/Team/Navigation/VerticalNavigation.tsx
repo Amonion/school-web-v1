@@ -85,14 +85,6 @@ export default function VerticalNavigation() {
             </Link>
           )}
 
-          {/* {(user?.staffPositions.includes("schools") ||
-            user?.staffPositions.includes("General")) && (
-            <Link className="v_nav_items py-2 block" href="/team/schools">
-              <i className="bi bi-bank mr-3"></i>
-              Schools
-            </Link>
-          )} */}
-
           {(user?.staffPositions.includes('schools') ||
             user?.staffPositions.includes('General')) && (
             <div className={`v_nav_items ${isSchool ? 'active two' : ''}`}>
@@ -119,155 +111,133 @@ export default function VerticalNavigation() {
             </div>
           )}
 
-          {(user?.staffPositions.includes('places') ||
-            user?.staffPositions.includes('General')) && (
-            <div className={`v_nav_items ${isPlace ? 'active two' : ''}`}>
-              <div
-                className="flex cursor-pointer items-center py-2"
-                onClick={() => togglePlace((e) => !e)}
-              >
-                <Link className="block" href="/team/places/1">
-                  <i className="bi bi-globe-americas mr-3"></i>
-                  Places
-                </Link>
-                <i
-                  className={`bi bi-caret-down-fill ml-auto ${
-                    isPlace ? 'active' : ''
-                  }`}
-                ></i>
-              </div>
-              <div className="nav_dropdown">
-                <Link className="inner_nav_items" href="/team/places/ads">
-                  Ads
-                </Link>
-                <Link className="inner_nav_items" href="/team/schools/table">
-                  Schools Table
-                </Link>
-              </div>
-            </div>
-          )}
-
-          {(user?.staffPositions.includes('news') ||
-            user?.staffPositions.includes('General')) && (
-            <Link className="v_nav_items py-2 block" href="/team/policy">
-              <i className="bi bi-globe-americas mr-3"></i>
-              Policy
-            </Link>
-          )}
-
-          {(user?.staffPositions.includes('news') ||
-            user?.staffPositions.includes('General')) && (
-            <Link className="v_nav_items py-2 block" href="/team/news">
-              <i className="bi bi-people mr-3"></i>
-              News
-            </Link>
-          )}
-
-          {(user?.staffPositions.includes('competitions') ||
-            user?.staffPositions.includes('General')) && (
+          <div className={`v_nav_items ${isPlace ? 'active two' : ''}`}>
             <div
-              className={`v_nav_items ${isCompetition ? 'active trip' : ''}`}
+              className="flex cursor-pointer items-center py-2"
+              onClick={() => togglePlace((e) => !e)}
             >
-              <div
-                className="flex cursor-pointer items-center py-2"
-                onClick={() => toggleCompetition((e) => !e)}
-              >
-                <i className="bi bi-trophy mr-3"></i>
-                Competitions
-                <i
-                  className={`bi bi-caret-down-fill ml-auto ${
-                    isCompetition ? 'active' : ''
-                  }`}
-                ></i>
-              </div>
-              <div className="nav_dropdown">
-                <Link
-                  className="inner_nav_items"
-                  href="/team/competitions/weekends"
-                >
-                  Weekends
-                </Link>
-                <Link
-                  className="inner_nav_items"
-                  href="/team/competitions/leagues"
-                >
-                  Leagues
-                </Link>
-                <Link
-                  className="inner_nav_items"
-                  href="/team/competitions/exams"
-                >
-                  Exams
-                </Link>
-              </div>
+              <Link className="block" href="/team/places/1">
+                <i className="bi bi-globe-americas mr-3"></i>
+                Places
+              </Link>
+              <i
+                className={`bi bi-caret-down-fill ml-auto ${
+                  isPlace ? 'active' : ''
+                }`}
+              ></i>
             </div>
-          )}
+            <div className="nav_dropdown">
+              <Link className="inner_nav_items" href="/team/places/ads">
+                Ads
+              </Link>
+              <Link className="inner_nav_items" href="/team/schools/table">
+                Schools Table
+              </Link>
+            </div>
+          </div>
 
-          {(user?.staffPositions.includes('messages') ||
-            user?.staffPositions.includes('General')) && (
-            <div className={`v_nav_items ${isMsgActive ? 'active trip' : ''}`}>
-              <div
-                className="flex cursor-pointer items-center py-2"
-                onClick={() => toggleMessages((e) => !e)}
-              >
-                <i className="bi bi-envelope mr-3"></i>
-                Messages
-                <i
-                  className={`bi bi-caret-down-fill ml-auto ${
-                    isMsgActive ? 'active' : ''
-                  }`}
-                ></i>
-              </div>
-              <div className="nav_dropdown">
-                <Link className="inner_nav_items" href="/team/messages/emails">
-                  Emails
-                </Link>
-                <Link
-                  className="inner_nav_items"
-                  href="/team/messages/notifications"
-                >
-                  Notifications
-                </Link>
-                <Link className="inner_nav_items" href="/team/messages/sms">
-                  SMS
-                </Link>
-              </div>
-            </div>
-          )}
+          <Link className="v_nav_items py-2 block" href="/team/policy">
+            <i className="bi bi-globe-americas mr-3"></i>
+            Policy
+          </Link>
 
-          {user && user?.staffRanking >= 20 && (
-            <div className={`v_nav_items ${isSettingsActive ? 'active' : ''}`}>
-              <div
-                onClick={() => toggleSettings((e) => !e)}
-                className="flex cursor-pointer items-center py-2"
-              >
-                <i className="bi bi-diagram-3 mr-3"></i>
-                Company
-                <i
-                  className={`bi bi-caret-down-fill ml-auto ${
-                    isSettingsActive ? 'active' : ''
-                  }`}
-                ></i>
-              </div>
-              <div className="nav_dropdown">
-                <Link className="inner_nav_items" href="/team/company/staffs">
-                  Staffs
-                </Link>
-                <Link
-                  className="inner_nav_items"
-                  href="/team/company/set-company"
-                >
-                  Set Company
-                </Link>
-                <Link className="inner_nav_items" href="/team/company/expenses">
-                  Expenses
-                </Link>
-                <Link className="inner_nav_items" href="/team/company">
-                  Branches
-                </Link>
-              </div>
+          <Link className="v_nav_items py-2 block" href="/team/news">
+            <i className="bi bi-people mr-3"></i>
+            News
+          </Link>
+
+          <div className={`v_nav_items ${isCompetition ? 'active trip' : ''}`}>
+            <div
+              className="flex cursor-pointer items-center py-2"
+              onClick={() => toggleCompetition((e) => !e)}
+            >
+              <i className="bi bi-trophy mr-3"></i>
+              Competitions
+              <i
+                className={`bi bi-caret-down-fill ml-auto ${
+                  isCompetition ? 'active' : ''
+                }`}
+              ></i>
             </div>
-          )}
+            <div className="nav_dropdown">
+              <Link
+                className="inner_nav_items"
+                href="/team/competitions/weekends"
+              >
+                Weekends
+              </Link>
+              <Link
+                className="inner_nav_items"
+                href="/team/competitions/leagues"
+              >
+                Leagues
+              </Link>
+              <Link className="inner_nav_items" href="/team/competitions/exams">
+                Exams
+              </Link>
+            </div>
+          </div>
+
+          <div className={`v_nav_items ${isMsgActive ? 'active trip' : ''}`}>
+            <div
+              className="flex cursor-pointer items-center py-2"
+              onClick={() => toggleMessages((e) => !e)}
+            >
+              <i className="bi bi-envelope mr-3"></i>
+              Messages
+              <i
+                className={`bi bi-caret-down-fill ml-auto ${
+                  isMsgActive ? 'active' : ''
+                }`}
+              ></i>
+            </div>
+            <div className="nav_dropdown">
+              <Link className="inner_nav_items" href="/team/messages/emails">
+                Emails
+              </Link>
+              <Link
+                className="inner_nav_items"
+                href="/team/messages/notifications"
+              >
+                Notifications
+              </Link>
+              <Link className="inner_nav_items" href="/team/messages/sms">
+                SMS
+              </Link>
+            </div>
+          </div>
+
+          <div className={`v_nav_items ${isSettingsActive ? 'active' : ''}`}>
+            <div
+              onClick={() => toggleSettings((e) => !e)}
+              className="flex cursor-pointer items-center py-2"
+            >
+              <i className="bi bi-diagram-3 mr-3"></i>
+              Company
+              <i
+                className={`bi bi-caret-down-fill ml-auto ${
+                  isSettingsActive ? 'active' : ''
+                }`}
+              ></i>
+            </div>
+            <div className="nav_dropdown">
+              <Link className="inner_nav_items" href="/team/company/staffs">
+                Staffs
+              </Link>
+              <Link
+                className="inner_nav_items"
+                href="/team/company/set-company"
+              >
+                Set Company
+              </Link>
+              <Link className="inner_nav_items" href="/team/company/expenses">
+                Expenses
+              </Link>
+              <Link className="inner_nav_items" href="/team/company">
+                Branches
+              </Link>
+            </div>
+          </div>
         </div>
         <ThemeToggle />
       </div>

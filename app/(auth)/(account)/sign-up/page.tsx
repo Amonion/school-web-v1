@@ -1,8 +1,7 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-
 import Cookies from 'js-cookie'
 import apiRequest, { ApiResponseInterface } from '@/lib/axios'
 import axios from 'axios'
@@ -16,6 +15,10 @@ const SignIn: React.FC = () => {
   const [error, setError] = useState<ValidationResult | null>(null)
   const [generalError, setGeneralError] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
+  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(
+    null
+  )
+  const [locating, setLocating] = useState(false)
   const [isChecked, setIsChecked] = useState(false)
   const [sFormData, setFormData] = useState({
     email: '',
@@ -37,6 +40,12 @@ const SignIn: React.FC = () => {
       return
     }
 
+    if (!locating) {
+      setGeneralError('Please enable location to continue with signup.')
+      setLoading(false)
+      return
+    }
+
     if (!isChecked) {
       setGeneralError('Please accept the terms and conditions to continue.')
       return
@@ -50,7 +59,8 @@ const SignIn: React.FC = () => {
     form.append('signupOS', getDeviceInfo().os)
     form.append('signupBrowser', getDeviceInfo().browser)
     form.append('signupDevice', getDeviceInfo().device)
-
+    form.append('latitude', String(location?.lat))
+    form.append('longitude', String(location?.lng))
     try {
       setLoading(true)
       const response = await apiRequest<ApiResponseInterface>('/users/', {
@@ -73,6 +83,41 @@ const SignIn: React.FC = () => {
     }
   }
 
+  const getUserLocation = () => {
+    setLocating(true)
+
+    if (!navigator.geolocation) {
+      setGeneralError('Geolocation is not supported by your browser.')
+      setLocating(false)
+      return
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords
+        setLocation({ lat: latitude, lng: longitude })
+        setLocating(false)
+      },
+      (error) => {
+        console.error('Geolocation error:', error)
+        if (error.code === error.PERMISSION_DENIED) {
+          setGeneralError('You need to allow location access to continue.')
+        } else {
+          setGeneralError('Failed to get location. Please try again.')
+        }
+        setLocating(false)
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      }
+    )
+  }
+
+  useEffect(() => {
+    getUserLocation()
+  }, [])
   return (
     <>
       {getDeviceInfo().os === 'Android' || getDeviceInfo().os === 'iOS' ? (

@@ -19,16 +19,16 @@ export interface News {
   author: string
   publishedAt: Date | null | number
   createdAt: Date | null | number
-  status: string
+  isPublished: boolean
   state: string
-  level: string
   country: string
   views: number
   shares: number
   comments: number
   bookmarks: number
   likes: number
-  tags: string
+  replies: number
+  tags: string[]
   continent: string
   picture: string | File | null
   video: string | File | null
@@ -36,6 +36,8 @@ export interface News {
   category: string
   subtitle: string
   source: string
+  bookmarked: boolean
+  liked: boolean
   isFeatured: boolean
   seoTitle: string
   seoDescription: string
@@ -52,16 +54,16 @@ export const NewsEmpty = {
   author: '',
   publishedAt: null,
   createdAt: null,
-  status: '',
+  isPublished: false,
   state: '',
-  level: '',
   country: '',
   views: 0,
+  replies: 0,
   comments: 0,
   shares: 0,
   bookmarks: 0,
   likes: 0,
-  tags: '',
+  tags: [],
   continent: '',
   picture: '',
   video: '',
@@ -69,6 +71,8 @@ export const NewsEmpty = {
   category: '',
   subtitle: '',
   source: '',
+  bookmarked: false,
+  liked: false,
   isFeatured: false,
   seoTitle: '',
   seoDescription: '',
@@ -77,14 +81,19 @@ export const NewsEmpty = {
 interface NewsState {
   count: number
   page_size: number
-  results: News[]
+  news: News[]
+  featuredNews: News[]
   loading: boolean
   selectedItems: News[]
-  searchedItems: News[]
+  searchedNews: News[]
   isAllChecked: boolean
   newsForm: News
   setForm: (key: keyof News, value: News[keyof News]) => void
   resetForm: () => void
+  getFeaturedNews: (
+    url: string,
+    setMessage: (message: string, isError: boolean) => void
+  ) => Promise<void>
   getItems: (
     url: string,
     setMessage: (message: string, isError: boolean) => void
@@ -97,7 +106,7 @@ interface NewsState {
   setLoading?: (loading: boolean) => void
   massDelete: (
     url: string,
-    selectedItems: News[],
+    selectedItems: Record<string, unknown>,
     setMessage: (message: string, isError: boolean) => void
   ) => Promise<void>
   deleteItem: (
@@ -120,18 +129,17 @@ interface NewsState {
   toggleActive: (index: number) => void
   toggleAllSelected: () => void
   reshuffleResults: () => void
-  searchItem: (url: string) => void
+  searchNews: (url: string) => void
 }
 
 const NewsStore = create<NewsState>((set) => ({
-  links: null,
   count: 0,
   page_size: 0,
-  results: [],
+  news: [],
+  featuredNews: [],
   loading: false,
-  error: null,
   selectedItems: [],
-  searchedItems: [],
+  searchedNews: [],
   isAllChecked: false,
   newsForm: NewsEmpty,
   setForm: (key, value) =>
@@ -157,7 +165,7 @@ const NewsStore = create<NewsState>((set) => ({
       set({
         count,
         page_size,
-        results: updatedResults,
+        news: updatedResults,
       })
     }
   },
@@ -184,6 +192,24 @@ const NewsStore = create<NewsState>((set) => ({
     }
   },
 
+  getFeaturedNews: async (
+    url: string,
+    setMessage: (message: string, isError: boolean) => void
+  ) => {
+    try {
+      const response = await apiRequest<FetchResponse>(url, {
+        setMessage,
+        setLoading: NewsStore.getState().setLoading,
+      })
+      const data = response?.data
+      if (data) {
+        set({ featuredNews: data.results })
+      }
+    } catch (error: unknown) {
+      console.log(error)
+    }
+  },
+
   getANews: async (
     url: string,
     setMessage: (message: string, isError: boolean) => void
@@ -204,7 +230,7 @@ const NewsStore = create<NewsState>((set) => ({
 
   reshuffleResults: async () => {
     set((state) => ({
-      results: state.results.map((item: News) => ({
+      news: state.news.map((item: News) => ({
         ...item,
         isChecked: false,
         isActive: false,
@@ -212,19 +238,19 @@ const NewsStore = create<NewsState>((set) => ({
     }))
   },
 
-  searchItem: _debounce(async (url: string) => {
+  searchNews: _debounce(async (url: string) => {
     const response = await apiRequest<FetchResponse>(url, {
       setLoading: NewsStore.getState().setLoading,
     })
     const results = response?.data.results
     if (results) {
-      set({ searchedItems: results })
+      set({ searchedNews: results })
     }
   }, 1000),
 
   massDelete: async (
-    url: string,
-    selectedItems: News[],
+    url,
+    selectedItems,
     setMessage: (message: string, isError: boolean) => void
   ) => {
     const response = await apiRequest<FetchResponse>(url, {
@@ -233,7 +259,10 @@ const NewsStore = create<NewsState>((set) => ({
       setMessage,
       setLoading: NewsStore.getState().setLoading,
     })
-    if (response) {
+    const data = response?.data
+    console.log(data)
+    if (data) {
+      NewsStore.getState().setProcessedResults(data)
     }
   },
 
@@ -286,20 +315,20 @@ const NewsStore = create<NewsState>((set) => ({
 
   toggleActive: (index: number) => {
     set((state) => {
-      const isCurrentlyActive = state.results[index]?.isActive
-      const updatedResults = state.results.map((tertiary, idx) => ({
+      const isCurrentlyActive = state.news[index]?.isActive
+      const updatedResults = state.news.map((tertiary, idx) => ({
         ...tertiary,
         isActive: idx === index ? !isCurrentlyActive : false,
       }))
       return {
-        results: updatedResults,
+        news: updatedResults,
       }
     })
   },
 
   toggleChecked: (index: number) => {
     set((state) => {
-      const updatedResults = state.results.map((tertiary, idx) =>
+      const updatedResults = state.news.map((tertiary, idx) =>
         idx === index
           ? { ...tertiary, isChecked: !tertiary.isChecked }
           : tertiary
@@ -313,7 +342,7 @@ const NewsStore = create<NewsState>((set) => ({
       )
 
       return {
-        results: updatedResults,
+        news: updatedResults,
         selectedItems: updatedSelectedItems,
         isAllChecked,
       }
@@ -322,9 +351,8 @@ const NewsStore = create<NewsState>((set) => ({
 
   toggleAllSelected: () => {
     set((state) => {
-      const isAllChecked =
-        state.results.length === 0 ? false : !state.isAllChecked
-      const updatedResults = state.results.map((item) => ({
+      const isAllChecked = state.news.length === 0 ? false : !state.isAllChecked
+      const updatedResults = state.news.map((item) => ({
         ...item,
         isChecked: isAllChecked,
       }))
@@ -332,7 +360,7 @@ const NewsStore = create<NewsState>((set) => ({
       const updatedSelectedItems = isAllChecked ? updatedResults : []
 
       return {
-        results: updatedResults,
+        news: updatedResults,
         selectedItems: updatedSelectedItems,
         isAllChecked,
       }

@@ -11,6 +11,7 @@ import axios, {
 } from 'axios'
 import { Office } from '@/src/zustand/utility/Office'
 import { BioUserSchoolInfo } from '@/src/zustand/user/BioUserSchoolInfo'
+import { Post } from '@/src/zustand/post/Post'
 const apiClient = axios.create({
   baseURL:
     process.env.NODE_ENV === 'production'
@@ -128,6 +129,7 @@ export interface ApiResponseInterface {
   data: ResponseData
   user: User
   bioUser: BioUser
+  posts: Post[]
   bioUserSchoolInfo: BioUserSchoolInfo
   bioUserState: BioUserState
   bioUserSettings: BioUserSettings

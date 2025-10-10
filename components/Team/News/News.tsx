@@ -1,41 +1,55 @@
 'use client'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, usePathname } from 'next/navigation'
 import {
   formatCount,
   formatDateToDDMMYY,
   formatTimeTo12Hour,
-  truncateString,
 } from '@/lib/helpers'
-import { MessageStore } from '@/src/zustand/notification/Message'
+import _debounce from 'lodash/debounce'
+import { AlartStore, MessageStore } from '@/src/zustand/notification/Message'
 import NewsStore from '@/src/zustand/news/News'
 import LinkedPagination from '@/components/Team/LinkedPagination'
+import {
+  Edit,
+  Globe,
+  Locate,
+  Map,
+  Pencil,
+  Rocket,
+  Trash,
+  User,
+} from 'lucide-react'
 
 const News: React.FC = () => {
-  const url = '/news'
   const {
     getItems,
     massDelete,
     deleteItem,
     updateNews,
-    results,
     toggleAllSelected,
     toggleChecked,
     setLoading,
+    toggleActive,
+    reshuffleResults,
+    searchNews,
+    searchedNews,
     isAllChecked,
     selectedItems,
     loading,
     count,
-    toggleActive,
-    reshuffleResults,
+    news,
   } = NewsStore()
   const [page_size] = useState(20)
   const [sort] = useState('-createdAt')
   const { setMessage } = MessageStore()
   const pathname = usePathname()
   const { page } = useParams()
+  const { setAlert } = AlartStore()
+  const inputRef = useRef<HTMLInputElement>(null)
+  const url = '/news'
 
   useEffect(() => {
     reshuffleResults()
@@ -48,36 +62,55 @@ const News: React.FC = () => {
     getItems(`${url}${params}`, setMessage)
   }, [page])
 
-  const deletePlace = async (id: string, index: number) => {
+  const deleteNews = async (id: string, index: number) => {
     toggleActive(index)
     const params = `?page_size=${page_size}&page=${
       page ? page : 1
     }&ordering=${sort}`
-    await deleteItem(`${url}${id}/${params}`, setMessage, setLoading)
+    await deleteItem(`${url}/${id}/${params}`, setMessage, setLoading)
   }
+
+  const startDelete = (id: string, index: number) => {
+    setAlert(
+      'Warning',
+      'Are you sure you want to delete this news?',
+      true,
+      () => deleteNews(id, index)
+    )
+  }
+
+  const handleSearchNews = _debounce(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value
+      if (value.trim().length > 0) {
+        searchNews(
+          `${url}/search?author=${value}&content=${value}&title=${value}&subtitle=${value}&page_size=${page_size}`
+        )
+      } else {
+        NewsStore.setState({ searchedNews: [] })
+      }
+    },
+    1000
+  )
 
   const DeleteItems = async () => {
     if (selectedItems.length === 0) {
       setMessage('Please select at least one email to delete', false)
       return
     }
-    await massDelete(`${url}mass-delete/`, selectedItems, setMessage)
+    const ids = selectedItems.map((item) => item._id)
+    await massDelete(`${url}/mass-delete`, { ids: ids }, setMessage)
   }
 
-  const setNews = async (status: string, id: string) => {
-    if (status === 'Expired') {
-      return
-    }
+  const setNewsApproval = async (isPublished: boolean, id: string) => {
     const params = `?page_size=${page_size}&page=${
       page ? page : 1
     }&ordering=${sort}`
-    const form = new FormData()
-    form.append('status', status === 'Draft' ? 'Published' : 'Draft')
-    if (status === 'Published') {
-      const date = new Date()
-      form.append('publishedAt', date.toISOString())
+    const form = {
+      isPublished: !isPublished,
+      publishedAt: new Date().toISOString(),
     }
-    updateNews(`${url}${id}${params}`, form, setMessage)
+    updateNews(`${url}/${id}${params}`, form, setMessage)
   }
 
   return (
@@ -86,9 +119,46 @@ const News: React.FC = () => {
         <div className="text-lg text-[var(--text-secondary)]">
           Table of News
         </div>
+        <div className="relative mb-2">
+          <div className={`input_wrap ml-auto active `}>
+            <input
+              ref={inputRef}
+              type="search"
+              onChange={handleSearchNews}
+              className={`transparent-input flex-1 `}
+              placeholder="Search questions"
+            />
+            {loading ? (
+              <i className="bi bi-opencollective common-icon loading"></i>
+            ) : (
+              <i className="bi bi-search common-icon cursor-pointer"></i>
+            )}
+          </div>
+
+          {searchedNews.length > 0 && (
+            <div
+              className={`dropdownList ${
+                searchedNews.length > 0
+                  ? 'overflow-auto'
+                  : 'overflow-hidden h-0'
+              }`}
+            >
+              {searchedNews.map((item, index) => (
+                <div key={index} className="input_drop_list">
+                  <Link
+                    href={`/school/students/student/${item._id}`}
+                    className="flex-1"
+                  >
+                    {item.title}
+                  </Link>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-      {results.map((item, index) => (
-        <div key={index} className="card_body sharp mb-3">
+      {news.map((item, index) => (
+        <div key={index} className="card_body sharp mb-1">
           <div className="">
             <div className="flex relative items-start mb-5">
               <div className="flex items-center mr-3">
@@ -100,7 +170,7 @@ const News: React.FC = () => {
                     <i className="bi bi-check text-white text-lg"></i>
                   )}
                 </div>
-                {(page ? Number(page) : 1 - 1) * page_size + index + 1}
+                {(page ? Number(page) - 1 : 1 - 1) * page_size + index + 1}
               </div>
               <div className="relative w-[80px] h-[50px] overflow-hidden rounded-[5px] mr-3">
                 {item.picture ? (
@@ -121,87 +191,91 @@ const News: React.FC = () => {
                 )}
               </div>
               <div className="t">
-                <div className="text-lg mb-2">{item.title}</div>
-                <div className="flex items-end">
-                  <div className="text-sm mr-5">
-                    {truncateString(item.subtitle, 30)}
-                  </div>
-                  <div
-                    onClick={() => setNews(item.status, item._id)}
-                    className={`${
-                      item.status === 'Draft'
-                        ? 'text-[var(--custom)]  border-[var(--custom)]'
-                        : item.status === 'Published'
-                        ? 'bg-[var(--success)] border-[var(--success)] text-white'
-                        : ''
-                    } rounded-[3px] border text-sm  py-[2px] px-3 cursor-pointer`}
-                  >
-                    {item.status}
-                  </div>
+                <div className="text-lg mb-1 text-[var(--text-secondary)]">
+                  {item.title}
+                </div>
+                <div className="line-clamp-2 overflow-ellipsis">
+                  {item.subtitle}
                 </div>
               </div>
-              <div className="absolute top-[-10px] right-2">
-                <i
-                  onClick={() => toggleActive(index)}
-                  className="bi bi-three-dots-vertical text-lg cursor-pointer"
-                ></i>
-                {item.isActive && (
-                  <div className="card_list_right">
-                    <span
-                      onClick={() => toggleActive(index)}
-                      className="more_close "
-                    >
-                      X
-                    </span>
-                    <Link
-                      className="card_list_item"
-                      href={`/team/news/edit-news/${item._id}`}
-                    >
-                      Edit News
-                    </Link>
+              <div className="absolute top-[-10px] right-0 flex items-center">
+                <Link href={`/team/news/edit-news/${item._id}`}>
+                  <Edit className="cursor-pointer" size={18} />
+                </Link>
 
-                    <div
-                      className="card_list_item"
-                      onClick={() => deletePlace(item._id, index)}
-                    >
-                      Delete News
-                    </div>
-                  </div>
-                )}
+                <Trash
+                  className="ml-2 cursor-pointer"
+                  onClick={() => startDelete(item._id, index)}
+                  size={18}
+                />
               </div>
             </div>
-            <div className="flex items-end">
-              <div className="flex text-sm mr-5">
-                <i className="bi bi-calendar mr-2 sm:mr-1"></i>
-                Written: {formatDateToDDMMYY(item.createdAt)} |{' '}
+            <div className="flex text-sm mb-2">
+              <div className="flex items-center mr-3">
+                <User size={14} className="mr-1" /> {item.author}
+              </div>
+              <div className="flex items-center mr-3">
+                <Globe size={14} className="mr-1" /> {item.priority}
+              </div>
+              {item.country && (
+                <div className="flex items-center mr-3">
+                  <Map size={14} className="mr-1" /> {item.country}
+                </div>
+              )}
+              {item.state && (
+                <div className="flex items-center">
+                  <Locate size={14} className="mr-1" /> {item.state}
+                </div>
+              )}
+            </div>
+            <div className="flex items-center">
+              <div className="flex items-center text-sm mr-5">
+                <Pencil className="w-3 h-3 mr-2" />
+                {formatDateToDDMMYY(item.createdAt)} |{' '}
                 {formatTimeTo12Hour(item.createdAt)}
               </div>
-              <div className="flex text-sm">
-                <i className="bi bi-calendar mr-2 sm:mr-1"></i>
-                Published: {formatDateToDDMMYY(item.publishedAt)} |{' '}
-                {formatTimeTo12Hour(item.publishedAt)}
-              </div>
-              <div className="ml-auto gap-3 grid grid-cols-5 text-[12px]">
-                <div className="flex items-center ml-auto">
+              {item.publishedAt && (
+                <div className="flex items-center text-sm">
+                  <Rocket className="w-3 h-3 mr-2" />
+                  {formatDateToDDMMYY(item.publishedAt)} |{' '}
+                  {formatTimeTo12Hour(item.publishedAt)}
+                </div>
+              )}
+              <div className="ml-auto flex items-center text-[12px]">
+                <div className="flex items-center">
                   <i className={`bi bi-heart mr-1 mb-[-2px]`}></i>{' '}
                   {formatCount(item.likes)}
                 </div>
-                <div className="flex items-center ml-5">
+                <div className="flex items-center ml-4">
                   <i className={`bi bi-bookmark mr-1 mb-[-2px]`}></i>{' '}
                   {formatCount(item.bookmarks)}
                 </div>
-                <div className="flex items-center ml-5">
+                <div className="flex items-center ml-4">
                   <i className={`bi bi-eye mr-1 mb-[-2px]`}></i>{' '}
                   {formatCount(item.views)}
                 </div>
-                <div className="flex items-center ml-5">
+                <div className="flex items-center ml-4">
                   <i className={`bi bi-chat mr-1 mb-[-2px]`}></i>{' '}
                   {formatCount(item.comments)}
                 </div>
-                <div className="flex items-center ml-5">
+                <div className="flex items-center ml-4">
                   <i className={`bi bi-share mr-1 mb-[-2px]`}></i>{' '}
                   {formatCount(item.shares)}
                 </div>
+              </div>
+              <div
+                onClick={() => setNewsApproval(item.isPublished, item._id)}
+                className={`${
+                  !item.isPublished
+                    ? 'bg-[var(--custom)]'
+                    : 'bg-[var(--success)]'
+                } rounded-full text-white flex justify-center items-center ml-3 text-sm w-6 h-6 cursor-pointer`}
+              >
+                {item.isPublished ? (
+                  <Rocket className="w-3 h-3" />
+                ) : (
+                  <Pencil className="w-3 h-3" />
+                )}
               </div>
             </div>
           </div>
@@ -236,7 +310,7 @@ const News: React.FC = () => {
       </div>
 
       <div className="card_body sharp">
-        <LinkedPagination url="/team/places" count={count} page_size={20} />
+        <LinkedPagination url="/team/news" count={count} page_size={20} />
       </div>
     </>
   )

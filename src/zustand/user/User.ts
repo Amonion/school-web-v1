@@ -99,7 +99,8 @@ export const UserEmpty = {
   picture: '',
   posts: 0,
   postMedia: 0,
-  signupCountry: '',
+  country: '',
+  state: '',
   signupIp: '',
   signupLocation: { lat: 0, lng: 0 },
   staffPositions: [],
@@ -395,7 +396,8 @@ export interface User {
   phone: string
   picture: string | File
   posts: number
-  signupCountry: string
+  country: string
+  state: string
   signupIp: string
   signupLocation: { lat: number; lng: number }
   staffPositions: string[]

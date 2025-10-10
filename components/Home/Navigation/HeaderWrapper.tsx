@@ -1,32 +1,17 @@
-import Link from 'next/link'
-import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
-import { usePathname, useRouter } from 'next/navigation'
-import { AuthStore } from '@/src/zustand/user/AuthStore'
-import { MessageStore } from '@/src/zustand/notification/Message'
-import { UserNotificationStore } from '@/src/zustand/notification/UserNotification'
+import { usePathname } from 'next/navigation'
 import { NavStore } from '@/src/zustand/notification/Navigation'
-import { PostStore } from '@/src/zustand/post/Post'
+import TraceHeader from './TraceHeader'
+import HomeHeader from './HomeHeader'
+import NewsHeader from './NewsHeader'
 
 export default function HeaderWrapper() {
-  const { unread, personalUnread, officialUnread } = UserNotificationStore()
-  const { user } = AuthStore()
-  const { setMessage } = MessageStore()
-  const {
-    setHeaderHeight,
-    toggleVNav,
-    togglePostBox,
-    toggleAsideVNav,
-    setScrollUp,
-  } = NavStore()
-  const { getPosts, page_size } = PostStore()
+  const { setHeaderHeight } = NavStore()
   const pathname = usePathname()
-  const router = useRouter()
   const divRef = useRef<HTMLDivElement | null>(null)
   const [showHeader, setShowHeader] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
   const [isOutOfView, setIsOutOfView] = useState(false)
-  const [sort] = useState('-createdAt')
 
   useEffect(() => {
     const updateHeaderHeight = () => {
@@ -62,16 +47,6 @@ export default function HeaderWrapper() {
     }
   }, [lastScrollY, isOutOfView])
 
-  const refresh = async () => {
-    setScrollUp()
-    if (user) {
-      getPosts(
-        `/posts/?myId=${user._id}&page_size=${page_size}&page=1&ordering=${sort}&postType=main`,
-        setMessage
-      )
-    }
-  }
-
   return (
     <>
       <div
@@ -83,77 +58,14 @@ export default function HeaderWrapper() {
         <div className="custom_container">
           <div className="w-full flex">
             <div className="sm:w-[270px] sm:min-w-[270px] xl:w-[300px] w-0" />
-
-            <div className="flex-1 py-3 overflow-x-auto sm:overflow-hidden border-b border-b-[var(--border)] relative sm:ml-5 md:mr-5  bg-[var(--primary)] flex">
-              <span onClick={toggleVNav} className="headerCircle hfs">
-                <i className="bi bi-text-left text-lg text-[var(--text-primary)]"></i>
-              </span>
-              <>
-                {pathname !== '/home' ? (
-                  <div onClick={router.back} className="headerCircle">
-                    <i className="bi bi-arrow-left common-icon"></i>
-                  </div>
-                ) : (
-                  <div onClick={togglePostBox} className="headerCircle sfs">
-                    <i className="bi bi-pen common-icon"></i>
-                  </div>
-                )}
-              </>
-
-              {pathname === '/home' && (
-                <Link href={`/home/following`} className="headerCircle">
-                  <i className={`bi bi-megaphone common-icon`}></i>
-                </Link>
+            <div className="flex-1 sm:px-4 p-2 overflow-x-auto sm:overflow-hidden border-b border-b-[var(--border)] relative sm:ml-5 md:mr-5  bg-[var(--primary)]">
+              {pathname.includes('/home/trace') ? (
+                <TraceHeader />
+              ) : pathname.includes('/home/news') ? (
+                <NewsHeader />
+              ) : (
+                pathname === '/home' && <HomeHeader />
               )}
-              <div className="mr-auto" />
-              <Link
-                href="/home/questions/"
-                className="mx-auto absoluteCenter hidden sm:block"
-              >
-                <Image
-                  style={{ height: 'auto' }}
-                  src="/images/cap.png"
-                  loading="lazy"
-                  sizes="100vw"
-                  className="w-12"
-                  width={0}
-                  height={0}
-                  alt="Schooling Social Logo"
-                />
-              </Link>
-              <div
-                onClick={refresh}
-                className="mx-auto block absoluteCenter cursor-pointer sm:hidden"
-              >
-                <Image
-                  style={{ height: 'auto' }}
-                  src="/images/cap.png"
-                  loading="lazy"
-                  sizes="100vw"
-                  className="w-14"
-                  width={0}
-                  height={0}
-                  alt="Schooling Social Logo"
-                />
-              </div>
-
-              <Link href="/home/notifications" className="headerCircle hfssfm">
-                {unread + officialUnread + personalUnread > 0 && (
-                  <span className="dot_notification">
-                    {unread + officialUnread + personalUnread > 9
-                      ? `9+`
-                      : unread + officialUnread + personalUnread}
-                  </span>
-                )}
-                <i className="bi bi-bell common-icon "></i>
-              </Link>
-
-              <div className="headerCircle sfshfm" onClick={toggleAsideVNav}>
-                <i className="bi bi-people"></i>
-              </div>
-              <Link href="/home/trace" className="headerCircle">
-                <i className="bi bi-search common-icon "></i>
-              </Link>
             </div>
             <div className="md:right-0 z-0 w-0 md:min-w-[270px] md:w-[270px] xl:w-[300px]" />
           </div>

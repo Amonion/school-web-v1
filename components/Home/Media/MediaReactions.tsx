@@ -14,6 +14,8 @@ import { Media } from '@/src/zustand/post/UserPost'
 import CommentStore from '@/src/zustand/post/Comment'
 import { formatCount } from '@/lib/helpers'
 import UserPostStore from '@/src/zustand/post/UserPost'
+import { PostStore } from '@/src/zustand/post/Post'
+import { usePathname } from 'next/navigation'
 
 interface MediaReactionsProps {
   media: Media
@@ -24,9 +26,11 @@ const MediaReactions: React.FC<MediaReactionsProps> = ({
   media,
   isDesktop,
 }) => {
-  const { postForm } = UserPostStore()
+  const { postForm } = PostStore()
+  const { userPostForm } = UserPostStore()
+  const pathname = usePathname()
   const {
-    setShowComment,
+    setShowGlassComment,
     togglePlay,
     setFitMode,
     fitMode,
@@ -91,40 +95,56 @@ const MediaReactions: React.FC<MediaReactionsProps> = ({
                 postForm.liked ? 'text-[var(--custom)]' : ''
               }`}
             >
-              {postForm.likes > 0 && (
+              {pathname === '/home' && postForm.likes > 0 ? (
                 <div className="actionText">{formatCount(postForm.likes)}</div>
+              ) : (
+                userPostForm.likes > 0 && (
+                  <div className="actionText">
+                    {formatCount(userPostForm.likes)}
+                  </div>
+                )
               )}
               <ThumbsUp
                 size={20}
                 color={postForm.liked ? '#da3986' : '#FFFFFF'}
               />
             </button>
-
             <button
-              className={`bg-black/50 p-2 text-white relative rounded-full backdrop-blur-sm transition hover:bg-black/70 ${
+              className={`text-white relative backdrop-blur-sm actionIconWrapper ${
                 postForm.hated ? 'text-[var(--custom)]' : ''
               }`}
             >
-              {postForm.hates > 0 && (
+              {pathname === '/home' && postForm.hates > 0 ? (
                 <div className="actionText">{formatCount(postForm.hates)}</div>
+              ) : (
+                userPostForm.hates > 0 && (
+                  <div className="actionText">
+                    {formatCount(userPostForm.hates)}
+                  </div>
+                )
               )}
               <ThumbsDown
                 size={20}
                 color={postForm.hated ? '#da3986' : '#FFFFFF'}
               />
             </button>
-
             <button
               onClick={(e) => {
                 e.stopPropagation()
-                setShowComment(true)
+                setShowGlassComment(true)
               }}
-              className="actionIconWrapper backdrop-blur-sm"
+              className={`text-white relative backdrop-blur-sm actionIconWrapper`}
             >
-              {postForm.replies > 0 && (
+              {pathname === '/home' && postForm.replies > 0 ? (
                 <div className="actionText">
                   {formatCount(postForm.replies)}
                 </div>
+              ) : (
+                userPostForm.replies > 0 && (
+                  <div className="actionText">
+                    {formatCount(userPostForm.replies)}
+                  </div>
+                )
               )}
               <MessageCircle size={20} />
             </button>

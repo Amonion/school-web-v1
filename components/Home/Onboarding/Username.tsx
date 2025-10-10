@@ -117,7 +117,7 @@ const Username = () => {
             htmlFor="avatar-upload"
             className="relative group cursor-pointer"
           >
-            <div className="w-24 h-24 rounded-full border-2 border-gray-300 overflow-hidden">
+            <div className="w-24 h-24 rounded-full border-2 border-[var(--border)] overflow-hidden">
               {avatar ? (
                 <img
                   src={avatar}
@@ -130,14 +130,8 @@ const Username = () => {
                 </div>
               )}
             </div>
-
-            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-              <span className="text-white text-sm">Change</span>
-            </div>
           </label>
-          <div className="text-center w-full mt-2">
-            Upload A Profile Picture
-          </div>
+          <div className="text-center w-full mt-2">Profile Picture</div>
           <input
             type="file"
             id="avatar-upload"

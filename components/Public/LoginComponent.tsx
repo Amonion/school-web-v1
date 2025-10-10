@@ -8,6 +8,7 @@ import { AuthStore } from '@/src/zustand/user/AuthStore'
 import DownloadApp from './DownloadApp'
 import { getDeviceInfo } from '@/lib/helpers'
 import { validateSignUp, ValidationResult } from '@/lib/validateInputs'
+import { PostStore } from '@/src/zustand/post/Post'
 const LoginComponent: React.FC = () => {
   const router = useRouter()
   const [route, setRoute] = useState<string>('')
@@ -68,6 +69,7 @@ const LoginComponent: React.FC = () => {
           activeOffice,
           userOffices,
           token,
+          posts,
         } = response.data
         AuthStore.getState().login(
           user,
@@ -78,6 +80,7 @@ const LoginComponent: React.FC = () => {
           token
         )
         AuthStore.getState().setOfficeState(activeOffice, userOffices)
+        PostStore.setState({ postResults: posts })
         setTimeout(() => {
           if (user.isFirstTime) {
             setRoute('onboarding')

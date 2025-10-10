@@ -4,8 +4,8 @@ import Polls from './Polls'
 import TruncatedContent from './TruncatedContent'
 import PostStat from './PostStat'
 import { Post, PostStore } from '@/src/zustand/post/Post'
-import PostMediaGrid from '../Media/PostMediaGrid'
-import HomeMedia from '../Media/HomeMedia'
+import HomePostMedia from '../Media/HomePostMedia'
+import UserPostMedia from '../Media/UserPostMedia'
 
 interface PostCardProps {
   post: Post
@@ -27,16 +27,16 @@ const PostCard: React.FC<
       <div
         ref={lastRef}
         onClick={() => moveToPost(post._id)}
-        className="post_card cursor-pointer"
+        className="bg-[var(--primary)] py-2 mb-1 cursor-pointer"
       >
         <PostHeader post={post} />
-        <div className="p-1 rounded-[5px] cursor-pointer mb-1 text-[16px] text-[var(--text-title-color)]">
+        <div className="px-2 cursor-pointer mb-1 text-[16px] text-[var(--text-title-color)]">
           <TruncatedContent content={post.content} limit={200} post={post} />
         </div>
         {pathname === '/home' ? (
-          <HomeMedia sources={post.media} />
+          <HomePostMedia sources={post.media} />
         ) : (
-          <PostMediaGrid sources={post.media} />
+          <UserPostMedia sources={post.media} />
         )}
         <Polls postId={post._id} />
         <PostStat post={post} />

@@ -1,26 +1,26 @@
-import React from "react";
-import CustomTextStyle from "@/src/types/TextStyle";
-import FontSize from "@/src/types/FontSize";
-import { useEffect, useRef } from "react";
-import { MathNode } from "@/src/types/Equation";
-import { Color } from "@tiptap/extension-color";
-import ListItem from "@tiptap/extension-list-item";
-import TextStyle from "@tiptap/extension-text-style";
-import { useEditor } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
-import TextAlign from "@tiptap/extension-text-align";
-import Underline from "@tiptap/extension-underline";
-import Link from "@tiptap/extension-link";
-import Table from "@tiptap/extension-table";
-import TableCell from "@tiptap/extension-table-cell";
-import TableHeader from "@tiptap/extension-table-header";
-import TableRow from "@tiptap/extension-table-row";
-import Highlight from "@tiptap/extension-highlight";
-import Dropcursor from "@tiptap/extension-dropcursor";
-import Superscript from "@tiptap/extension-superscript";
-import Subscript from "@tiptap/extension-subscript";
-import Placeholder from "@tiptap/extension-placeholder";
-import Image from "@tiptap/extension-image";
+import React from 'react'
+import CustomTextStyle from '@/src/types/TextStyle'
+import FontSize from '@/src/types/FontSize'
+import { useEffect, useRef } from 'react'
+import { MathNode } from '@/src/types/Equation'
+import { Color } from '@tiptap/extension-color'
+import ListItem from '@tiptap/extension-list-item'
+import TextStyle from '@tiptap/extension-text-style'
+import { useEditor } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
+import TextAlign from '@tiptap/extension-text-align'
+import Underline from '@tiptap/extension-underline'
+import Link from '@tiptap/extension-link'
+import Table from '@tiptap/extension-table'
+import TableCell from '@tiptap/extension-table-cell'
+import TableHeader from '@tiptap/extension-table-header'
+import TableRow from '@tiptap/extension-table-row'
+import Highlight from '@tiptap/extension-highlight'
+import Dropcursor from '@tiptap/extension-dropcursor'
+import Superscript from '@tiptap/extension-superscript'
+import Subscript from '@tiptap/extension-subscript'
+import Placeholder from '@tiptap/extension-placeholder'
+import Image from '@tiptap/extension-image'
 
 const CustomTableCell = TableCell.extend({
   addAttributes() {
@@ -28,17 +28,17 @@ const CustomTableCell = TableCell.extend({
       ...this.parent?.(),
       backgroundColor: {
         default: null,
-        parseHTML: (element) => element.getAttribute("data-background-color"),
+        parseHTML: (element) => element.getAttribute('data-background-color'),
         renderHTML: (attributes) => {
           return {
-            "data-background-color": attributes.backgroundColor,
+            'data-background-color': attributes.backgroundColor,
             style: `background-color: ${attributes.backgroundColor}`,
-          };
+          }
         },
       },
-    };
+    }
   },
-});
+})
 
 const ResizableImage = Image.extend({
   addAttributes() {
@@ -46,55 +46,55 @@ const ResizableImage = Image.extend({
       ...this.parent?.(),
       src: {
         default: null,
-        parseHTML: (element) => element.getAttribute("src"), // Ensure 'src' is extracted correctly
+        parseHTML: (element) => element.getAttribute('src'), // Ensure 'src' is extracted correctly
         renderHTML: (attributes) => {
           return {
             src: attributes.src, // Make sure this is correctly set when updating
-          };
+          }
         },
       },
       width: {
         default: null,
-        parseHTML: (element) => element.getAttribute("width"),
+        parseHTML: (element) => element.getAttribute('width'),
         renderHTML: (attributes) => {
-          if (!attributes.width) return {};
-          return { width: attributes.width };
+          if (!attributes.width) return {}
+          return { width: attributes.width }
         },
       },
       height: {
         default: null,
-        parseHTML: (element) => element.getAttribute("height"),
+        parseHTML: (element) => element.getAttribute('height'),
         renderHTML: (attributes) => {
-          if (!attributes.height) return {};
-          return { height: attributes.height };
+          if (!attributes.height) return {}
+          return { height: attributes.height }
         },
       },
       style: {
         default: null,
-        parseHTML: (element) => element.getAttribute("style"),
+        parseHTML: (element) => element.getAttribute('style'),
         renderHTML: (attributes) => {
-          if (!attributes.style) return {};
-          return { style: attributes.style };
+          if (!attributes.style) return {}
+          return { style: attributes.style }
         },
       },
-    };
+    }
   },
-});
+})
 
 const AlignableImage = ResizableImage.extend({
   addAttributes() {
     return {
       ...this.parent?.(),
       alignment: {
-        default: "center",
-        parseHTML: (element) => element.style.float || "center",
+        default: 'center',
+        parseHTML: (element) => element.style.float || 'center',
         renderHTML: (attributes) => {
-          return { style: `float: ${attributes.alignment};` };
+          return { style: `float: ${attributes.alignment};` }
         },
       },
-    };
+    }
   },
-});
+})
 
 const extensions = [
   Color.configure({ types: [TextStyle.name, ListItem.name] }),
@@ -119,75 +119,75 @@ const extensions = [
   Link.configure({
     openOnClick: true,
     HTMLAttributes: {
-      rel: "noopener noreferrer",
-      target: "_blank",
+      rel: 'noopener noreferrer',
+      target: '_blank',
     },
   }),
   Superscript,
   Subscript,
   Placeholder.configure({
-    placeholder: "Write something …",
+    placeholder: 'Write something …',
   }),
   Image,
   AlignableImage,
   Dropcursor,
   Underline,
-  TextAlign.configure({ types: ["paragraph", "heading"] }),
+  TextAlign.configure({ types: ['paragraph', 'heading'] }),
   Highlight.configure({ multicolor: true }),
   MathNode,
-];
+]
 
 interface MyEditorProps {
-  value: string;
+  value: string
   onChange: (
     value: string,
     delta: unknown,
     source: string,
     editor: unknown
-  ) => void;
+  ) => void
 }
 
 interface MyEditorProps {
-  value: string;
+  value: string
   onChange: (
     value: string,
     delta: unknown,
     source: string,
     editor: unknown
-  ) => void;
+  ) => void
 }
 
 const PostEditor: React.FC<MyEditorProps> = ({ value, onChange }) => {
-  const editorContainerRef = useRef<HTMLDivElement>(null);
+  const editorContainerRef = useRef<HTMLDivElement>(null)
 
   const editor = useEditor({
     extensions: extensions,
     immediatelyRender: false,
-    content: value || "",
+    content: value || '',
     onUpdate: ({ editor }) => {
-      const content = editor.getHTML().replace(/\n/g, "<br><br>");
-      onChange(content, { ops: [] }, "user", editor);
+      const content = editor.getHTML().replace(/\n/g, '<br><br>')
+      onChange(content, { ops: [] }, 'user', editor)
     },
-  });
+  })
 
   useEffect(() => {
     if (editor && editorContainerRef.current) {
-      editorContainerRef.current.appendChild(editor.view.dom);
+      editorContainerRef.current.appendChild(editor.view.dom)
     }
-  }, [editor]);
+  }, [editor])
 
   useEffect(() => {
     if (editor && editor.getHTML() !== value) {
-      editor.commands.setContent(value || "");
-      editor.view.updateState(editor.view.state);
+      editor.commands.setContent(value || '')
+      editor.view.updateState(editor.view.state)
     }
-  }, [value, editor]);
+  }, [value, editor])
 
   return (
-    <div className="mb-5 post">
+    <div className="mb-3 post">
       <div ref={editorContainerRef} id="editor" />
     </div>
-  );
-};
+  )
+}
 
-export default PostEditor;
+export default PostEditor

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Upload, Smile, Save, Plus } from 'lucide-react'
+import { Upload, Smile, Plus } from 'lucide-react'
 import Picker from '@emoji-mart/react'
 import data from '@emoji-mart/data'
 import { getFileType } from '@/lib/helpers'
@@ -10,7 +10,7 @@ import { AlartStore, MessageStore } from '@/src/zustand/notification/Message'
 import { useTheme } from '@/context/ThemeProvider'
 import { AuthStore } from '@/src/zustand/user/AuthStore'
 import PostEditor from '../Editor/PostEditor'
-import { Poll, Post, PostStore } from '@/src/zustand/post/Post'
+import { IMedia, Media, Poll, Post, PostStore } from '@/src/zustand/post/Post'
 import { usePersonalNotificationContext } from '@/context/HomeContext/PersonalNotificationContext'
 
 type file = {
@@ -63,8 +63,22 @@ const PostBox: React.FC<PostBoxProps> = () => {
     socket.on(`post_${user?.username}`, (data: Response) => {
       togglePostBox()
       setLoading(false)
+      const transformedMedia: IMedia[] = Array.isArray(data.data.media)
+        ? data.data.media.map((item: Media) => ({
+            postId: data.data._id,
+            src: item.source,
+            preview: item.preview,
+            type: item.type,
+            content: data.data.content,
+            replies: data.data.replies,
+          }))
+        : []
       PostStore.setState((prev) => ({
         postResults: [{ ...data.data, viewed: true }, ...prev.postResults],
+        mediaResults:
+          transformedMedia.length > 0
+            ? [...transformedMedia, ...prev.mediaResults]
+            : [...prev.mediaResults],
       }))
 
       setMessage(data.message, true)
@@ -95,6 +109,7 @@ const PostBox: React.FC<PostBoxProps> = () => {
         },
         createdAt: new Date().toISOString(),
         media: files,
+        country: user?.country,
       }
 
       if (
@@ -222,6 +237,137 @@ const PostBox: React.FC<PostBoxProps> = () => {
     }
   }
 
+  // const uploadFile = async (file: File, index: number, type: string) => {
+  //   try {
+  //     setLoading(true)
+
+  //     const getMediaDimensions = (): Promise<{
+  //       width: number
+  //       height: number
+  //     }> =>
+  //       new Promise((resolve, reject) => {
+
+  //         if (type.includes('image')) {
+  //           const img = new window.Image()
+  //           img.onload = () => resolve({ width: img.width, height: img.height })
+  //           img.onerror = reject
+  //           img.src = URL.createObjectURL(file)
+  //         } else if (type.includes('video')) {
+  //           const video = document.createElement('video')
+  //           video.preload = 'metadata'
+  //           video.onloadedmetadata = () => {
+  //             URL.revokeObjectURL(video.src)
+  //             resolve({ width: video.videoWidth, height: video.videoHeight })
+  //           }
+  //           video.onerror = reject
+  //           video.src = URL.createObjectURL(file)
+  //         } else {
+  //           resolve({ width: 0, height: 0 })
+  //         }
+  //       })
+
+  //     const { width, height } = await getMediaDimensions()
+
+  //     const { data: filePresign } = await axios.post(
+  //       `${baseURL}s3-presigned-url`,
+  //       {
+  //         fileName: file.name,
+  //         fileType: file.type,
+  //       }
+  //     )
+
+  //     const { uploadUrl: fileUploadUrl } = filePresign
+
+  //     await axios.put(fileUploadUrl, file, {
+  //       headers: { 'Content-Type': file.type },
+  //       onUploadProgress: (progressEvent) => {
+  //         if (progressEvent.total) {
+  //           const percent = Math.round(
+  //             (progressEvent.loaded / progressEvent.total) * 100
+  //           )
+  //           setPercents((prev) => {
+  //             const updated = [...prev]
+  //             updated[index] = percent
+  //             return updated
+  //           })
+  //         }
+  //       },
+  //     })
+
+  //     const publicFileUrl = fileUploadUrl.split('?')[0]
+  //     let publicThumbUrl = publicFileUrl
+
+  //     if (type.includes('video')) {
+  //       const video = document.createElement('video')
+  //       video.src = URL.createObjectURL(file)
+  //       video.crossOrigin = 'anonymous'
+  //       video.preload = 'metadata'
+  //       video.muted = true
+  //       video.playsInline = true
+
+  //       const canvas = document.createElement('canvas')
+
+  //       await new Promise((resolve, reject) => {
+  //         video.onloadedmetadata = () => {
+  //           video.currentTime = Math.min(1, video.duration / 2)
+  //         }
+
+  //         video.onseeked = () => {
+  //           canvas.width = video.videoWidth
+  //           canvas.height = video.videoHeight
+
+  //           const ctx = canvas.getContext('2d')
+  //           ctx?.drawImage(video, 0, 0, canvas.width, canvas.height)
+
+  //           canvas.toBlob(async (blob) => {
+  //             if (!blob) return reject('Failed to create thumbnail blob.')
+
+  //             const thumbFileName =
+  //               file.name.replace(/\.[^/.]+$/, '') + '-thumb.jpg'
+
+  //             const { data: thumbPresign } = await axios.post(
+  //               `${baseURL}s3-presigned-url`,
+  //               {
+  //                 fileName: thumbFileName,
+  //                 fileType: 'image/jpeg',
+  //               }
+  //             )
+
+  //             const { uploadUrl: thumbUploadUrl } = thumbPresign
+
+  //             await axios.put(thumbUploadUrl, blob, {
+  //               headers: { 'Content-Type': 'image/jpeg' },
+  //             })
+
+  //             publicThumbUrl = thumbUploadUrl.split('?')[0]
+  //             resolve(true)
+  //           }, 'image/jpeg')
+  //         }
+
+  //         video.onerror = () => reject('Error loading video for thumbnail.')
+  //       })
+  //     }
+
+  //     setFiles((prevs) => {
+  //       const updated = [...prevs]
+  //       updated[index] = {
+  //         type,
+  //         source: publicFileUrl,
+  //         preview: publicThumbUrl,
+  //         width,
+  //         height,
+  //       }
+  //       return updated
+  //     })
+
+  //     return publicFileUrl
+  //   } catch (error) {
+  //     console.error('Upload failed:', error)
+  //   } finally {
+  //     setLoading(false)
+  //   }
+  // }
+
   const uploadFile = async (file: File, index: number, type: string) => {
     try {
       setLoading(true)
@@ -252,6 +398,48 @@ const PostBox: React.FC<PostBoxProps> = () => {
 
       const { width, height } = await getMediaDimensions()
 
+      let localThumbUrl = ''
+      if (type.includes('video')) {
+        localThumbUrl = await new Promise<string>((resolve, reject) => {
+          const video = document.createElement('video')
+          video.src = URL.createObjectURL(file)
+          video.crossOrigin = 'anonymous'
+          video.preload = 'metadata'
+          video.muted = true
+          video.playsInline = true
+
+          const canvas = document.createElement('canvas')
+
+          video.onloadedmetadata = () => {
+            video.currentTime = Math.min(1, video.duration / 2)
+          }
+
+          video.onseeked = () => {
+            canvas.width = video.videoWidth
+            canvas.height = video.videoHeight
+            const ctx = canvas.getContext('2d')
+            ctx?.drawImage(video, 0, 0, canvas.width, canvas.height)
+            resolve(canvas.toDataURL('image/jpeg'))
+          }
+
+          video.onerror = () => reject('Error generating local thumbnail.')
+        })
+      }
+
+      setFiles((prev) => {
+        const updated = [...prev]
+        updated[index] = {
+          type,
+          source: '',
+          preview: type.includes('video')
+            ? localThumbUrl
+            : URL.createObjectURL(file),
+          width,
+          height,
+        }
+        return updated
+      })
+
       const { data: filePresign } = await axios.post(
         `${baseURL}s3-presigned-url`,
         {
@@ -259,7 +447,6 @@ const PostBox: React.FC<PostBoxProps> = () => {
           fileType: file.type,
         }
       )
-
       const { uploadUrl: fileUploadUrl } = filePresign
 
       await axios.put(fileUploadUrl, file, {
@@ -279,67 +466,31 @@ const PostBox: React.FC<PostBoxProps> = () => {
       })
 
       const publicFileUrl = fileUploadUrl.split('?')[0]
-      let publicThumbUrl = publicFileUrl
+      let publicThumbUrl = localThumbUrl
 
       if (type.includes('video')) {
-        const video = document.createElement('video')
-        video.src = URL.createObjectURL(file)
-        video.crossOrigin = 'anonymous'
-        video.preload = 'metadata'
-        video.muted = true // required for some browsers
-        video.playsInline = true
-
-        const canvas = document.createElement('canvas')
-
-        await new Promise((resolve, reject) => {
-          video.onloadedmetadata = () => {
-            video.currentTime = Math.min(1, video.duration / 2) // Seek to 1s or halfway
+        const blob = await (await fetch(localThumbUrl)).blob()
+        const thumbFileName = file.name.replace(/\.[^/.]+$/, '') + '-thumb.jpg'
+        const { data: thumbPresign } = await axios.post(
+          `${baseURL}s3-presigned-url`,
+          {
+            fileName: thumbFileName,
+            fileType: 'image/jpeg',
           }
-
-          video.onseeked = () => {
-            canvas.width = video.videoWidth
-            canvas.height = video.videoHeight
-
-            const ctx = canvas.getContext('2d')
-            ctx?.drawImage(video, 0, 0, canvas.width, canvas.height)
-
-            canvas.toBlob(async (blob) => {
-              if (!blob) return reject('Failed to create thumbnail blob.')
-
-              const thumbFileName =
-                file.name.replace(/\.[^/.]+$/, '') + '-thumb.jpg'
-
-              const { data: thumbPresign } = await axios.post(
-                `${baseURL}s3-presigned-url`,
-                {
-                  fileName: thumbFileName,
-                  fileType: 'image/jpeg',
-                }
-              )
-
-              const { uploadUrl: thumbUploadUrl } = thumbPresign
-
-              await axios.put(thumbUploadUrl, blob, {
-                headers: { 'Content-Type': 'image/jpeg' },
-              })
-
-              publicThumbUrl = thumbUploadUrl.split('?')[0]
-              resolve(true)
-            }, 'image/jpeg')
-          }
-
-          video.onerror = () => reject('Error loading video for thumbnail.')
+        )
+        const { uploadUrl: thumbUploadUrl } = thumbPresign
+        await axios.put(thumbUploadUrl, blob, {
+          headers: { 'Content-Type': 'image/jpeg' },
         })
+        publicThumbUrl = thumbUploadUrl.split('?')[0]
       }
 
-      setFiles((prevs) => {
-        const updated = [...prevs]
+      setFiles((prev) => {
+        const updated = [...prev]
         updated[index] = {
-          type,
+          ...updated[index],
           source: publicFileUrl,
           preview: publicThumbUrl,
-          width,
-          height,
         }
         return updated
       })
@@ -537,14 +688,9 @@ const PostBox: React.FC<PostBoxProps> = () => {
                   />
                 </label>
 
-                <div className="flex items-center sm:ml-auto">
-                  <Save className="post_box_icon active" />
-                  {/* <Send className="post_box_icon active" /> */}
-
-                  <button onClick={postMessage} className="custom_btn">
-                    Post
-                  </button>
-                </div>
+                <button onClick={postMessage} className="custom_btn ml:auto">
+                  Post
+                </button>
               </div>
             </>
           )}

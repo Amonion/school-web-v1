@@ -3,18 +3,18 @@ import 'swiper/css'
 import 'swiper/css/autoplay'
 import CommentStore from '@/src/zustand/post/Comment'
 import { Post, PostStore } from '@/src/zustand/post/Post'
-import CommonMedia from './CommonMedia'
+import CommonMedia from './CommonPostMedia'
 
 interface MediaSource {
   source: string
   type: string
 }
 
-interface HomeMediaProps {
+interface HomePostMediaProps {
   sources: MediaSource[]
 }
 
-const HomeMedia: React.FC<HomeMediaProps> = ({ sources }) => {
+const HomePostMedia: React.FC<HomePostMediaProps> = ({ sources }) => {
   const { mediaResults, setSelectedMedia, setCurrentIndex, setFitMode } =
     PostStore()
   const { page_size, currentPage, getComments } = CommentStore()
@@ -56,4 +56,4 @@ const HomeMedia: React.FC<HomeMediaProps> = ({ sources }) => {
   )
 }
 
-export default HomeMedia
+export default HomePostMedia

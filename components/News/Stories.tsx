@@ -277,8 +277,8 @@ export default function Stories() {
 
   return (
     <>
-      <div className="w-full overflow-x-auto py-3">
-        <div className="flex gap-2 px-2">
+      <div className="w-full overflow-x-auto py-2 mb-1">
+        <div className="flex gap-2 px-2 md:px-0">
           <div className="story bg-[var(--primary)] flex flex-col justify-between p-3 cursor-pointer">
             <div className="w-10 h-10 border-[var(--border)] rounded-full bg-[var(--secondary)] flex items-center justify-center text-[var(--custom)] border">
               <Plus size={20} />

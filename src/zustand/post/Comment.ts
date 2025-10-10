@@ -96,7 +96,9 @@ interface CommentState {
   postedComment: Comment
   loading: boolean
   fitMode: boolean
+  isMobile: boolean
   showComments: boolean
+  showGlassComments: boolean
   showActions: boolean
   error: string | null
   successs?: string | null
@@ -106,6 +108,7 @@ interface CommentState {
   commentForm: Post
   mainPost: Post
   setForm: (key: keyof Post, value: Post[keyof Post]) => void
+  setIsMobile: (status: boolean) => void
   resetForm: () => void
   getComments: (url: string) => Promise<void>
   getAComment: (
@@ -119,6 +122,7 @@ interface CommentState {
   setMainPost: (post: Post) => void
   setShowActions: (loading: boolean) => void
   setShowComment: (loading: boolean) => void
+  setShowGlassComment: (loading: boolean) => void
   setProgress: (progress: number) => void
   setFitMode: (status: boolean) => void
   togglePlay: (play: boolean) => void
@@ -155,11 +159,13 @@ const CommentStore = create<CommentState>((set) => ({
   progress: 0,
   commentResults: [],
   comments: [],
+  isMobile: false,
   loading: false,
   fitMode: false,
   isPlaying: true,
   showActions: false,
   showComments: false,
+  showGlassComments: false,
   error: null,
   selectedComments: [],
   searchResult: [],
@@ -178,6 +184,10 @@ const CommentStore = create<CommentState>((set) => ({
       },
     })),
 
+  setIsMobile: (status) =>
+    set({
+      isMobile: status,
+    }),
   resetForm: () =>
     set({
       activeComment: CommentEmpty,
@@ -186,6 +196,9 @@ const CommentStore = create<CommentState>((set) => ({
   resetActiveComment: () => set({ activeComment: CommentEmpty }),
   setFitMode: (status: boolean) => {
     set({ fitMode: status })
+  },
+  setShowGlassComment: (loadState: boolean) => {
+    set({ showGlassComments: loadState })
   },
   setShowComment: (loadState: boolean) => {
     set({ showComments: loadState })

@@ -12,7 +12,6 @@ export default function Post() {
     getPosts,
     page_size,
     updatePost,
-    reshuffleResults,
     hasMore,
     addMorePosts,
     setCurrentPage,
@@ -23,17 +22,14 @@ export default function Post() {
   const { user } = AuthStore()
 
   useEffect(() => {
-    if (user) {
+    if (user && postResults.length === 0) {
       setCurrentPage(1)
       getPosts(
         `/posts/?myId=${user._id}&page_size=${page_size}&page=1&ordering=${sort}&postType=main`,
         setMessage
       )
     }
-    return () => {
-      reshuffleResults()
-    }
-  }, [user])
+  }, [user, postResults])
 
   useEffect(() => {
     if (user && currentPage > 1) {

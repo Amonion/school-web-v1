@@ -2,26 +2,27 @@
 import React, { useRef, useEffect } from 'react'
 import CommentStore from '@/src/zustand/post/Comment'
 import { Post, PostStore } from '@/src/zustand/post/Post'
-import MediaHolder from './MediaHolder'
+import MobileMediaViewer from './MobileMediaViewer'
+import DesktopMediaViewer from './DesktopMediaViewer'
 
-const PostMediaHolder: React.FC = () => {
+const HomeMediaHolder: React.FC = () => {
   const {
     currentPage,
     page_size,
+    isMobile,
     showComments,
     setFitMode,
+    setIsMobile,
     setShowActions,
     getComments,
   } = CommentStore()
   const {
     mediaResults,
-    isMobile,
     currentIndex,
     selectedMedia,
     postForm,
     setSelectedMedia,
     setCurrentIndex,
-    setIsMobile,
   } = PostStore()
 
   const touchStartY = useRef(0)
@@ -123,18 +124,26 @@ const PostMediaHolder: React.FC = () => {
 
   return (
     <>
-      <MediaHolder
-        isMobile={isMobile}
-        selectedMedia={selectedMedia}
-        postForm={postForm}
-        closeFullScreen={closeFullScreen}
-        handleTouchStart={handleTouchStart}
-        handleTouchEnd={handleTouchEnd}
-        goToPrevious={goToPrevious}
-        goToNext={goToNext}
-      />
+      {selectedMedia && isMobile && (
+        <MobileMediaViewer
+          media={selectedMedia}
+          postForm={postForm}
+          onClose={closeFullScreen}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        />
+      )}
+
+      {selectedMedia && !isMobile && (
+        <DesktopMediaViewer
+          media={selectedMedia}
+          onClose={closeFullScreen}
+          goToPrevious={goToPrevious}
+          goToNext={goToNext}
+        />
+      )}
     </>
   )
 }
 
-export default PostMediaHolder
+export default HomeMediaHolder
