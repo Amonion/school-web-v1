@@ -95,7 +95,7 @@ const NewsStat: React.FC<PostProps> = ({ post }) => {
       onClick={(e) => {
         e.stopPropagation()
       }}
-      className="py-2 bg-[var(--primary)] cursor-default px-2 flex items-center justify-between"
+      className="py-2 cursor-default flex items-center justify-between px-2 sm:pr-2 md:px-2"
     >
       <div className="post_stat cursor-pointer flex items-center space-x-1 transition-all duration-300">
         {loading && isLiked ? (

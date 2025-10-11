@@ -1,53 +1,17 @@
 'use client'
 import HomeMediaHolder from '@/components/Home/Media/HomeMediaHolder'
 import HomeNews from '@/components/News/HomeNews'
-import Stories from '@/components/News/Stories'
-import { NavStore } from '@/src/zustand/notification/Navigation'
-import { useEffect } from 'react'
 import MainNewsGrid from '@/components/News/MainNewsGrid'
+import PopularNews from '@/components/News/PopularNews'
+import RelatedNews from '@/components/News/RelatedNews'
 const Home: React.FC = () => {
-  const { scrollUp } = NavStore()
-
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }, [scrollUp])
-
-  useEffect(() => {
-    let startY = 0
-
-    const handleTouchStart = (e: TouchEvent) => {
-      startY = e.touches[0].clientY
-    }
-
-    const handleTouchMove = (e: TouchEvent) => {
-      const currentY = e.touches[0].clientY
-      const scrollY = window.scrollY
-      if (scrollY === 0 && currentY > startY + 50) {
-        e.preventDefault()
-        runMyFunction()
-      }
-    }
-
-    const runMyFunction = () => {
-      console.log('✅ Custom pull-to-refresh triggered')
-    }
-
-    document.addEventListener('touchstart', handleTouchStart, {
-      passive: false,
-    })
-    document.addEventListener('touchmove', handleTouchMove, { passive: false })
-
-    return () => {
-      document.removeEventListener('touchstart', handleTouchStart)
-      document.removeEventListener('touchmove', handleTouchMove)
-    }
-  }, [])
   return (
     <>
       <HomeMediaHolder />
       <HomeNews />
-      <Stories />
+      <PopularNews />
       <MainNewsGrid />
+      <RelatedNews />
     </>
   )
 }

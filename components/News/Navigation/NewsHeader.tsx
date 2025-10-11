@@ -5,7 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { UserNotificationStore } from '@/src/zustand/notification/UserNotification'
 
-export default function HeaderWrapper() {
+export default function NewsHeader() {
   const { setHeaderHeight } = NavStore()
   const pathname = usePathname()
   const divRef = useRef<HTMLDivElement | null>(null)
@@ -61,7 +61,7 @@ export default function HeaderWrapper() {
         <div className="custom_container">
           <div className="w-full flex">
             <div className="sm:w-[270px] sm:min-w-[270px] xl:w-[300px] w-0" />
-            <div className="flex-1 sm:px-4 p-2 overflow-x-auto sm:overflow-hidden border-b border-b-[var(--border)] relative sm:ml-5 md:mr-5  bg-[var(--primary)]">
+            <div className="flex-1 py-2 overflow-x-auto sm:overflow-hidden border-b border-b-[var(--border)] relative sm:ml-5 md:mr-5  bg-[var(--primary)]">
               <div className="flex items-center relative">
                 <div className="headerCircle hfs">
                   <i
@@ -111,7 +111,7 @@ export default function HeaderWrapper() {
                   )}
                   <i className={`bi bi-bell text-lg`}></i>
                 </Link>
-                <div className="headerCircle">
+                <div className="headerCircle hfm">
                   <i className="bi bi-search text-lg"></i>
                 </div>
               </div>

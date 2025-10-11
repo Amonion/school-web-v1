@@ -130,12 +130,19 @@
   @apply md:right-0 justify-end md:sticky z-30 w-full md:min-w-[270px] md:w-[270px] xl:w-[300px] bg-black/20;
 }
 
+.v_nav.news {
+  @apply md:right-0 justify-end md:sticky z-30 w-full md:min-w-[270px] md:w-[270px] xl:w-[300px];
+}
+
 .v_nav_card {
   @apply md:border-none w-[300px] xl:w-full flex flex-col overflow-auto h-[100vh] bg-[var(--white)] px-3;
 }
 
 .v_nav_card.aside {
-  @apply border-l-2 border-l-[var(--border-color)] h-[100vh];
+  @apply border-l-2 border-l-[var(--border-color)];
+}
+.v_nav_card.news {
+  @apply px-0 bg-transparent flex flex-col pr-2 xl:pr-0;
 }
 
 .v_nav_card.nav {

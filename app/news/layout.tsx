@@ -6,13 +6,13 @@ import UserResponse from '../../components/Messages/UserResponse'
 import UserAlert from '@/components/Messages/UserAlert'
 import { useEffect, useRef } from 'react'
 import { usePathname } from 'next/navigation'
-import AsideFriends from '@/components/Home/Navigation/AsideFriends'
 import VerticalNavigation from '@/components/Home/Navigation/VerticalNavigation'
 import { NavStore } from '@/src/zustand/notification/Navigation'
 import PostBox from '@/components/Home/Posts/PostBox'
 import MobileNav from '@/components/Home/Navigation/MobileNav'
 import CommentBottomSheet from '@/components/Home/Comment/CommentBottomSheet'
-import MainHeader from '@/components/News/Navigation/MainHeader'
+import AsideNews from '@/components/News/Navigation/AsideNews'
+import NewsHeader from '@/components/News/Navigation/NewsHeader'
 
 export default function RootLayout({
   children,
@@ -78,19 +78,19 @@ export default function RootLayout({
             <VerticalNavigation />
 
             <div className="flex-1 overflow-x-auto sm:overflow-hidden relative sm:ml-5 md:mr-5 flex flex-col">
-              <MainHeader />
+              <NewsHeader />
 
               <div
                 style={{
                   marginTop: `${headerHeight}px`,
                   minHeight: `calc(100vh - ${headerHeight}px)`,
                 }}
-                className={`flex flex-col flex-1 w-full`}
+                className={`flex flex-col pb-[55px] sm:pb-0 flex-1 w-full`}
               >
                 {children}
               </div>
             </div>
-            <AsideFriends />
+            <AsideNews />
           </div>
         </div>
       </div>

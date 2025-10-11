@@ -116,7 +116,7 @@ const sampleStories: Story[] = [
   },
 ]
 
-export default function Stories() {
+export default function GiveawayScroll() {
   const [openIdx, setOpenIdx] = useState<number | null>(null)
   const [itemIdx, setItemIdx] = useState(0)
   const [paused, setPaused] = useState(false)
@@ -277,13 +277,15 @@ export default function Stories() {
 
   return (
     <>
-      <div className="w-full overflow-x-auto py-2 mb-1">
+      <div className="text-lg mt-4 px-2 sm:px-0">Free Giveaways</div>
+
+      <div className="w-full overflow-x-auto py-2 mb-2">
         <div className="flex gap-2 px-2 md:px-0">
           <div className="story bg-[var(--primary)] flex flex-col justify-between p-3 cursor-pointer">
             <div className="w-10 h-10 border-[var(--border)] rounded-full bg-[var(--secondary)] flex items-center justify-center text-[var(--custom)] border">
               <Plus size={20} />
             </div>
-            <span className="text-white text-sm">Your story</span>
+            <span className="text-white text-sm">Throw Some Gifts</span>
           </div>
 
           {sampleStories.map((story, idx) => (

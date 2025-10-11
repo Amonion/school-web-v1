@@ -1,10 +1,10 @@
 'use client'
 import HomeMediaHolder from '@/components/Home/Media/HomeMediaHolder'
 import HomeNews from '@/components/News/HomeNews'
-import Stories from '@/components/News/Stories'
 import Post from '@/components/Home/Posts/Post'
 import { NavStore } from '@/src/zustand/notification/Navigation'
 import { useEffect } from 'react'
+import GiveawayScroll from '@/components/Home/Giveaway/GiveawayScroll'
 const Home: React.FC = () => {
   const { togglePostBox, scrollUp } = NavStore()
 
@@ -46,7 +46,7 @@ const Home: React.FC = () => {
     <>
       <HomeMediaHolder />
       <HomeNews />
-      <Stories />
+      <GiveawayScroll />
       <Post />
 
       <div

@@ -1,7 +1,7 @@
 'use client'
 import HomeMediaHolder from '@/components/Home/Media/HomeMediaHolder'
 import HomeNews from '@/components/News/HomeNews'
-import Stories from '@/components/News/Stories'
+import Stories from '@/components/News/PopularNews'
 import Post from '@/components/Home/Posts/Post'
 import { NavStore } from '@/src/zustand/notification/Navigation'
 import { useEffect } from 'react'
