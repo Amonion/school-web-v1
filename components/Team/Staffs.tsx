@@ -1,15 +1,14 @@
-"use client";
-import Link from "next/link";
-import Image from "next/image";
-import StaffStore from "@/src/zustand/team/Staff";
-import { useState, useEffect, useRef } from "react";
-import { MessageStore } from "@/src/zustand/msgStore";
-import { usePathname } from "next/navigation";
-import { Staff } from "@/src/interface/team/interface";
-import Pagination from "@/components/Team/Pagination";
+'use client'
+import Link from 'next/link'
+import Image from 'next/image'
+import { useState, useEffect, useRef } from 'react'
+import { usePathname } from 'next/navigation'
+import Pagination from '@/components/Team/Pagination'
+import StaffStore, { Staff } from '@/src/zustand/app/Staff'
+import { MessageStore } from '@/src/zustand/notification/Message'
 
 const ComponentStaffs: React.FC = () => {
-  const url = "/users/staffs/";
+  const url = '/users/staffs/'
   const {
     count,
     getItems,
@@ -22,48 +21,48 @@ const ComponentStaffs: React.FC = () => {
     loading,
     toggleActive,
     reshuffleResults,
-  } = StaffStore();
-  const [currentPage, setCurrentPage] = useState(1);
-  const [page_size] = useState(20);
-  const [sort] = useState("-createdAt");
-  const prevPage = useRef(currentPage);
-  const { setMessage } = MessageStore();
-  const pathname = usePathname();
+  } = StaffStore()
+  const [currentPage, setCurrentPage] = useState(1)
+  const [page_size] = useState(20)
+  const [sort] = useState('-createdAt')
+  const prevPage = useRef(currentPage)
+  const { setMessage } = MessageStore()
+  const pathname = usePathname()
 
   useEffect(() => {
-    reshuffleResults();
-  }, [pathname]);
+    reshuffleResults()
+  }, [pathname])
 
   useEffect(() => {
-    reshuffleResults();
+    reshuffleResults()
     if (results.length === 0 || currentPage !== prevPage.current) {
-      const params = `?page_size=${page_size}&page=${currentPage}&ordering=${sort}`;
-      getItems(`${url}${params}`, setMessage);
+      const params = `?page_size=${page_size}&page=${currentPage}&ordering=${sort}`
+      getItems(`${url}${params}`, setMessage)
     }
-    prevPage.current = currentPage;
-  }, [getItems, results.length, currentPage]);
+    prevPage.current = currentPage
+  }, [getItems, results.length, currentPage])
 
   const makeUser = async (staff: Staff) => {
     const data = {
-      userStatus: "User",
+      userStatus: 'User',
       isUser: true,
       isActive: false,
-    };
-    const params = `?page_size=${page_size}&page=${currentPage}&ordering=${sort}`;
+    }
+    const params = `?page_size=${page_size}&page=${currentPage}&ordering=${sort}`
     await updateItem(
       `${url}${staff._id}/${params}&return=many`,
       data,
       setMessage
-    );
-  };
+    )
+  }
 
   const DeleteItems = async () => {
     if (selectedItems.length === 0) {
-      setMessage("Please select at least one user to delete", false);
-      return;
+      setMessage('Please select at least one user to delete', false)
+      return
     }
-    await massDelete(`${url}mass-delete/`, url, selectedItems, setMessage);
-  };
+    await massDelete(`${url}mass-delete/`, selectedItems, setMessage)
+  }
   return (
     <>
       <div className="card_body">
@@ -86,14 +85,14 @@ const ComponentStaffs: React.FC = () => {
                   <tr
                     key={index}
                     className={`${
-                      index % 2 === 1 ? "bg-[var(--white-gray)]" : ""
+                      index % 2 === 1 ? 'bg-[var(--white-gray)]' : ''
                     }`}
                   >
                     <td>
                       <div className="flex items-center">
                         <div
                           className={`checkbox ${
-                            item.isChecked ? "active" : ""
+                            item.isChecked ? 'active' : ''
                           }`}
                           onClick={() => toggleChecked(index)}
                         >
@@ -138,7 +137,7 @@ const ComponentStaffs: React.FC = () => {
                           width={0}
                           sizes="100vw"
                           height={0}
-                          style={{ width: "50px", height: "auto" }}
+                          style={{ width: '50px', height: 'auto' }}
                         />
                       ) : (
                         <span>N/A</span>
@@ -171,7 +170,7 @@ const ComponentStaffs: React.FC = () => {
                 width={0}
                 sizes="100vw"
                 height={0}
-                style={{ width: "100%", height: "auto" }}
+                style={{ width: '100%', height: 'auto' }}
               />
             </div>
           )}
@@ -188,7 +187,7 @@ const ComponentStaffs: React.FC = () => {
               <button className="custom_btn line" onClick={toggleAllSelected}>
                 <div
                   className={`checkbox ${
-                    selectedItems.length > 0 ? "active" : ""
+                    selectedItems.length > 0 ? 'active' : ''
                   }`}
                 >
                   {selectedItems.length > 0 && (
@@ -227,7 +226,7 @@ const ComponentStaffs: React.FC = () => {
         </div>
       </div>
     </>
-  );
-};
+  )
+}
 
-export default ComponentStaffs;
+export default ComponentStaffs

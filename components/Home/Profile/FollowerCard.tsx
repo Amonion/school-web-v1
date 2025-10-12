@@ -1,8 +1,7 @@
 import Image from 'next/image'
 import { forwardRef } from 'react'
-import { SocialUser } from '@/src/interface/user/interface'
 import Link from 'next/link'
-import SocialStore from '@/src/zustand/users/Social'
+import SocialStore, { SocialUser } from '@/src/zustand/post/Social'
 
 interface FollowerCardProps {
   user: SocialUser

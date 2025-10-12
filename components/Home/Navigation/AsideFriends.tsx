@@ -3,7 +3,7 @@ import { NavStore } from '@/src/zustand/notification/Navigation'
 import { MessageStore } from '@/src/zustand/notification/Message'
 import FriendStore from '@/src/zustand/chat/Friend'
 import { AuthStore } from '@/src/zustand/user/AuthStore'
-import UsersList from '../Chat/UsersList'
+// import UsersList from '../Chat/UsersList'
 
 export default function AsideFriends() {
   const { asideNav, toggleAsideVNav } = NavStore()
@@ -32,7 +32,7 @@ export default function AsideFriends() {
         }}
         className="v_nav_card aside"
       >
-        <UsersList />
+        {/* <UsersList /> */}
       </div>
     </div>
   )

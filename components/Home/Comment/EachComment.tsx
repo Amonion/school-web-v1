@@ -29,7 +29,7 @@ const EachComment: React.FC<EachCommentProps> = ({
   hasMoreComments,
 }) => {
   const { user } = AuthStore()
-  const { setActiveComment, updateComment, showGlassComments } = CommentStore()
+  const { setActiveComment, updateComment } = CommentStore()
   const [pageSize] = useState(20)
   const [currentPage, setCurrentPage] = useState(1)
   const [hasMore, setHasMore] = useState(false)
@@ -305,19 +305,6 @@ const EachComment: React.FC<EachCommentProps> = ({
                 comment.level === 1 ? 'mr-2' : 'mr-1'
               } relative z-10`}
             >
-              {/* {comment.comments.length > 0 && (
-                <div
-                  style={{
-                    height:
-                      parentHeight -
-                      lastHeight -
-                      (comment.level === 1 ? 45 : 30),
-                    top: comment.level === 1 ? 40 : 28, // avatar center offset
-                    left: comment.level === 1 ? 20 : 16, // half avatar width
-                  }}
-                  className="absolute w-px bg-[var(--border)]"
-                />
-              )} */}
               {comment.comments.length > 0 && (
                 <div
                   style={{
@@ -328,19 +315,13 @@ const EachComment: React.FC<EachCommentProps> = ({
                     top: comment.level === 1 ? 40 : 28,
                     left: comment.level === 1 ? 20 : 16,
                   }}
-                  className={`absolute w-px ${
-                    showGlassComments ? 'bg-gray-400' : 'bg-[var(--border)]'
-                  }`}
+                  className={`absolute w-px bg-[var(--border)]`}
                 />
               )}
 
               {comment.level > 1 && (
                 <div
-                  className={`absolute border-l border-b ${
-                    showGlassComments
-                      ? 'border-gray-400'
-                      : 'border-[var(--border)]'
-                  } rounded-bl-[18px]`}
+                  className={`absolute border-l border-b bg-[var(--border)] rounded-bl-[18px]`}
                   style={{
                     height: 22,
                     width: 32,
@@ -374,13 +355,7 @@ const EachComment: React.FC<EachCommentProps> = ({
                 href={`/home/profile/${comment.username}`}
                 className="flex items-center mb-1"
               >
-                <div
-                  className={`${
-                    showGlassComments
-                      ? 'text-white'
-                      : 'text-[var(--text-secondary)]'
-                  } mr-2`}
-                >
+                <div className={`text-[var(--text-secondary)] mr-2`}>
                   {comment.displayName}
                 </div>
                 <div className="ml-auto text-sm">
@@ -391,8 +366,6 @@ const EachComment: React.FC<EachCommentProps> = ({
                 <div
                   onClick={() => toggleIsActive(comment._id, comment.level)}
                   className={`p-1 rounded-[5px] cursor-pointer mb-1  text-sm sm:text-base ${
-                    showGlassComments ? 'text-gray-100' : ''
-                  } ${
                     comment.isActive ? '' : 'line-clamp-3 overflow-ellipsis'
                   }`}
                 >
@@ -418,14 +391,14 @@ const EachComment: React.FC<EachCommentProps> = ({
                 >
                   {comment.liked ? (
                     <ThumbsUp
-                      size={comment.level > 1 ? 14 : 16}
+                      size={14}
                       fill="currentColor"
                       stroke="currentColor"
                       className="text-[var(--text-primary)] mr-1"
                     />
                   ) : (
                     <ThumbsUp
-                      size={comment.level > 1 ? 14 : 16}
+                      size={14}
                       className="text-[var(--text-primary)] mr-1"
                     />
                   )}
@@ -438,14 +411,14 @@ const EachComment: React.FC<EachCommentProps> = ({
                 >
                   {comment.hated ? (
                     <ThumbsDown
-                      size={comment.level > 1 ? 14 : 16}
+                      size={14}
                       fill="currentColor"
                       stroke="currentColor"
                       className="text-[var(--text-primary)] -mb-[6px] mr-1"
                     />
                   ) : (
                     <ThumbsDown
-                      size={comment.level > 1 ? 14 : 16}
+                      size={14}
                       className="text-[var(--text-primary)] -mb-[6px] mr-1"
                     />
                   )}
@@ -490,16 +463,10 @@ const EachComment: React.FC<EachCommentProps> = ({
                       top: comment.level === 1 ? -60 : 28,
                       left: comment.level === 1 ? -28 : 16,
                     }}
-                    className={`absolute z-0 w-[0.5px] ${
-                      showGlassComments ? 'bg-gray-400' : 'bg-[var(--border)]'
-                    }`}
+                    className={`absolute z-0 w-[0.5px] bg-[var(--border)]`}
                   />
                   <div
-                    className={`absolute border-l border-b ${
-                      showGlassComments
-                        ? 'border-gray-400'
-                        : 'border-[var(--border)]'
-                    } rounded-bl-[18px]`}
+                    className={`absolute border-l border-b border-[var(--border)] rounded-bl-[18px]`}
                     style={{
                       height: 22,
                       width: 32,
@@ -512,11 +479,7 @@ const EachComment: React.FC<EachCommentProps> = ({
                       toggleIsActive(comment._id, comment.level, true)
                       fetchComments()
                     }}
-                    className={`${
-                      showGlassComments
-                        ? 'text-white'
-                        : 'text-[var(--textSecondary)]'
-                    } text-sm ml-3 cursor-pointer`}
+                    className={`text-[12px] ml-3 cursor-pointer`}
                   >
                     {formatCount(comment.replies)} Replies
                   </div>

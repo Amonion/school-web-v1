@@ -1,13 +1,13 @@
 'use client'
 import Link from 'next/link'
 import Image from 'next/image'
-import ExpensesStore from '@/src/zustand/team/Expenses'
 import { useState, useEffect, useRef } from 'react'
-import { MessageStore } from '@/src/zustand/msgStore'
 import { usePathname } from 'next/navigation'
-import { useAuthStore } from '@/src/zustand/authStore'
 import { formatDateToDDMMYY, formatTimeTo12Hour } from '@/lib/helpers'
 import Pagination from '@/components/Team/Pagination'
+import ExpensesStore from '@/src/zustand/app/Expenses'
+import { MessageStore } from '@/src/zustand/notification/Message'
+import { AuthStore } from '@/src/zustand/user/AuthStore'
 
 const Expenses: React.FC = () => {
   const url = '/company/expenses/'
@@ -24,7 +24,7 @@ const Expenses: React.FC = () => {
     toggleActive,
     reshuffleResults,
   } = ExpensesStore()
-  const { user } = useAuthStore.getState()
+  const { user } = AuthStore.getState()
   const [currentPage, setCurrentPage] = useState(1)
   const [page_size] = useState(20)
   const [sort] = useState('-createdAt')
@@ -51,7 +51,7 @@ const Expenses: React.FC = () => {
       setMessage('Please select at least one email to delete', false)
       return
     }
-    await massDelete(`${url}mass-delete/`, url, selectedItems, setMessage)
+    await massDelete(`${url}mass-delete/`, selectedItems, setMessage)
   }
   return (
     <>
@@ -175,9 +175,9 @@ const Expenses: React.FC = () => {
                     Select All
                   </button>
 
-                  {user?.level !== null &&
-                    user?.level !== undefined &&
-                    user.level > 15 && (
+                  {user?.staffRanking !== null &&
+                    user?.staffRanking !== undefined &&
+                    user.staffRanking > 15 && (
                       <button className="custom_btn line" onClick={DeleteItems}>
                         <i className="bi bi-trash text-lg mr-2"></i>
                         Delete

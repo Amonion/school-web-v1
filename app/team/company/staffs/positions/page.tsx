@@ -1,13 +1,13 @@
-"use client";
-import Link from "next/link";
-import PositionStore from "@/src/zustand/team/Position";
-import { useState, useEffect, useRef } from "react";
-import { MessageStore } from "@/src/zustand/msgStore";
-import { usePathname } from "next/navigation";
-import Pagination from "@/components/Team/Pagination";
+'use client'
+import Link from 'next/link'
+import { useState, useEffect, useRef } from 'react'
+import { usePathname } from 'next/navigation'
+import Pagination from '@/components/Team/Pagination'
+import PositionStore from '@/src/zustand/app/Position'
+import { MessageStore } from '@/src/zustand/notification/Message'
 
 const Positions: React.FC = () => {
-  const url = "/company/positions/";
+  const url = '/company/positions/'
   const {
     toggleActive,
     toggleChecked,
@@ -19,36 +19,36 @@ const Positions: React.FC = () => {
     toggleAllSelected,
     massDelete,
     reshuffleResults,
-  } = PositionStore();
-  const [currentPage, setCurrentPage] = useState(1);
-  const [page_size] = useState(20);
-  const [sort] = useState("-createdAt");
-  const prevPage = useRef(currentPage);
-  const { setMessage } = MessageStore();
-  const pathname = usePathname();
+  } = PositionStore()
+  const [currentPage, setCurrentPage] = useState(1)
+  const [page_size] = useState(20)
+  const [sort] = useState('-createdAt')
+  const prevPage = useRef(currentPage)
+  const { setMessage } = MessageStore()
+  const pathname = usePathname()
 
   useEffect(() => {
-    reshuffleResults();
-  }, [pathname]);
+    reshuffleResults()
+  }, [pathname])
 
   useEffect(() => {
-    reshuffleResults();
+    reshuffleResults()
     if (positionResults.length === 0 || currentPage !== prevPage.current) {
       getPositions(
         `${url}?page_size=${page_size}&page=${currentPage}&ordering=${sort}`,
         setMessage
-      );
+      )
     }
-    prevPage.current = currentPage;
-  }, [getPositions, positionResults.length, currentPage]);
+    prevPage.current = currentPage
+  }, [getPositions, positionResults.length, currentPage])
 
   const DeleteItems = async () => {
     if (searchedPositions.length === 0) {
-      setMessage("Please select at least one user to delete", false);
-      return;
+      setMessage('Please select at least one user to delete', false)
+      return
     }
-    await massDelete(`${url}mass-delete/`, url, searchedPositions, setMessage);
-  };
+    await massDelete(`${url}mass-delete/`, searchedPositions, setMessage)
+  }
   return (
     <>
       <div className="card_body">
@@ -69,13 +69,13 @@ const Positions: React.FC = () => {
                 <tr
                   key={index}
                   className={`${
-                    index % 2 === 1 ? "bg-[var(--white-gray)]" : ""
+                    index % 2 === 1 ? 'bg-[var(--white-gray)]' : ''
                   }`}
                 >
                   <td>
                     <div className="flex items-center">
                       <div
-                        className={`checkbox ${item.isChecked ? "active" : ""}`}
+                        className={`checkbox ${item.isChecked ? 'active' : ''}`}
                         onClick={() => toggleChecked(index)}
                       >
                         {item.isChecked && (
@@ -127,7 +127,7 @@ const Positions: React.FC = () => {
               <button className="custom_btn line" onClick={toggleAllSelected}>
                 <div
                   className={`checkbox ${
-                    searchedPositions.length > 0 ? "active" : ""
+                    searchedPositions.length > 0 ? 'active' : ''
                   }`}
                 >
                   {searchedPositions.length > 0 && (
@@ -160,7 +160,7 @@ const Positions: React.FC = () => {
         </div>
       </div>
     </>
-  );
-};
+  )
+}
 
-export default Positions;
+export default Positions

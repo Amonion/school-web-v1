@@ -1,9 +1,8 @@
 import Image from 'next/image'
 import { forwardRef } from 'react'
-import { SocialUser } from '@/src/interface/user/interface'
 import Link from 'next/link'
-import SocialStore from '@/src/zustand/users/Social'
-import { useAuthStore } from '@/src/zustand/authStore'
+import SocialStore, { SocialUser } from '@/src/zustand/post/Social'
+import { AuthStore } from '@/src/zustand/user/AuthStore'
 
 interface MutedCardProps {
   social: SocialUser
@@ -12,7 +11,7 @@ interface MutedCardProps {
 const MutedCard = forwardRef<HTMLDivElement, MutedCardProps>(
   ({ social }, ref) => {
     const { unmuteUser } = SocialStore()
-    const { user } = useAuthStore()
+    const { user } = AuthStore()
 
     const unmuteAccount = () => {
       unmuteUser(`/posts/mute/${social.accountUserId}`, {

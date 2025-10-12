@@ -3,9 +3,8 @@ import Link from 'next/link'
 import { appendForm } from '@/lib/helpers'
 import { validateInputs } from '@/lib/validation'
 import { useState, useEffect } from 'react'
-import CountryStore from '@/src/zustand/team/Country'
-import { MessageStore } from '@/src/zustand/msgStore'
-import { Country } from '@/src/interface/team/interface'
+import CountryStore, { Country } from '@/src/zustand/place/CountryOrigin'
+import { MessageStore } from '@/src/zustand/notification/Message'
 
 const CreateCountry: React.FC = () => {
   const url = '/places/'
@@ -44,7 +43,7 @@ const CreateCountry: React.FC = () => {
         if (existingItem) {
           populateFields(existingItem)
         } else {
-          await getCountries(`${url}`)
+          await getCountries(`${url}`, setMessage)
           const fetchedItems = CountryStore.getState().countries.find(
             (item) => item.id === itemId
           )

@@ -3,10 +3,9 @@ import Link from 'next/link'
 import { appendForm } from '@/lib/helpers'
 import { validateInputs } from '@/lib/validation'
 import { useState, useEffect } from 'react'
-import ExpensesStore from '@/src/zustand/team/Expenses'
-import { MessageStore } from '@/src/zustand/msgStore'
-import { Expenses } from '@/src/interface/team/interface'
 import QuillEditor from '@/components/Team/Editor/QuillEditor'
+import ExpensesStore, { Expenses } from '@/src/zustand/app/Expenses'
+import { MessageStore } from '@/src/zustand/notification/Message'
 
 const CreateExpenses: React.FC = () => {
   const url = '/company/expenses/'

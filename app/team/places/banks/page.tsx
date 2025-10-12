@@ -1,15 +1,15 @@
-"use client";
-import Link from "next/link";
-import Image from "next/image";
-import BankStore from "@/src/zustand/team/Bank";
-import { useState, useEffect, useRef } from "react";
-import { MessageStore } from "@/src/zustand/msgStore";
-import { usePathname } from "next/navigation";
-import { useAuthStore } from "@/src/zustand/authStore";
-import Pagination from "@/components/Team/Pagination";
+'use client'
+import Link from 'next/link'
+import Image from 'next/image'
+import { useState, useEffect, useRef } from 'react'
+import { usePathname } from 'next/navigation'
+import Pagination from '@/components/Team/Pagination'
+import BankStore from '@/src/zustand/finance/Bank'
+import { MessageStore } from '@/src/zustand/notification/Message'
+import { AuthStore } from '@/src/zustand/user/AuthStore'
 
 const Banks: React.FC = () => {
-  const url = "/places/banks";
+  const url = '/places/banks'
   const {
     getBanks,
     banks,
@@ -23,49 +23,49 @@ const Banks: React.FC = () => {
     reshuffleResults,
     deleteItem,
     count,
-  } = BankStore();
+  } = BankStore()
 
-  const { user } = useAuthStore.getState();
-  const [currentPage, setCurrentPage] = useState(1);
-  const [country, setCountry] = useState<string | null>(null);
-  const [id, setId] = useState<string | null>(null);
-  const [page_size] = useState(20);
-  const [sort] = useState("-dateCreated");
-  const prevPage = useRef(currentPage);
-  const { setMessage } = MessageStore();
-  const pathname = usePathname();
-
-  useEffect(() => {
-    reshuffleResults();
-  }, [pathname]);
+  const { user } = AuthStore.getState()
+  const [currentPage, setCurrentPage] = useState(1)
+  const [country, setCountry] = useState<string | null>(null)
+  const [id, setId] = useState<string | null>(null)
+  const [page_size] = useState(20)
+  const [sort] = useState('-dateCreated')
+  const prevPage = useRef(currentPage)
+  const { setMessage } = MessageStore()
+  const pathname = usePathname()
 
   useEffect(() => {
-    reshuffleResults();
-    const query = window.location.search;
-    const el = String(new URLSearchParams(query).get("country"));
-    const id = String(new URLSearchParams(query).get("id"));
+    reshuffleResults()
+  }, [pathname])
+
+  useEffect(() => {
+    reshuffleResults()
+    const query = window.location.search
+    const el = String(new URLSearchParams(query).get('country'))
+    const id = String(new URLSearchParams(query).get('id'))
     if (el && id) {
-      setCountry(el);
-      setId(id);
-      const params = `?country=${el}&page_size=${page_size}&page=${currentPage}`;
-      getBanks(`${url}${params}`, setMessage);
+      setCountry(el)
+      setId(id)
+      const params = `?country=${el}&page_size=${page_size}&page=${currentPage}`
+      getBanks(`${url}${params}`, setMessage)
     }
-    prevPage.current = currentPage;
-  }, [pathname, banks.length, currentPage]);
+    prevPage.current = currentPage
+  }, [pathname, banks.length, currentPage])
 
   const deletePlace = async (id: string, index: number) => {
-    toggleActive(index);
-    const params = `?page_size=${page_size}&page=${currentPage}&ordering=${sort}`;
-    await deleteItem(`${url}${id}/${params}`, setMessage);
-  };
+    toggleActive(index)
+    const params = `?page_size=${page_size}&page=${currentPage}&ordering=${sort}`
+    await deleteItem(`${url}${id}/${params}`, setMessage)
+  }
 
   const DeleteItems = async () => {
     if (selectedItems.length === 0) {
-      setMessage("Please select at least one email to delete", false);
-      return;
+      setMessage('Please select at least one email to delete', false)
+      return
     }
-    await massDelete(`${url}mass-delete/`, url, selectedItems, setMessage);
-  };
+    await massDelete(`${url}mass-delete/`, selectedItems, setMessage)
+  }
   return (
     <>
       <div className="card_body">
@@ -87,14 +87,14 @@ const Banks: React.FC = () => {
                   <tr
                     key={index}
                     className={`${
-                      index % 2 === 1 ? "bg-[var(--white-gray)]" : ""
+                      index % 2 === 1 ? 'bg-[var(--white-gray)]' : ''
                     }`}
                   >
                     <td>
                       <div className="flex items-center">
                         <div
                           className={`checkbox ${
-                            item.isChecked ? "active" : ""
+                            item.isChecked ? 'active' : ''
                           }`}
                           onClick={() => toggleChecked(index)}
                         >
@@ -140,7 +140,7 @@ const Banks: React.FC = () => {
                           width={0}
                           sizes="100vw"
                           height={0}
-                          style={{ width: "50px", height: "auto" }}
+                          style={{ width: '50px', height: 'auto' }}
                         />
                       ) : (
                         <span>N/A</span>
@@ -164,7 +164,7 @@ const Banks: React.FC = () => {
                 width={0}
                 sizes="100vw"
                 height={0}
-                style={{ width: "100%", height: "auto" }}
+                style={{ width: '100%', height: 'auto' }}
               />
             </div>
           )}
@@ -184,7 +184,7 @@ const Banks: React.FC = () => {
                     className="custom_btn line"
                     onClick={toggleAllSelected}
                   >
-                    <div className={`checkbox ${isAllChecked ? "active" : ""}`}>
+                    <div className={`checkbox ${isAllChecked ? 'active' : ''}`}>
                       {isAllChecked && (
                         <i className="bi bi-check text-white text-lg"></i>
                       )}
@@ -192,9 +192,9 @@ const Banks: React.FC = () => {
                     Select All
                   </button>
 
-                  {user?.level !== null &&
-                    user?.level !== undefined &&
-                    user.level > 15 && (
+                  {user?.staffRanking !== null &&
+                    user?.staffRanking !== undefined &&
+                    user.staffRanking > 15 && (
                       <button className="custom_btn line" onClick={DeleteItems}>
                         <i className="bi bi-trash text-lg mr-2"></i>
                         Delete
@@ -223,7 +223,7 @@ const Banks: React.FC = () => {
         </div>
       </div>
     </>
-  );
-};
+  )
+}
 
-export default Banks;
+export default Banks

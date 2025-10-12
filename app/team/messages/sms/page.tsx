@@ -1,15 +1,15 @@
-"use client";
-import Link from "next/link";
-import Image from "next/image";
-import { truncateString } from "@/lib/helpers";
-import SmsStore from "@/src/zustand/team/Sms";
-import { useState, useEffect, useRef } from "react";
-import { MessageStore } from "@/src/zustand/msgStore";
-import { usePathname } from "next/navigation";
-import Pagination from "@/components/Team/Pagination";
+'use client'
+import Link from 'next/link'
+import Image from 'next/image'
+import { truncateString } from '@/lib/helpers'
+import { useState, useEffect, useRef } from 'react'
+import { usePathname } from 'next/navigation'
+import Pagination from '@/components/Team/Pagination'
+import { MessageStore } from '@/src/zustand/notification/Message'
+import SmsStore from '@/src/zustand/app/Sms'
 
 const Sms: React.FC = () => {
-  const url = "/messages/sms/";
+  const url = '/messages/sms/'
   const {
     getItems,
     massDelete,
@@ -22,39 +22,39 @@ const Sms: React.FC = () => {
     count,
     toggleActive,
     reshuffleResults,
-  } = SmsStore();
-  const [currentPage, setCurrentPage] = useState(1);
-  const [page_size] = useState(5);
-  const [sort] = useState("-createdAt");
-  const prevPage = useRef(currentPage);
-  const { setMessage } = MessageStore();
-  const pathname = usePathname();
+  } = SmsStore()
+  const [currentPage, setCurrentPage] = useState(1)
+  const [page_size] = useState(5)
+  const [sort] = useState('-createdAt')
+  const prevPage = useRef(currentPage)
+  const { setMessage } = MessageStore()
+  const pathname = usePathname()
 
   useEffect(() => {
-    reshuffleResults();
-  }, [pathname]);
+    reshuffleResults()
+  }, [pathname])
 
   useEffect(() => {
-    reshuffleResults();
+    reshuffleResults()
     if (results.length === 0 || currentPage !== prevPage.current) {
-      const params = `?page_size=${page_size}&page=${currentPage}&ordering=${sort}`;
-      getItems(`${url}${params}`, setMessage);
+      const params = `?page_size=${page_size}&page=${currentPage}&ordering=${sort}`
+      getItems(`${url}${params}`, setMessage)
     }
-    prevPage.current = currentPage;
-  }, [getItems, results.length, currentPage]);
+    prevPage.current = currentPage
+  }, [getItems, results.length, currentPage])
 
   const deleteEmail = async (id: string) => {
-    const params = `?page_size=${page_size}&page=${currentPage}&ordering=${sort}`;
-    await deleteItem(`${url}${id}/${params}`, url, setMessage);
-  };
+    const params = `?page_size=${page_size}&page=${currentPage}&ordering=${sort}`
+    await deleteItem(`${url}${id}/${params}`, setMessage)
+  }
 
   const DeleteItems = async () => {
     if (selectedItems.length === 0) {
-      setMessage("Please select at least one email to delete", false);
-      return;
+      setMessage('Please select at least one email to delete', false)
+      return
     }
-    await massDelete(`${url}mass-delete/`, url, selectedItems, setMessage);
-  };
+    await massDelete(`${url}mass-delete/`, selectedItems, setMessage)
+  }
   return (
     <>
       <div className="card_body">
@@ -74,14 +74,14 @@ const Sms: React.FC = () => {
                   <tr
                     key={index}
                     className={`${
-                      index % 2 === 1 ? "bg-[var(--white-gray)]" : ""
+                      index % 2 === 1 ? 'bg-[var(--white-gray)]' : ''
                     }`}
                   >
                     <td>
                       <div className="flex items-center">
                         <div
                           className={`checkbox ${
-                            item.isChecked ? "active" : ""
+                            item.isChecked ? 'active' : ''
                           }`}
                           onClick={() => toggleChecked(index)}
                         >
@@ -121,7 +121,7 @@ const Sms: React.FC = () => {
 
                     <td>{item.name}</td>
                     <td>
-                      {" "}
+                      {' '}
                       <div
                         dangerouslySetInnerHTML={{
                           __html: truncateString(item.content, 150),
@@ -142,7 +142,7 @@ const Sms: React.FC = () => {
                 width={0}
                 sizes="100vw"
                 height={0}
-                style={{ width: "100%", height: "auto" }}
+                style={{ width: '100%', height: 'auto' }}
               />
             </div>
           )}
@@ -159,7 +159,7 @@ const Sms: React.FC = () => {
               <button className="custom_btn line" onClick={toggleAllSelected}>
                 <div
                   className={`checkbox ${
-                    selectedItems.length > 0 ? "active" : ""
+                    selectedItems.length > 0 ? 'active' : ''
                   }`}
                 >
                   {selectedItems.length > 0 && (
@@ -192,7 +192,7 @@ const Sms: React.FC = () => {
         </div>
       </div>
     </>
-  );
-};
+  )
+}
 
-export default Sms;
+export default Sms

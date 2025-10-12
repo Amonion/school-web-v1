@@ -65,9 +65,9 @@ const MobileMediaViewer: React.FC<MobileMediaViewerProps> = ({
   }
 
   return (
-    <>
+    <div className="fixed inset-0 bg-black flex items-center justify-center z-40 overflow-hidden">
       <div
-        className="fixed inset-0 bg-black flex items-center justify-center z-40 overflow-hidden"
+        className="relative flex-1"
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
         onClick={() => setShowActions(!showActions)}
@@ -128,8 +128,9 @@ const MobileMediaViewer: React.FC<MobileMediaViewerProps> = ({
           <MediaReactions media={media} />
         </div>
       </div>
+
       <MediaCommentSection />
-    </>
+    </div>
   )
 }
 

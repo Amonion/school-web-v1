@@ -1,12 +1,12 @@
 'use client'
 import Link from 'next/link'
 import Image from 'next/image'
-import AreaStore from '@/src/zustand/team/Area'
 import { useState, useEffect, useRef } from 'react'
-import { MessageStore } from '@/src/zustand/msgStore'
 import { usePathname } from 'next/navigation'
-import { useAuthStore } from '@/src/zustand/authStore'
 import Pagination from '@/components/Team/Pagination'
+import AreaStore from '@/src/zustand/place/AreaOrigin'
+import { MessageStore } from '@/src/zustand/notification/Message'
+import { AuthStore } from '@/src/zustand/user/AuthStore'
 
 const States: React.FC = () => {
   const url = '/places/area'
@@ -25,7 +25,7 @@ const States: React.FC = () => {
     count,
   } = AreaStore()
 
-  const { user } = useAuthStore.getState()
+  const { user } = AuthStore.getState()
   const [currentPage, setCurrentPage] = useState(1)
   const [page_size] = useState(20)
   const [sort] = useState('area')
@@ -188,9 +188,9 @@ const States: React.FC = () => {
                     Select All
                   </button>
 
-                  {user?.level !== null &&
-                    user?.level !== undefined &&
-                    user.level > 15 && (
+                  {user?.staffRanking !== null &&
+                    user?.staffRanking !== undefined &&
+                    user.staffRanking > 15 && (
                       <button className="custom_btn line" onClick={DeleteItems}>
                         <i className="bi bi-trash text-lg mr-2"></i>
                         Delete

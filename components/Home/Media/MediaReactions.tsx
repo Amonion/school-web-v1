@@ -1,14 +1,6 @@
 'use client'
 import React from 'react'
-import {
-  Maximize2,
-  Minimize2,
-  MessageCircle,
-  ThumbsUp,
-  ThumbsDown,
-  Play,
-  Pause,
-} from 'lucide-react'
+import { MessageCircle, ThumbsUp, ThumbsDown, Play, Pause } from 'lucide-react'
 import { motion, AnimatePresence, Variants } from 'framer-motion'
 import { Media } from '@/src/zustand/post/UserPost'
 import CommentStore from '@/src/zustand/post/Comment'
@@ -29,15 +21,8 @@ const MediaReactions: React.FC<MediaReactionsProps> = ({
   const { postForm } = PostStore()
   const { userPostForm } = UserPostStore()
   const pathname = usePathname()
-  const {
-    setShowGlassComment,
-    togglePlay,
-    setFitMode,
-    fitMode,
-    isPlaying,
-    showActions,
-    progress,
-  } = CommentStore()
+  const { setShowGlassComment, togglePlay, isPlaying, showActions, progress } =
+    CommentStore()
 
   const actionVariants: Variants = {
     hidden: {
@@ -148,18 +133,6 @@ const MediaReactions: React.FC<MediaReactionsProps> = ({
               )}
               <MessageCircle size={20} />
             </button>
-
-            {!isDesktop && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setFitMode(!fitMode)
-                }}
-                className="bg-black/50 p-2 rounded-full backdrop-blur-sm text-white"
-              >
-                {fitMode ? <Maximize2 size={24} /> : <Minimize2 size={24} />}
-              </button>
-            )}
           </motion.div>
         )}
       </AnimatePresence>

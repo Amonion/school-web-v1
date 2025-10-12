@@ -1,24 +1,23 @@
-"use client";
-import Link from "next/link";
-import { appendForm } from "@/lib/helpers";
-import { validateInputs } from "@/lib/validation";
-import { useState, useEffect } from "react";
-import PositionStore from "@/src/zustand/team/Position";
-import { MessageStore } from "@/src/zustand/msgStore";
-import { Position } from "@/src/interface/team/interface";
+'use client'
+import Link from 'next/link'
+import { appendForm } from '@/lib/helpers'
+import { validateInputs } from '@/lib/validation'
+import { useState, useEffect } from 'react'
+import PositionStore, { Position } from '@/src/zustand/app/Position'
+import { MessageStore } from '@/src/zustand/notification/Message'
 
 const CreatePosition: React.FC = () => {
-  const url = "/company/positions/";
-  const [isEditing, setIsEditing] = useState(false);
-  const [id, setId] = useState("");
-  const [currentPage] = useState(1);
-  const [page_size] = useState(5);
-  const [sort] = useState("-createdAt");
+  const url = '/company/positions/'
+  const [isEditing, setIsEditing] = useState(false)
+  const [id, setId] = useState('')
+  const [currentPage] = useState(1)
+  const [page_size] = useState(5)
+  const [sort] = useState('-createdAt')
   const [queryParams] = useState(
     `?page_size=${page_size}&page=${currentPage}&ordering=${sort}`
-  );
-  const [name, setName] = useState("");
-  const { setMessage } = MessageStore();
+  )
+  const [name, setName] = useState('')
+  const { setMessage } = MessageStore()
   const {
     positionFormData,
     setPositionForm,
@@ -28,126 +27,124 @@ const CreatePosition: React.FC = () => {
     resetForm,
     postItem,
     updateItem,
-  } = PositionStore();
+  } = PositionStore()
 
   useEffect(() => {
-    resetForm();
-  }, []);
+    resetForm()
+  }, [])
 
   useEffect(() => {
     const initialize = async () => {
-      const query = window.location.search;
-      const itemId = new URLSearchParams(query).get("id");
-      const name = new URLSearchParams(query).get("name");
+      const query = window.location.search
+      const itemId = new URLSearchParams(query).get('id')
+      const name = new URLSearchParams(query).get('name')
 
       if (itemId !== null) {
-        setName(String(name));
-        setId(itemId);
-        setIsEditing(true);
+        setName(String(name))
+        setId(itemId)
+        setIsEditing(true)
 
-        const existingItem = positionResults.find(
-          (item) => item._id === itemId
-        );
+        const existingItem = positionResults.find((item) => item._id === itemId)
 
         if (existingItem) {
-          populateFields(existingItem);
+          populateFields(existingItem)
         } else {
-          await getPositions(`${url}`, setMessage);
+          await getPositions(`${url}`, setMessage)
 
           const fetchedItems = PositionStore.getState().positionResults.find(
             (item) => item._id === itemId
-          );
+          )
 
           if (fetchedItems) {
-            populateFields(fetchedItems);
+            populateFields(fetchedItems)
           } else {
-            console.warn("Place with the specified ID was not found.");
+            console.warn('Place with the specified ID was not found.')
           }
         }
       } else {
-        setId("");
-        setIsEditing(false);
-        setName("");
+        setId('')
+        setIsEditing(false)
+        setName('')
       }
-    };
+    }
 
-    initialize();
-  }, [positionResults, getPositions]);
+    initialize()
+  }, [positionResults, getPositions])
 
   const populateFields = (item: Position) => {
-    setPositionForm("level", item.level);
-    setPositionForm("salary", item.salary);
-    setPositionForm("role", item.role);
-    setPositionForm("salary", item.salary);
-    setPositionForm("duties", item.duties);
-    setPositionForm("position", item.position);
-  };
+    setPositionForm('level', item.level)
+    setPositionForm('salary', item.salary)
+    setPositionForm('role', item.role)
+    setPositionForm('salary', item.salary)
+    setPositionForm('duties', item.duties)
+    setPositionForm('position', item.position)
+  }
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    const { name, value } = e.target;
-    setPositionForm(name as keyof typeof positionFormData, value);
-  };
+    const { name, value } = e.target
+    setPositionForm(name as keyof typeof positionFormData, value)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     const inputsToValidate = [
       {
-        name: "duties",
+        name: 'duties',
         value: positionFormData.duties,
         rules: { blank: true, minLength: 1, maxLength: 100 },
-        field: "Duties",
+        field: 'Duties',
       },
       {
-        name: "role",
+        name: 'role',
         value: positionFormData.role,
         rules: { blank: true, minLength: 1, maxLength: 100 },
-        field: "Role",
+        field: 'Role',
       },
       {
-        name: "level",
+        name: 'level',
         value: positionFormData.level,
         rules: { blank: true, maxLength: 3 },
-        field: "Level",
+        field: 'Level',
       },
       {
-        name: "salary",
+        name: 'salary',
         value: positionFormData.salary,
         rules: { blank: true, maxLength: 15 },
-        field: "Salary",
+        field: 'Salary',
       },
       {
-        name: "position",
+        name: 'position',
         value: positionFormData.position,
         rules: { blank: true, minLength: 3, maxLength: 100 },
-        field: "Position",
+        field: 'Position',
       },
-    ];
-    const { messages } = validateInputs(inputsToValidate);
+    ]
+    const { messages } = validateInputs(inputsToValidate)
     const getFirstNonEmptyMessage = (
       messages: Record<string, string>
     ): string | null => {
       for (const key in messages) {
-        if (messages[key].trim() !== "") {
-          return messages[key];
+        if (messages[key].trim() !== '') {
+          return messages[key]
         }
       }
-      return null;
-    };
+      return null
+    }
 
-    const firstNonEmptyMessage = getFirstNonEmptyMessage(messages);
+    const firstNonEmptyMessage = getFirstNonEmptyMessage(messages)
     if (firstNonEmptyMessage) {
-      setMessage(firstNonEmptyMessage, false);
-      return;
+      setMessage(firstNonEmptyMessage, false)
+      return
     }
-    e.preventDefault();
-    const data = appendForm(inputsToValidate);
+    e.preventDefault()
+    const data = appendForm(inputsToValidate)
     if (isEditing) {
-      updateItem(`${url}${id}/${queryParams}`, data, setMessage);
+      updateItem(`${url}${id}/${queryParams}`, data, setMessage)
     } else {
-      await postItem(url, data, setMessage);
+      await postItem(url, data, setMessage)
     }
-  };
+  }
 
   return (
     <>
@@ -250,7 +247,7 @@ const CreatePosition: React.FC = () => {
         </div>
       </div>
     </>
-  );
-};
+  )
+}
 
-export default CreatePosition;
+export default CreatePosition

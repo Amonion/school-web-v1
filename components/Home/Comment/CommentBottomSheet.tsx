@@ -10,8 +10,8 @@ import { MessageStore } from '@/src/zustand/notification/Message'
 import CommentStore, { CommentEmpty } from '@/src/zustand/post/Comment'
 import { useTheme } from '@/context/ThemeProvider'
 import { AuthStore } from '@/src/zustand/user/AuthStore'
-import ChatEditor from '../Chat/ChatEditor'
 import { Media } from '@/src/zustand/post/UserPost'
+import ChatEditor from '@/components/Chat/ChatEditor'
 
 const CommentBottomSheet = () => {
   const [text, setText] = useState('')
@@ -144,7 +144,7 @@ const CommentBottomSheet = () => {
                 !isMobile
                   ? 'w-full bottom-0 justify-center flex'
                   : 'right-0 w-full'
-              } fixed bottom-0 z-40 left-0 flex flex-col max-h-[70%]`}
+              } fixed bottom-0 z-40 left-0 flex flex-col max-h-[70vh]`}
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
               exit={{ y: '100%' }}

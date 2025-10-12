@@ -1,10 +1,10 @@
 'use client'
 import { useEffect, useRef } from 'react'
 import Image from 'next/image'
-import { useAuthStore } from '@/src/zustand/authStore'
-import SocialStore from '@/src/zustand/users/Social'
-import { useTheme } from '@/context/ThemeContext'
-import BlockedCard from '@/components/Users/Profile/BlockedCard'
+import { AuthStore } from '@/src/zustand/user/AuthStore'
+import { useTheme } from '@/context/ThemeProvider'
+import BlockedCard from '@/components/Home/Profile/BlockedCard'
+import SocialStore from '@/src/zustand/post/Social'
 
 export default function PeopleList() {
   const lastUserRef = useRef<HTMLDivElement | null>(null)
@@ -18,7 +18,7 @@ export default function PeopleList() {
     getBlockedUsers,
     fetchMoreBlockedUsers,
   } = SocialStore()
-  const { user } = useAuthStore()
+  const { user } = AuthStore()
   const { theme } = useTheme()
   const sort = '-createdAt'
 

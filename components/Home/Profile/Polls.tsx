@@ -1,11 +1,11 @@
-import Image from "next/image";
+import { Post } from '@/src/zustand/post/Post'
+import Image from 'next/image'
 // import MediaDisplay from "@/components/Users/Media/MediaDisplay";
 // import { useAuthStore } from "@/src/zustand/authStore";
-import React from "react";
-import { Post } from "@/src/interface/user/interface";
+import React from 'react'
 
 interface PostProps {
-  post: Post;
+  post: Post
 }
 const Polls: React.FC<PostProps> = ({ post }) => {
   return (
@@ -28,7 +28,7 @@ const Polls: React.FC<PostProps> = ({ post }) => {
         </div>
       ))}
     </div>
-  );
-};
+  )
+}
 
-export default Polls;
+export default Polls

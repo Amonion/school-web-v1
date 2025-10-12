@@ -146,9 +146,8 @@ const CommentList = () => {
     }
   }, [currentPage])
   return (
-    <div className="flex-1 overflow-y-auto sm:px-4 px-2">
-      <h3 className="text-lg font-semibold mb-3 text-white">Comments</h3>
-      <div className="space-y-5 pb-4">
+    <div className="flex-1 bg-[var(--secondary)] overflow-y-auto sm:px-4 px-2">
+      <div className="space-y-5 pt-2 pb-4">
         {comments.map((item, index) => (
           <EachComment key={index} comment={item} />
         ))}

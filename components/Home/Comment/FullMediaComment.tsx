@@ -1,6 +1,6 @@
 'use client'
-import React, { useRef, useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import React, { useEffect, useRef, useState } from 'react'
+import { motion, AnimatePresence, useMotionValue } from 'framer-motion'
 import { ImageIcon, Send, Smile } from 'lucide-react'
 import CommentStore, { CommentEmpty } from '@/src/zustand/post/Comment'
 import { MessageStore } from '@/src/zustand/notification/Message'
@@ -11,11 +11,11 @@ import Picker from '@emoji-mart/react'
 import { useTheme } from '@/context/ThemeProvider'
 import data from '@emoji-mart/data'
 
-interface MediaCommentSectionProps {
+interface FullMediaCommentSectionProps {
   isDesktop?: boolean
 }
 
-const MediaCommentSection: React.FC<MediaCommentSectionProps> = ({
+const FullMediaCommentSection: React.FC<FullMediaCommentSectionProps> = ({
   isDesktop,
 }) => {
   const {
@@ -26,6 +26,7 @@ const MediaCommentSection: React.FC<MediaCommentSectionProps> = ({
     resetForm,
     postItem,
     setTempComment,
+    setMediaHeight,
     setShowGlassComment,
   } = CommentStore()
   const [commentText, setCommentText] = useState('')
@@ -37,6 +38,9 @@ const MediaCommentSection: React.FC<MediaCommentSectionProps> = ({
   const emojiPickerRef = useRef<HTMLDivElement>(null)
   const [showEmojiPicker, setShowEmojiPicker] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
+  const coverRef = useRef<HTMLDivElement | null>(null)
+  const y = useMotionValue(0)
+  const commentRef = useRef<HTMLDivElement>(null)
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -128,12 +132,40 @@ const MediaCommentSection: React.FC<MediaCommentSectionProps> = ({
     setCommentText((prev) => prev + emoji.native)
   }
 
+  useEffect(() => {
+    if (showGlassComments) {
+      setMediaHeight('30vh')
+      y.set(0)
+    } else {
+      setMediaHeight('100vh')
+    }
+  }, [showGlassComments, y])
+
+  useEffect(() => {
+    const unsubscribe = y.on('change', (latestY) => {
+      if (typeof latestY !== 'number') return
+
+      const minHeight = 30
+      const maxHeight = 100
+      const dragRatio = Math.min(Math.max(latestY / 300, 0), 1)
+      const newHeight = minHeight + (maxHeight - minHeight) * dragRatio
+      if (!showGlassComments) {
+        setMediaHeight(`100vh`)
+      } else {
+        setMediaHeight(`${newHeight}vh`)
+      }
+    })
+
+    return () => unsubscribe()
+  }, [y, showGlassComments])
+
   return (
     <AnimatePresence>
       {showGlassComments && (
         <>
           <motion.div
-            className="fixed inset-0 z-50 bg-black/50"
+            ref={coverRef}
+            className="fixed inset-0 z-50"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -144,12 +176,11 @@ const MediaCommentSection: React.FC<MediaCommentSectionProps> = ({
           />
 
           <motion.div
-            onClick={(e) => e.stopPropagation()}
+            ref={commentRef}
             className={`${
               isDesktop ? '-translate-x-1/2 w-[600px]' : 'left-0 right-0 w-full'
-            } fixed bottom-0 z-50 backdrop-blur-sm bg-[var(--secondary)]/50 border ${
-              showGlassComments ? 'border-[#404040]' : 'border-[var(--border)]'
-            } rounded-t-2xl flex flex-col max-h-[70%]`}
+            } fixed bottom-0 z-50 bg-[var(--primary)] rounded-t-2xl flex flex-col h-[100vh] max-h-[70%]`}
+            style={{ y }}
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
@@ -157,7 +188,7 @@ const MediaCommentSection: React.FC<MediaCommentSectionProps> = ({
             drag="y"
             dragConstraints={{ top: 0, bottom: 0 }}
             onDragEnd={(_, info) => {
-              if (info.offset.y > 100) setShowGlassComment(false)
+              if (info.offset.y > 150) setShowGlassComment(false)
             }}
           >
             <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mt-2 mb-3" />
@@ -165,11 +196,7 @@ const MediaCommentSection: React.FC<MediaCommentSectionProps> = ({
             <CommentList />
 
             <div
-              className={`border-t ${
-                showGlassComments
-                  ? 'border-[#404040]'
-                  : 'border-[var(--border)]'
-              } p-2 sm:p-3 bg-[var(--secondary)]/60 backdrop-blur-md`}
+              className={`border-t border-[var(--border)] p-2 sm:p-3 bg-[var(--secondary)]/60 backdrop-blur-md`}
             >
               {activeComment.username && (
                 <div className="flex w-full flex-wrap items-center mb-1 px-2">
@@ -183,7 +210,7 @@ const MediaCommentSection: React.FC<MediaCommentSectionProps> = ({
                 </div>
               )}
               <div className="flex items-end gap-2">
-                <label className="cursor-pointer bg-black/30 p-2 rounded-full hover:bg-black/50 transition flex-shrink-0">
+                <label className="cursor-pointer bg-[var(--secondary)] p-2 rounded-full hover:bg-black/50 transition flex-shrink-0">
                   <input
                     type="file"
                     accept="image/*"
@@ -194,11 +221,7 @@ const MediaCommentSection: React.FC<MediaCommentSectionProps> = ({
                 </label>
 
                 <div
-                  className={`flex-1 border ${
-                    showGlassComments
-                      ? 'border-[#404040]'
-                      : 'border-[var(--border)]'
-                  } flex items-end bg-black/30 rounded-[25px] px-2`}
+                  className={`flex-1 flex items-end bg-[var(--secondary)] rounded-[25px] px-2`}
                 >
                   <Smile
                     onClick={() => setShowEmojiPicker((prev) => !prev)}
@@ -227,7 +250,7 @@ const MediaCommentSection: React.FC<MediaCommentSectionProps> = ({
                   className={`p-2 rounded-full flex-shrink-0 transition ${
                     commentText.trim() || commentImage
                       ? 'bg-[var(--custom)] hover:bg-[var(--custom)]'
-                      : 'bg-gray-500/40 cursor-not-allowed'
+                      : 'bg-[var(--secondary)] cursor-not-allowed'
                   }`}
                 >
                   <Send size={18} className="text-white" />
@@ -254,4 +277,4 @@ const MediaCommentSection: React.FC<MediaCommentSectionProps> = ({
   )
 }
 
-export default MediaCommentSection
+export default FullMediaCommentSection

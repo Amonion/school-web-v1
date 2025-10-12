@@ -1,5 +1,6 @@
 'use client'
-import ChatHead from '@/components/Home/Chat/Chat/ChatHead'
+
+// import ChatHead from '@/components/Chat/ChatHead'
 
 export default function UserChat({
   children,
@@ -12,7 +13,7 @@ export default function UserChat({
       <div className="flex-1 fixed sm:relative w-full h-[100vh] pb-[55px] sm:pb-1 flex flex-col">
         {/* <div className="sticky z-30 left-0 rounded-t-[10px] py-2 top-0 w-full bg-[var(--primary)] mb-2 hidden sm:block h-[65px]"> */}
         <div className="sticky z-30 left-0 py-2 top-0 w-full bg-[var(--primary)] mb-2 h-[65px]">
-          <ChatHead />
+          {/* <ChatHead /> */}
         </div>
 
         {children}

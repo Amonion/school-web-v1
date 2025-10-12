@@ -1,6 +1,6 @@
 'use client'
 import { useEffect } from 'react'
-import { useParams, usePathname } from 'next/navigation' // ✅ Get dynamic route params
+import { useParams, usePathname } from 'next/navigation'
 import { PostStore } from '@/src/zustand/post/Post'
 import CommentStore from '@/src/zustand/post/Comment'
 import { MessageStore } from '@/src/zustand/notification/Message'
@@ -8,7 +8,6 @@ import PostHeader from '@/components/Home/Posts/PostHeader'
 import MediaDisplay from '@/components/Home/Media/MediaDisplay'
 import Polls from '@/components/Home/Posts/Polls'
 import PostStat from '@/components/Home/Posts/PostStat'
-import CommentBottomSheet from '@/components/Home/Comment/CommentBottomSheet'
 import { AuthStore } from '@/src/zustand/user/AuthStore'
 
 const MainPost = () => {
@@ -33,7 +32,7 @@ const MainPost = () => {
   useEffect(() => {
     if (postForm._id && pathname === `/home/posts/${_id}`) {
       getComments(
-        `/posts/?postId=${_id}&level=1&myId=${user?._id}&page_size=30&page=1&ordering=-createdAt`
+        `/posts/comments/?postId=${_id}&level=1&postType=comment&myId=${user?._id}&page_size=30&page=1&ordering=-createdAt`
       )
       setMainPost(postForm)
       setShowComment(true)
@@ -62,7 +61,6 @@ const MainPost = () => {
           <PostStat post={postForm} />
         </div>
       </div>
-      <CommentBottomSheet />
     </>
   )
 }

@@ -89,6 +89,7 @@ interface CommentState {
   currentPage: number
   page_size: number
   progress: number
+  mediaHeight: string
   commentResults: Comment[]
   comments: Comment[]
   activeComment: Comment
@@ -108,6 +109,7 @@ interface CommentState {
   commentForm: Post
   mainPost: Post
   setForm: (key: keyof Post, value: Post[keyof Post]) => void
+  setMediaHeight: (height: string) => void
   setIsMobile: (status: boolean) => void
   resetForm: () => void
   getComments: (url: string) => Promise<void>
@@ -157,6 +159,7 @@ const CommentStore = create<CommentState>((set) => ({
   page_size: 20,
   currentPage: 1,
   progress: 0,
+  mediaHeight: '100vh',
   commentResults: [],
   comments: [],
   isMobile: false,
@@ -184,6 +187,11 @@ const CommentStore = create<CommentState>((set) => ({
       },
     })),
 
+  setMediaHeight: (height) => {
+    set({
+      mediaHeight: height,
+    })
+  },
   setIsMobile: (status) =>
     set({
       isMobile: status,

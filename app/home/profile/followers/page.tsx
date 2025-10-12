@@ -1,10 +1,10 @@
 'use client'
 import { useEffect, useRef } from 'react'
-import { useAuthStore } from '@/src/zustand/authStore'
 import Image from 'next/image'
-import SocialStore from '@/src/zustand/users/Social'
-import FollowerCard from '@/components/Users/Profile/FollowerCard'
-import { useTheme } from '@/context/ThemeContext'
+import { AuthStore } from '@/src/zustand/user/AuthStore'
+import SocialStore from '@/src/zustand/post/Social'
+import FollowerCard from '@/components/Home/Profile/FollowerCard'
+import { useTheme } from '@/context/ThemeProvider'
 
 export default function PeopleList() {
   const lastUserRef = useRef<HTMLDivElement | null>(null)
@@ -18,7 +18,7 @@ export default function PeopleList() {
     getFollowers,
     fetchMoreFollowers,
   } = SocialStore()
-  const { user } = useAuthStore()
+  const { user } = AuthStore()
   const { theme } = useTheme()
   const sort = '-createdAt'
   useEffect(() => {

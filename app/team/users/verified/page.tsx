@@ -1,47 +1,47 @@
-"use client";
-import Link from "next/link";
-import Image from "next/image";
-import UserStore from "@/src/zustand/team/User";
-import { useState, useEffect, useRef } from "react";
-import { MessageStore } from "@/src/zustand/msgStore";
-import { usePathname } from "next/navigation";
-import Pagination from "@/components/Team/Pagination";
-import { formatDateToDDMMYY, formatTimeTo12Hour } from "@/lib/helpers";
+'use client'
+import Link from 'next/link'
+import Image from 'next/image'
+import { useState, useEffect, useRef } from 'react'
+import { usePathname } from 'next/navigation'
+import Pagination from '@/components/Team/Pagination'
+import { formatDateToDDMMYY, formatTimeTo12Hour } from '@/lib/helpers'
+import { UserStore } from '@/src/zustand/user/User'
+import { MessageStore } from '@/src/zustand/notification/Message'
 const UsersOnVerification: React.FC = () => {
-  const url = "users/";
+  const url = 'users/'
   const {
-    getItems,
+    getUsers,
     count,
-    results,
+    users,
     toggleChecked,
     loading,
     toggleActive,
     reshuffleResults,
-  } = UserStore();
-  const [currentPage, setCurrentPage] = useState(1);
-  const [page_size] = useState(20);
-  const [sort] = useState("-createdAt");
-  const prevPage = useRef(currentPage);
-  const { setMessage } = MessageStore();
-  const pathname = usePathname();
+  } = UserStore()
+  const [currentPage, setCurrentPage] = useState(1)
+  const [page_size] = useState(20)
+  const [sort] = useState('-createdAt')
+  const prevPage = useRef(currentPage)
+  const { setMessage } = MessageStore()
+  const pathname = usePathname()
 
   useEffect(() => {
-    reshuffleResults();
-  }, [pathname]);
+    reshuffleResults()
+  }, [pathname])
 
   useEffect(() => {
-    reshuffleResults();
-    const params = `?page_size=${page_size}&page=${currentPage}&ordering=${sort}&userStatus=User&isVerified=true`;
-    getItems(`${url}${params}`, setMessage);
-    prevPage.current = currentPage;
-  }, [currentPage]);
+    reshuffleResults()
+    const params = `?page_size=${page_size}&page=${currentPage}&ordering=${sort}&userStatus=User&isVerified=true`
+    getUsers(`${url}${params}`, setMessage)
+    prevPage.current = currentPage
+  }, [currentPage])
 
   return (
     <>
       <div className="card_body">
         <div className="custom_sm_title">Verified Users</div>
         <div className="overflow-auto mb-5">
-          {results.length > 0 ? (
+          {users.length > 0 ? (
             <table className="">
               <thead>
                 <tr>
@@ -54,18 +54,18 @@ const UsersOnVerification: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {results.map((item, index) => (
+                {users.map((item, index) => (
                   <tr
                     key={index}
                     className={`${
-                      index % 2 === 1 ? "bg-[var(--white-gray)]" : ""
+                      index % 2 === 1 ? 'bg-[var(--white-gray)]' : ''
                     }`}
                   >
                     <td>
                       <div className="flex items-center">
                         <div
                           className={`checkbox ${
-                            item.isChecked ? "active" : ""
+                            item.isChecked ? 'active' : ''
                           }`}
                           onClick={() => toggleChecked(index)}
                         >
@@ -90,9 +90,9 @@ const UsersOnVerification: React.FC = () => {
                           className="object-cover rounded-full"
                           height={0}
                           style={{
-                            minWidth: "70px",
-                            width: "70px",
-                            height: "70px",
+                            minWidth: '70px',
+                            width: '70px',
+                            height: '70px',
                           }}
                         />
                       ) : (
@@ -130,7 +130,7 @@ const UsersOnVerification: React.FC = () => {
                 width={0}
                 sizes="100vw"
                 height={0}
-                style={{ width: "100%", height: "auto" }}
+                style={{ width: '100%', height: 'auto' }}
               />
             </div>
           )}
@@ -155,7 +155,7 @@ const UsersOnVerification: React.FC = () => {
         </div>
       </div>
     </>
-  );
-};
+  )
+}
 
-export default UsersOnVerification;
+export default UsersOnVerification

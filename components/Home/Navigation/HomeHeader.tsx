@@ -13,7 +13,6 @@ export default function HomeHeader() {
   const { setMessage } = MessageStore()
   const { toggleVNav, togglePostBox, toggleAsideVNav, setScrollUp } = NavStore()
   const { getPosts, page_size } = PostStore()
-
   const [sort] = useState('-createdAt')
 
   const refresh = async () => {

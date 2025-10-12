@@ -1,9 +1,8 @@
 import Image from 'next/image'
 import { forwardRef } from 'react'
-import { SocialUser } from '@/src/interface/user/interface'
 import Link from 'next/link'
-import SocialStore from '@/src/zustand/users/Social'
-import { useAuthStore } from '@/src/zustand/authStore'
+import SocialStore, { SocialUser } from '@/src/zustand/post/Social'
+import { AuthStore } from '@/src/zustand/user/AuthStore'
 
 interface FollowingCardProps {
   social: SocialUser
@@ -12,7 +11,7 @@ interface FollowingCardProps {
 const FollowingCard = forwardRef<HTMLDivElement, FollowingCardProps>(
   ({ social }, ref) => {
     const { unFollowUser } = SocialStore()
-    const { user } = useAuthStore()
+    const { user } = AuthStore()
 
     const unfollowAccount = () => {
       unFollowUser(`/users/follow/${social.userId}`, {

@@ -1,18 +1,18 @@
-"use client";
-import { appendForm } from "@/lib/helpers";
-import { validateInputs } from "@/lib/validation";
-import { useState, useEffect } from "react";
-import AreaStore from "@/src/zustand/team/Area";
-import { MessageStore } from "@/src/zustand/msgStore";
-import { Area } from "@/src/interface/team/interface";
+'use client'
+import { appendForm } from '@/lib/helpers'
+import { validateInputs } from '@/lib/validation'
+import { useState, useEffect } from 'react'
+import AreaStore from '@/src/zustand/place/AreaOrigin'
+import { MessageStore } from '@/src/zustand/notification/Message'
+import { Area } from '@/src/zustand/place/Area'
 
 const CreateArea: React.FC = () => {
-  const url = "/places/";
-  let itemId: string | null = null;
-  const [isEditing, setIsEditing] = useState(false);
-  const [id, setId] = useState<string | null>("");
+  const url = '/places/'
+  let itemId: string | null = null
+  const [isEditing, setIsEditing] = useState(false)
+  const [id, setId] = useState<string | null>('')
   // const [name, setName] = useState("");
-  const { setMessage } = MessageStore();
+  const { setMessage } = MessageStore()
   const {
     area,
     loadingArea,
@@ -22,174 +22,174 @@ const CreateArea: React.FC = () => {
     setItemForm,
     getOneArea,
     updateItem,
-  } = AreaStore();
+  } = AreaStore()
 
   useEffect(() => {
-    resetForm();
-  }, []);
+    resetForm()
+  }, [])
 
   useEffect(() => {
-    const query = window.location.search;
-    itemId = new URLSearchParams(query).get("id");
-    setId(itemId);
-    const stateId = new URLSearchParams(query).get("stateId");
+    const query = window.location.search
+    itemId = new URLSearchParams(query).get('id')
+    setId(itemId)
+    const stateId = new URLSearchParams(query).get('stateId')
 
     const initialize = async () => {
       if (stateId !== null) {
-        await getOneArea(`${url}${stateId}`, setMessage, true);
+        await getOneArea(`${url}${stateId}`, setMessage, true)
       } else if (itemId !== null) {
-        setIsEditing(true);
-        setId(itemId);
-        const existingItem = area.find((item) => item.id === itemId);
+        setIsEditing(true)
+        setId(itemId)
+        const existingItem = area.find((item) => item.id === itemId)
         if (existingItem) {
-          populateFields(existingItem);
+          populateFields(existingItem)
         } else {
-          await getOneArea(`${url}${itemId}`, setMessage, false);
+          await getOneArea(`${url}${itemId}`, setMessage, false)
         }
       } else {
-        setId(null);
-        setIsEditing(false);
+        setId(null)
+        setIsEditing(false)
         // setName("");
       }
-    };
+    }
 
-    initialize();
-  }, [itemId]);
+    initialize()
+  }, [itemId])
 
   const populateFields = (item: Area) => {
-    setItemForm("state", item.state);
-    setItemForm("area", item.area);
-    setItemForm("zipCode", item.zipCode);
-  };
+    setItemForm('state', item.state)
+    setItemForm('area', item.area)
+    setItemForm('zipCode', item.zipCode)
+  }
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    const { name, value } = e.target;
-    setItemForm(name as keyof typeof form, value);
-  };
+    const { name, value } = e.target
+    setItemForm(name as keyof typeof form, value)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     const inputsToValidate = !isEditing
       ? [
           {
-            name: "country",
+            name: 'country',
             value: form.country,
             rules: { blank: true, maxLength: 1000 },
-            field: "Country field",
+            field: 'Country field',
           },
           {
-            name: "continent",
+            name: 'continent',
             value: form.continent,
             rules: { blank: true, maxLength: 1000 },
-            field: "Continent field",
+            field: 'Continent field',
           },
           {
-            name: "countryFlag",
+            name: 'countryFlag',
             value: form.countryFlag,
             rules: { blank: true, minLength: 3, maxLength: 1000 },
-            field: "countryFlag field",
+            field: 'countryFlag field',
           },
           {
-            name: "countryCode",
+            name: 'countryCode',
             value: form.countryCode,
             rules: { blank: false, maxLength: 1000 },
-            field: "Country code",
+            field: 'Country code',
           },
           {
-            name: "countrySymbol",
+            name: 'countrySymbol',
             value: form.countrySymbol,
             rules: { blank: false, maxLength: 1000 },
-            field: "Country symbol",
+            field: 'Country symbol',
           },
           {
-            name: "currency",
+            name: 'currency',
             value: form.currency,
             rules: { blank: false, maxLength: 1000 },
-            field: "Currency",
+            field: 'Currency',
           },
           {
-            name: "currencySymbol",
+            name: 'currencySymbol',
             value: form.currencySymbol,
             rules: { blank: false, maxLength: 1000 },
-            field: "Currency symbol",
+            field: 'Currency symbol',
           },
           {
-            name: "state",
+            name: 'state',
             value: form.state,
             rules: { blank: false, maxLength: 1000 },
-            field: "State field",
+            field: 'State field',
           },
           {
-            name: "stateCapital",
+            name: 'stateCapital',
             value: form.stateCapital,
             rules: { blank: false, maxLength: 1000 },
-            field: "Capital field",
+            field: 'Capital field',
           },
           {
-            name: "area",
+            name: 'area',
             value: form.area,
             rules: { blank: false, maxLength: 1000 },
-            field: "Area",
+            field: 'Area',
           },
           {
-            name: "zipCode",
+            name: 'zipCode',
             value: form.zipCode,
             rules: { blank: false, maxLength: 1000 },
-            field: "Zip code",
+            field: 'Zip code',
           },
           {
-            name: "source",
-            value: "State",
+            name: 'source',
+            value: 'State',
             rules: { blank: false, maxLength: 1000 },
-            field: "State ",
+            field: 'State ',
           },
           {
-            name: "stateLogo",
+            name: 'stateLogo',
             value: form.stateLogo,
             rules: { blank: false, maxSize: 5 },
-            field: "State Logo",
+            field: 'State Logo',
           },
         ]
       : [
           {
-            name: "area",
+            name: 'area',
             value: form.area,
             rules: { blank: false, minLength: 3, maxLength: 1000 },
-            field: "Area",
+            field: 'Area',
           },
           {
-            name: "source",
-            value: "Area",
+            name: 'source',
+            value: 'Area',
             rules: { blank: false, minLength: 3, maxLength: 1000 },
-            field: "area",
+            field: 'area',
           },
-        ];
-    const { messages } = validateInputs(inputsToValidate);
+        ]
+    const { messages } = validateInputs(inputsToValidate)
     const getFirstNonEmptyMessage = (
       messages: Record<string, string>
     ): string | null => {
       for (const key in messages) {
-        if (messages[key].trim() !== "") {
-          return messages[key];
+        if (messages[key].trim() !== '') {
+          return messages[key]
         }
       }
-      return null;
-    };
+      return null
+    }
 
-    const firstNonEmptyMessage = getFirstNonEmptyMessage(messages);
+    const firstNonEmptyMessage = getFirstNonEmptyMessage(messages)
     if (firstNonEmptyMessage) {
-      setMessage(firstNonEmptyMessage, false);
-      return;
+      setMessage(firstNonEmptyMessage, false)
+      return
     }
-    e.preventDefault();
-    const data = appendForm(inputsToValidate);
+    e.preventDefault()
+    const data = appendForm(inputsToValidate)
     if (isEditing) {
-      updateItem(`${url}${id}/`, data, setMessage);
+      updateItem(`${url}${id}/`, data, setMessage)
     } else {
-      await postItem(`${url}`, data, setMessage);
+      await postItem(`${url}`, data, setMessage)
     }
-  };
+  }
 
   return (
     <>
@@ -246,7 +246,7 @@ const CreateArea: React.FC = () => {
         </div>
       </div>
     </>
-  );
-};
+  )
+}
 
-export default CreateArea;
+export default CreateArea

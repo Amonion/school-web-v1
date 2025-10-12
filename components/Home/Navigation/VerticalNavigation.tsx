@@ -36,12 +36,21 @@ export default function VerticalNavigation() {
         <VNavHeader />
 
         <div className="mt-5 mb-auto">
-          <Link className="v_nav_items_user block" href="/home">
+          <Link
+            className={`v_nav_items_user ${
+              pathname === '/home' ? 'text-[var(--custom)]' : ''
+            } block`}
+            href="/home"
+          >
             <i className="bi bi-house mr-3"></i>
             Home
           </Link>
           <Link
-            className="v_nav_items_user block"
+            className={`v_nav_items_user ${
+              pathname === `/home/profile/${user?.username}`
+                ? 'text-[var(--custom)]'
+                : ''
+            } block`}
             href={`/home/profile/${user?.username}`}
           >
             <div className="flex cursor-pointer items-center py-2">
@@ -50,7 +59,9 @@ export default function VerticalNavigation() {
             </div>
           </Link>
           <Link
-            className="v_nav_items_user block"
+            className={`v_nav_items_user ${
+              pathname === '/home/posts/bookmarks' ? 'text-[var(--custom)]' : ''
+            } block`}
             href={`/home/posts/bookmarks`}
           >
             <div className="flex cursor-pointer items-center py-2">
@@ -70,7 +81,14 @@ export default function VerticalNavigation() {
               Results
             </div>
           </Link> */}
-          <Link className="v_nav_items_user block" href={`/home/verification`}>
+          <Link
+            className={`v_nav_items_user ${
+              pathname.includes('/home/verification')
+                ? 'text-[var(--custom)]'
+                : ''
+            } block`}
+            href={`/home/verification`}
+          >
             <div className="flex cursor-pointer items-center py-2">
               <i className="bi bi-shield-check mr-3"></i>
               Verification
@@ -81,7 +99,14 @@ export default function VerticalNavigation() {
               )}
             </div>
           </Link>
-          <Link className="v_nav_items_user block" href={`/home/notifications`}>
+          <Link
+            className={`v_nav_items_user ${
+              pathname.includes('/home/notifications')
+                ? 'text-[var(--custom)]'
+                : ''
+            } block`}
+            href={`/home/notifications`}
+          >
             <div className="flex cursor-pointer items-center py-2">
               <i className="bi bi-bell mr-3"></i>
               Notification

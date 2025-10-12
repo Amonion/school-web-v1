@@ -1,7 +1,6 @@
 import { create } from 'zustand'
 import _debounce from 'lodash/debounce'
 import apiRequest from '@/lib/axios'
-import { FileType } from '@/src/interface'
 
 interface FetchChatResponse {
   count: number
@@ -807,6 +806,15 @@ export interface Chat {
 export const Chat = {
   day: '',
   chats: [],
+}
+
+export interface FileType {
+  type: string
+  source: string
+  name: string
+  size: number
+  duration: number
+  pages: number
 }
 
 export interface ChatContent {

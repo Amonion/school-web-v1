@@ -79,15 +79,15 @@ const HomeNews: React.FC = () => {
                 >
                   <span className="actionIndicator">
                     <Eye size={18} />
-                    <div className="">{formatCount(14500)}</div>
+                    <div className="">{formatCount(item.views)}</div>
                   </span>
                   <span className="actionIndicator">
                     <Heart size={18} />
-                    <div className="shadow-sm">{formatCount(14500)}</div>
+                    <div className="shadow-sm">{formatCount(item.likes)}</div>
                   </span>
                   <span className="actionIndicator">
                     <MessageCircle size={18} />
-                    <div className="">{formatCount(14500)}</div>
+                    <div className="">{formatCount(item.replies)}</div>
                   </span>
                 </div>
               </div>

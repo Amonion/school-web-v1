@@ -3,7 +3,6 @@ import { usePathname } from 'next/navigation'
 import { NavStore } from '@/src/zustand/notification/Navigation'
 import TraceHeader from './TraceHeader'
 import HomeHeader from './HomeHeader'
-import NewsHeader from './NewsHeader'
 
 export default function HeaderWrapper() {
   const { setHeaderHeight } = NavStore()
@@ -17,7 +16,7 @@ export default function HeaderWrapper() {
     const updateHeaderHeight = () => {
       if (divRef.current) {
         const height = divRef.current.getBoundingClientRect().height
-        setHeaderHeight(pathname.includes('/home/friends') ? 0 : height)
+        setHeaderHeight(height)
       }
     }
 
@@ -61,10 +60,8 @@ export default function HeaderWrapper() {
             <div className="flex-1 sm:px-4 p-2 overflow-x-auto sm:overflow-hidden border-b border-b-[var(--border)] relative sm:ml-5 md:mr-5  bg-[var(--primary)]">
               {pathname.includes('/home/trace') ? (
                 <TraceHeader />
-              ) : pathname.includes('/home/news') ? (
-                <NewsHeader />
               ) : (
-                pathname === '/home' && <HomeHeader />
+                <HomeHeader />
               )}
             </div>
             <div className="md:right-0 z-0 w-0 md:min-w-[270px] md:w-[270px] xl:w-[300px]" />

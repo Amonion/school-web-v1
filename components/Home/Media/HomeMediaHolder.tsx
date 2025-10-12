@@ -2,8 +2,9 @@
 import React, { useRef, useEffect } from 'react'
 import CommentStore from '@/src/zustand/post/Comment'
 import { Post, PostStore } from '@/src/zustand/post/Post'
-import MobileMediaViewer from './MobileMediaViewer'
+// import MobileMediaViewer from './MobileMediaViewer'
 import DesktopMediaViewer from './DesktopMediaViewer'
+import MobileMediaView from '../Comment/MobileMediaView'
 
 const HomeMediaHolder: React.FC = () => {
   const {
@@ -124,8 +125,17 @@ const HomeMediaHolder: React.FC = () => {
 
   return (
     <>
-      {selectedMedia && isMobile && (
+      {/* {selectedMedia && isMobile && (
         <MobileMediaViewer
+          media={selectedMedia}
+          postForm={postForm}
+          onClose={closeFullScreen}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        />
+      )} */}
+      {selectedMedia && isMobile && (
+        <MobileMediaView
           media={selectedMedia}
           postForm={postForm}
           onClose={closeFullScreen}

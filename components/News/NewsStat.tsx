@@ -100,7 +100,7 @@ const NewsStat: React.FC<PostProps> = ({ post }) => {
       <div className="post_stat cursor-pointer flex items-center space-x-1 transition-all duration-300">
         {loading && isLiked ? (
           <i
-            className={`bi bi-heart-fill text-[var(--custom-color)] scale-125 post_icon text-[16px] transition-transform duration-300`}
+            className={`bi bi-heart-fill text-[var(--custom-color)] scale-125 post_icon text-[12px] transition-transform duration-300`}
           ></i>
         ) : (
           <i
@@ -110,7 +110,7 @@ const NewsStat: React.FC<PostProps> = ({ post }) => {
                 ? 'bi-heart-fill text-[var(--custom-color)] '
                 : 'bi-heart'
             }
-      post_icon text-[16px] transition-transform duration-300`}
+      post_icon text-[12px] transition-transform duration-300`}
           ></i>
         )}
         <span className="transition-opacity duration-300">
@@ -120,7 +120,7 @@ const NewsStat: React.FC<PostProps> = ({ post }) => {
       <div className="post_stat cursor-pointer flex items-center space-x-1 transition-all duration-300">
         {loading && isSaved ? (
           <i
-            className={`bi bi-bookmark-fill text-[var(--custom-color)] scale-125 post_icon text-[16px] transition-transform duration-300`}
+            className={`bi bi-bookmark-fill text-[var(--custom-color)] scale-125 post_icon text-[12px] transition-transform duration-300`}
           ></i>
         ) : (
           <i
@@ -130,7 +130,7 @@ const NewsStat: React.FC<PostProps> = ({ post }) => {
                 ? 'bi-bookmark-fill text-[var(--custom-color)] '
                 : 'bi-bookmark'
             }
-      post_icon text-[16px] transition-transform duration-300`}
+      post_icon text-[12px] transition-transform duration-300`}
           ></i>
         )}
         <span className="transition-opacity duration-300">
@@ -143,13 +143,13 @@ const NewsStat: React.FC<PostProps> = ({ post }) => {
           3.1K
         </div> */}
       <div className="post_stat">
-        <i className="bi bi-chat-left-text post_icon mt-1 text-[16px]"></i>
+        <i className="bi bi-chat-left-text post_icon mt-1 text-[12px]"></i>
         {formatCount(post.replies)}
       </div>
 
       <div className="post_stat">
         {/* <i className="bi bi-lightning-charge post_icon text-[18px]"></i> */}
-        <i className="bi bi-eye post_icon text-[18px]"></i>
+        <i className="bi bi-eye post_icon text-[14px]"></i>
         {formatCount(post.views)}
       </div>
       <div className="post_stat relative" onClick={handleCopy}>

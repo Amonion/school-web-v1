@@ -3,11 +3,10 @@ import Link from 'next/link'
 import { appendForm } from '@/lib/helpers'
 import { validateInputs } from '@/lib/validation'
 import { useState, useEffect } from 'react'
-import DocumentStore from '@/src/zustand/team/Document'
-import { MessageStore } from '@/src/zustand/msgStore'
-import { Document } from '@/src/interface/team/interface'
 import QuillEditor from '@/components/Team/Editor/QuillEditor'
 import { apiRequest } from '@/lib/axios'
+import DocumentStore, { Document } from '@/src/zustand/place/Document'
+import { MessageStore } from '@/src/zustand/notification/Message'
 
 const CreateDocument: React.FC = () => {
   const url = '/places/documents'
