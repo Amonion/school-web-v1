@@ -50,7 +50,7 @@ export default function RootLayout({
 
   useEffect(() => {
     setIsMounted(true)
-    // getCompany('/company', setMessage)
+    getCompany('/company', setMessage)
 
     if (navigator.onLine) {
       setOnline('', true)
