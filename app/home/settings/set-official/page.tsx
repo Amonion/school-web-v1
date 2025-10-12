@@ -54,7 +54,7 @@ export default function SetSocial() {
     }
     e.preventDefault()
     const data = appendForm(inputsToValidate)
-    updateBioUserSettings(`${url}${bioUser._id}`, data, setMessage)
+    updateBioUserSettings(`${url}${bioUser?._id}`, data, setMessage)
   }
 
   const handleDeleteAccount = () => {

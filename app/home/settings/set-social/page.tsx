@@ -19,7 +19,7 @@ export default function SetNotification() {
   const url = '/users/settings/'
 
   useEffect(() => {
-    getUserSettings(`${url}${user._id}`, setMessage)
+    getUserSettings(`${url}${user?._id}`, setMessage)
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {

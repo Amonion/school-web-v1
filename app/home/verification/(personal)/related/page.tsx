@@ -26,7 +26,9 @@ export default function Related() {
   }, [bioUserState])
 
   useEffect(() => {
-    BioUserStore.setState({ bioUserForm: bioUser })
+    if (bioUser) {
+      BioUserStore.setState({ bioUserForm: bioUser })
+    }
   }, [])
 
   const handleInputChange = (
@@ -195,28 +197,28 @@ export default function Related() {
             <div className="">
               <div className="text-sm">Occupation</div>
               <div className="selected_item text-[var(--text-secondary)]">
-                {bioUser.occupation}
+                {bioUser?.occupation}
               </div>
             </div>
 
             <div className="">
               <div className="text-sm"> Mother Maiden Name</div>
               <div className="selected_item text-[var(--text-secondary)]">
-                {bioUser.motherName}
+                {bioUser?.motherName}
               </div>
             </div>
 
             <div className="">
               <div className="text-sm">Next of Kin</div>
               <div className="selected_item text-[var(--text-secondary)]">
-                {bioUser.nextKinName}
+                {bioUser?.nextKinName}
               </div>
             </div>
 
             <div className="">
               <div className="text-sm">Next of Kin Phone</div>
               <div className="selected_item text-[var(--text-secondary)]">
-                {bioUser.nextKinPhoneNumber}
+                {bioUser?.nextKinPhoneNumber}
               </div>
             </div>
           </div>

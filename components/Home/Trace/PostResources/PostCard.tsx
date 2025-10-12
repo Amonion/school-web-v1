@@ -1,12 +1,12 @@
-import Image from "next/image";
-import Link from "next/link";
+import Image from 'next/image'
+import Link from 'next/link'
 
-import { forwardRef } from "react";
-import { Post } from "@/src/interface/user/interface";
-import { truncateString } from "@/lib/helpers";
+import { forwardRef } from 'react'
+import { truncateString } from '@/lib/helpers'
+import { Post } from '@/src/zustand/post/Post'
 
 interface PostListCardProps {
-  post: Post;
+  post: Post
 }
 
 const PostListCard = forwardRef<HTMLDivElement, PostListCardProps>(
@@ -20,7 +20,7 @@ const PostListCard = forwardRef<HTMLDivElement, PostListCardProps>(
           >
             {post.media && post.media[0] && (
               <div className="h-auto pr-[10px] max-h-[70px] w-[70px] sm:max-h-[150px] sm:w-[150px] xs:rounded-[10px] rounded-[5px] block overflow-hidden">
-                {post.media[0].type === "video" ? (
+                {post.media[0].type === 'video' ? (
                   <video
                     className="w-full h-full object-cover pointer-events-none"
                     src={post.media[0].source}
@@ -30,7 +30,7 @@ const PostListCard = forwardRef<HTMLDivElement, PostListCardProps>(
                   />
                 ) : (
                   <Image
-                    style={{ height: "100%", objectFit: "cover" }}
+                    style={{ height: '100%', objectFit: 'cover' }}
                     src={post.media[0].source}
                     loading="lazy"
                     sizes="100vw"
@@ -65,10 +65,10 @@ const PostListCard = forwardRef<HTMLDivElement, PostListCardProps>(
           </Link>
         </div>
       </>
-    );
+    )
   }
-);
+)
 
-PostListCard.displayName = "PostListCard";
+PostListCard.displayName = 'PostListCard'
 
-export default PostListCard;
+export default PostListCard

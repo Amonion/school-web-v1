@@ -44,11 +44,15 @@ export default function Origin() {
         setMessage
       )
     }
-    BioUserStore.setState({ bioUserForm: bioUser })
+  }, [])
+  useEffect(() => {
+    if (bioUser) {
+      BioUserStore.setState({ bioUserForm: bioUser })
+    }
   }, [])
 
   useEffect(() => {
-    if (bioUser.residentCountry) {
+    if (bioUser?.residentCountry) {
       getStates(
         `/places/state/?country=${bioUser.residentCountry}&page_size=350&field=state&sort=state`,
         setMessage
@@ -57,7 +61,7 @@ export default function Origin() {
   }, [bioUser])
 
   useEffect(() => {
-    if (bioUser.residentState) {
+    if (bioUser?.residentState) {
       getArea(
         `/places/area/?state=${bioUser.residentState}&page_size=350&field=area&sort=area`
       )
@@ -378,41 +382,41 @@ export default function Origin() {
             <div className="">
               <div className="text-sm">Area Name</div>
               <div className="selected_item text-[var(--text-secondary)]">
-                {bioUser.residentArea}
+                {bioUser?.residentArea}
               </div>
             </div>
 
             <div className="">
               <div className="text-sm">State Name</div>
               <div className="selected_item text-[var(--text-secondary)]">
-                {bioUser.residentState}
+                {bioUser?.residentState}
               </div>
             </div>
 
             <div className="">
               <div className="text-sm">Country Name</div>
               <div className="selected_item text-[var(--text-secondary)]">
-                {bioUser.residentCountry}
+                {bioUser?.residentCountry}
               </div>
             </div>
 
             <div className="">
               <div className="text-sm">Continent Name</div>
               <div className="selected_item text-[var(--text-secondary)]">
-                {bioUser.residentContinent}
+                {bioUser?.residentContinent}
               </div>
             </div>
 
             <div className="">
               <div className="text-sm">Phone Address</div>
               <div className="selected_item text-[var(--text-secondary)]">
-                {bioUser.phone}
+                {bioUser?.phone}
               </div>
             </div>
             <div className="">
               <div className="text-sm">Residential Address</div>
               <div className="selected_item text-[var(--text-secondary)]">
-                {bioUser.residentAddress}
+                {bioUser?.residentAddress}
               </div>
             </div>
           </div>
