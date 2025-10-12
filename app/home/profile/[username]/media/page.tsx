@@ -1,6 +1,5 @@
 'use client'
 import React, { useEffect } from 'react'
-import PostStore from '@/src/zustand/post/UserPost'
 import CommentStore from '@/src/zustand/post/Comment'
 import { Post } from '@/src/zustand/post/Post'
 import UserPostStore from '@/src/zustand/post/UserPost'
@@ -9,11 +8,11 @@ const MediaGrid: React.FC = () => {
   const { currentPage, page_size, sort, setShowActions, getComments } =
     CommentStore()
   const {
-    mediaResults,
+    userMediaResults,
     isMobile,
     currentIndex,
-    selectedMedia,
-    setSelectedMedia,
+    selectedUserMedia,
+    setSelectedUserMedia,
     setCurrentIndex,
     setFitMode,
     setIsMobile,
@@ -28,7 +27,7 @@ const MediaGrid: React.FC = () => {
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
-      if (!selectedMedia || isMobile) return
+      if (!selectedUserMedia || isMobile) return
       if (e.key === 'ArrowLeft') {
         goToPrevious()
       } else if (e.key === 'ArrowRight') {
@@ -39,7 +38,7 @@ const MediaGrid: React.FC = () => {
     }
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
-  }, [selectedMedia, isMobile])
+  }, [selectedUserMedia, isMobile])
 
   useEffect(() => {
     if (!isMobile) {
@@ -66,50 +65,51 @@ const MediaGrid: React.FC = () => {
 
   const setMainPost = (index: number) => {
     let comment: Post | undefined
-    PostStore.setState((prev) => {
+    UserPostStore.setState((prev) => {
       comment = prev.postResults.find(
-        (item) => item._id === mediaResults[index].postId
+        (item) => item._id === userMediaResults[index].postId
       )
+
       return {
-        postForm: prev.postResults.find(
-          (item) => item._id === mediaResults[index].postId
+        userPostForm: prev.postResults.find(
+          (item) => item._id === userMediaResults[index].postId
         ),
       }
     })
     CommentStore.setState({ mainPost: comment })
-    if (mediaResults[index].postId) {
+    if (userMediaResults[index].postId) {
       getComments(
-        `/posts/comments?page=${currentPage}&ordering=${sort}&page_size=${page_size}&postType=comment&postId=${mediaResults[index].postId}&level=1`
+        `/posts/comments?page=${currentPage}&ordering=${sort}&page_size=${page_size}&postType=comment&postId=${userMediaResults[index].postId}&level=1`
       )
     }
   }
 
   const openFullScreen = (index: number) => {
     setMainPost(index)
-    setSelectedMedia(mediaResults[index])
+    setSelectedUserMedia(userMediaResults[index])
     setCurrentIndex(index)
     setFitMode(false)
   }
 
   const closeFullScreen = () => {
-    setSelectedMedia(null)
+    setSelectedUserMedia(null)
     setFitMode(false)
   }
 
   const goToPrevious = () => {
     const newIndex =
-      (currentIndex - 1 + mediaResults.length) % mediaResults.length
+      (currentIndex - 1 + userMediaResults.length) % userMediaResults.length
 
     setMainPost(newIndex)
-    setSelectedMedia(mediaResults[newIndex])
+    setSelectedUserMedia(userMediaResults[newIndex])
     setCurrentIndex(newIndex)
     setFitMode(false)
   }
 
   const goToNext = () => {
-    const newIndex = (currentIndex + 1) % mediaResults.length
+    const newIndex = (currentIndex + 1) % userMediaResults.length
     setMainPost(newIndex)
-    setSelectedMedia(mediaResults[newIndex])
+    setSelectedUserMedia(userMediaResults[newIndex])
     setCurrentIndex(newIndex)
     setFitMode(false)
   }
@@ -117,7 +117,7 @@ const MediaGrid: React.FC = () => {
   return (
     <div className="container mx-auto sm:px-2 sm:pb-2">
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-1">
-        {mediaResults.map((item, index) => (
+        {userMediaResults.map((item, index) => (
           <div
             key={index}
             className="relative aspect-square overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 cursor-pointer group"
