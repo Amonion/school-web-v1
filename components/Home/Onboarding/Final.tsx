@@ -5,30 +5,31 @@ import { useRouter } from 'next/navigation'
 import { MessageStore } from '@/src/zustand/notification/Message'
 import { AuthStore } from '@/src/zustand/user/AuthStore'
 import { UserStore } from '@/src/zustand/user/User'
-import { AppStore } from '@/src/zustand/app/AppStore'
 import { FetchUser } from '@/src/zustand/user/BioUser'
 import apiRequest from '@/lib/axios'
 import CountryStore, { Country } from '@/src/zustand/place/CountryOrigin'
 import StateStore from '@/src/zustand/place/StateOrigin'
 import { PostStore } from '@/src/zustand/post/Post'
 import NewsStore from '@/src/zustand/news/News'
+import CompanyStore from '@/src/zustand/app/Company'
+import Spinner from '@/components/LoadingAnimations/Spinner'
 
 const Final = () => {
   const { setMessage } = MessageStore()
   const { userForm } = UserStore()
-  const { getApp, appForm, loading } = AppStore()
+  const { companyForm, loading } = CompanyStore()
   const { countries, getCountries } = CountryStore()
   const { states, getStates } = StateStore()
   const { user } = AuthStore()
   const [country, setCountry] = useState('')
   const [state, setState] = useState('')
+  const [status, setStatus] = useState('Creating your account')
   const [isCountryList, setCountryList] = useState(false)
   const [isStateList, setStateList] = useState(false)
   const [inProcess, setInProcess] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
-    getApp(`/company`, setMessage)
     if (countries.length === 0) {
       getCountries(
         `/places/countries/?country=&page_size=350&field=country&sort=country`,
@@ -69,7 +70,7 @@ const Final = () => {
         AuthStore.getState().setUser(user)
         PostStore.setState({ postResults: posts })
         NewsStore.setState({ featuredNews: featuredNews })
-        setInProcess(false)
+        setStatus('Routing you to home page')
         if (AuthStore.getState().user) {
           router.replace('/home/')
         }
@@ -95,10 +96,10 @@ const Final = () => {
   }
 
   return (
-    <div className="welcome_slide z-30 w-full">
+    <div className="welcome_slide pb-[50px] z-30 w-full">
       <div className="title">READY </div>
       <div className="text-sm">TO</div>
-      <div className="sm:text-4xl text-2xl text-[var(--custom-color)] font-bold mb-8">
+      <div className="sm:text-4xl text-xl text-[var(--custom-color)] font-bold mb-4 sm:mb-8">
         SOCIALIZE?
       </div>
 
@@ -182,10 +183,10 @@ const Final = () => {
         </div>
       ) : (
         <div>
-          {appForm && appForm.finalInstruction && (
+          {companyForm && companyForm.finalInstruction && (
             <div
               dangerouslySetInnerHTML={{
-                __html: appForm.finalInstruction,
+                __html: companyForm.finalInstruction,
               }}
             ></div>
           )}
@@ -199,8 +200,8 @@ const Final = () => {
           </div>
         ) : (
           <div className="custom_btn neutral">
-            <i className="bi bi-opencollective loading "></i>
-            Processing...
+            <Spinner size={30} />
+            {status}
           </div>
         )}
       </div>

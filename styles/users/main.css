@@ -386,7 +386,7 @@ ol li{
 }
 
 .story {
-  @apply w-[100px] h-[150px] flex-shrink-0 rounded-[10px] overflow-hidden relative cursor-pointer last:mr-3
+  @apply w-[100px] h-[150px] sm:w-[120px] sm:h-[170px] flex-shrink-0 rounded-[10px] overflow-hidden relative cursor-pointer last:mr-3
 
 }
 

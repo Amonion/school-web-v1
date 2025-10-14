@@ -14,11 +14,12 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   const pathname = usePathname()
-  const { getPolicies } = PolicyStore()
+  const { getPolicies, getTerms } = PolicyStore()
   const { setMessage } = MessageStore()
 
   useEffect(() => {
-    getPolicies(`/company/policy/?page_size=100`, setMessage)
+    getPolicies(`/company/policy/?page_size=100&category=Policy`, setMessage)
+    getTerms(`/company/policy/?page_size=100&category=Terms`, setMessage)
   }, [])
 
   return (

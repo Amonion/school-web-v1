@@ -23,24 +23,22 @@ export default function NotFound() {
             alt="Schooling Social Logo"
           />
         </div>
-        <div className="max-w-[1000px] flex flex-col items-center w-full my-auto pb-5">
+        <div className="max-w-[1000px] px-4 flex flex-col items-center w-full my-auto pb-5">
           <div className="text-center text-2xl mb-5 text-[var(--text-secondary)]">
             Page Not Found
           </div>
-          <div className="w-[400px] h-[300px]">
-            <Image
-              src={
-                theme === 'dark'
-                  ? `/images/NotFoundDark.png`
-                  : '/images/NotFoundLight.png'
-              }
-              alt="Media"
-              width={0}
-              height={0}
-              sizes="100vw"
-              className="w-full h-full object-contain"
-            />
-          </div>
+          <Image
+            src={
+              theme === 'dark'
+                ? `/images/NotFoundDark.png`
+                : '/images/NotFoundLight.png'
+            }
+            alt="Media"
+            width={0}
+            height={0}
+            sizes="100vw"
+            className="max-w-[400px] w-full h-auto object-contain"
+          />
           <div className="flex items-center">
             <div
               onClick={() => router.back()}

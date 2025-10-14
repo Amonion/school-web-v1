@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import { Upload, Smile, Plus } from 'lucide-react'
+import { Upload, Smile, Plus, Palette } from 'lucide-react'
 import Picker from '@emoji-mart/react'
 import data from '@emoji-mart/data'
-import { getFileType } from '@/lib/helpers'
+import { countText, getFileType } from '@/lib/helpers'
 import axios from 'axios'
 import Image from 'next/image'
 import { NavStore } from '@/src/zustand/notification/Navigation'
@@ -26,10 +26,22 @@ interface PostBoxProps {
   postType?: string
 }
 
+const colors = [
+  '#da3986',
+  '#1877F2',
+  '#00BFA6',
+  '#FF6F00',
+  '#F44336',
+  '#FFFFFF',
+]
+
+const maxText = 500
+
 const PostBox: React.FC<PostBoxProps> = () => {
   const [polls, addPoll] = useState<Poll[]>([])
   const [files, setFiles] = useState<file[]>([])
   const [text, setText] = useState('')
+  const [color, setColor] = useState('')
   const [pollText, setPollText] = useState('')
   // const [postType, setPostType] = useState(type);
   const [onPoll, setOnPoll] = useState(false)
@@ -39,6 +51,8 @@ const PostBox: React.FC<PostBoxProps> = () => {
   const [pollPercent, setPollPercent] = useState(0)
   const emojiPickerRef = useRef<HTMLDivElement>(null)
   const { togglePostBox } = NavStore()
+  const [isColor, setIsColor] = useState(false)
+  const [isPoster, setIsPoster] = useState(false)
   const { theme } = useTheme()
   const { setMessage, baseURL } = MessageStore()
   const { setAlert } = AlartStore()
@@ -56,6 +70,12 @@ const PostBox: React.FC<PostBoxProps> = () => {
     const audio = new Audio('/sounds/pop.wav')
     audio.play().catch((error) => console.error('Error playing sound:', error))
   }
+
+  useEffect(() => {
+    if (color) {
+      setIsPoster(true)
+    }
+  }, [color])
 
   useEffect(() => {
     if (!socket) return
@@ -110,6 +130,7 @@ const PostBox: React.FC<PostBoxProps> = () => {
         createdAt: new Date().toISOString(),
         media: files,
         country: user?.country,
+        backgroundColor: color,
       }
 
       if (
@@ -125,6 +146,15 @@ const PostBox: React.FC<PostBoxProps> = () => {
     } else {
       setMessage(`Sorry, something went wrong, refresh and try again.`, false)
     }
+  }
+
+  const selectColor = (color: string) => {
+    if (color === '#FFFFFF') {
+      setColor('')
+    } else {
+      setColor(color)
+    }
+    setIsColor(false)
   }
 
   const clearInput = () => {
@@ -376,15 +406,50 @@ const PostBox: React.FC<PostBoxProps> = () => {
     <>
       <div
         onClick={closeBox}
-        className="w-full fixed h-[100vh] bg-black bg-opacity-30 flex items-end justify-center overflow-hidden z-[40]"
+        className="w-full flex-col fixed h-[100vh] bg-black bg-opacity-30 flex justify-end items-center overflow-hidden z-[40]"
       >
+        {isPoster && (
+          <div
+            style={{ backgroundColor: color }}
+            className="relative w-full flex-1 text-white  flex justify-center items-center max-h-[200px] max-w-[600px]"
+          >
+            <div
+              className="text-lg sm:text-xl text-center"
+              dangerouslySetInnerHTML={{
+                __html: text,
+              }}
+            ></div>
+            <span className="absolute bottom-1 font-medium right-1">
+              {countText(text)}/{maxText}
+            </span>
+          </div>
+        )}
         <div
           onClick={(e) => {
             e.stopPropagation()
           }}
-          className="bg-[var(--primary)] p-3 shadow-lg w-full max-w-[600px]"
+          className="bg-[var(--primary)] relative p-3 shadow-lg w-full max-w-[600px]"
         >
-          <PostEditor value={text} onChange={(content) => setText(content)} />
+          {isColor && (
+            <div className="flex absolute -top-7 left-0">
+              {colors.map((color, index) => (
+                <div
+                  onClick={() => selectColor(color)}
+                  className="w-5 h-5 cursor-pointer border border-[var(--border)] rounded-full mr-3"
+                  style={{ backgroundColor: color }}
+                  key={index}
+                ></div>
+              ))}
+            </div>
+          )}
+          <PostEditor
+            value={text}
+            onChange={(content) => {
+              if (countText(content) <= maxText) {
+                setText(content)
+              }
+            }}
+          />
 
           {onPoll && (
             <>
@@ -545,19 +610,26 @@ const PostBox: React.FC<PostBoxProps> = () => {
                   onClick={() => setOnPoll((e) => !e)}
                   className="bi bi-border-width post_box_icon active"
                 ></i>
+                <Palette
+                  onClick={() => setIsColor(!isColor)}
+                  size={22}
+                  className="cursor-pointer mr-3"
+                />
 
-                <label className="relative mr-auto">
-                  <Upload className="post_box_icon active" />
-                  <input
-                    type="file"
-                    multiple
-                    accept="image/*,video/*"
-                    className="hidden"
-                    onChange={handleFileUpload}
-                  />
-                </label>
+                {!isPoster && (
+                  <label className="relative mr-auto">
+                    <Upload className="post_box_icon active" />
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/*,video/*"
+                      className="hidden"
+                      onChange={handleFileUpload}
+                    />
+                  </label>
+                )}
 
-                <button onClick={postMessage} className="custom_btn ml:auto">
+                <button onClick={postMessage} className="custom_btn ml-auto">
                   Post
                 </button>
               </div>

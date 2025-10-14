@@ -59,6 +59,13 @@ const MobileMediaView: React.FC<MobileMediaViewProps> = ({
     setStarted(true)
   }, [])
 
+  useEffect(() => {
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [])
+
   const handleTimeUpdate = () => {
     const video = videoRef.current
     if (!video) return
@@ -68,7 +75,7 @@ const MobileMediaView: React.FC<MobileMediaViewProps> = ({
 
   return (
     <>
-      <div className="flex z-40  bg-black fixed left-0 top-0 w-full h-[100vh]">
+      <div className="flex z-40 bg-black fixed left-0 top-0 w-full h-[100vh]">
         <motion.div
           onTouchStart={onTouchStart}
           onTouchEnd={onTouchEnd}

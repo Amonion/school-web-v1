@@ -19,7 +19,7 @@ const HomeNews: React.FC = () => {
   const pathname = usePathname()
 
   useEffect(() => {
-    if (featuredNews.length === 0 && user && user.country && user.state) {
+    if (featuredNews.length === 0 && user) {
       const params = `?country=${user.country}&state=${user.state}`
       getFeaturedNews(`${url}${params}`, setMessage)
     }
@@ -28,7 +28,7 @@ const HomeNews: React.FC = () => {
   // if (featuredNews.length === 0) return null
 
   return (
-    <div className="w-full overflow-hidden shadow-xl">
+    <div className="w-full overflow-hidden">
       {featuredNews.length > 0 && (
         <Swiper
           modules={[EffectFade, Autoplay]}
@@ -59,10 +59,10 @@ const HomeNews: React.FC = () => {
                 <div className="absolute right-1 top-2 rounded-[25px] bg-black/50 text-white py-1 px-2 text-[12px] items-center flex">
                   {formatRelativeDate(String(item?.publishedAt))}
                 </div>
-                <div className="absolute bottom-0 p-5 pr-7">
+                <div className="absolute bottom-0 p-2 sm:p-5 pr-7">
                   <Link
                     href={`/news/${item._id}`}
-                    className="text-lg text-white sm:text-xl font-semibold mb-1"
+                    className="text-lg text-white sm:text-xl sm:font-semibold mb-1"
                   >
                     {item.title}
                   </Link>

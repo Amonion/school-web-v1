@@ -365,7 +365,7 @@ const EachComment: React.FC<EachCommentProps> = ({
               <div className="flex-1 mb-1 text-[16px]">
                 <div
                   onClick={() => toggleIsActive(comment._id, comment.level)}
-                  className={`p-1 rounded-[5px] cursor-pointer mb-1  text-sm sm:text-base ${
+                  className={`p-1 mb-1 cursor-pointer text-sm sm:text-base ${
                     comment.isActive ? '' : 'line-clamp-3 overflow-ellipsis'
                   }`}
                 >

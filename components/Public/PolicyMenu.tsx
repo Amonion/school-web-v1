@@ -33,8 +33,8 @@ const PolicyMenu: React.FC = () => {
           href={`#${item.name}`}
           key={index}
           className={`${
-            item.isChecked ? 'font-bold text-white' : ''
-          } flex items-start text-[20px] cursor-pointer mb-2`}
+            item.isChecked ? 'font-bold' : ''
+          } flex items-start text-[20px] text-white cursor-pointer mb-2`}
         >
           <div className="w-5 h-5 mt-[6px] text-base flex items-center justify-center rounded-full mr-3 border border-[var(--custom-border)]">
             {index + 1}

@@ -5,14 +5,14 @@ import { usePathname } from 'next/navigation'
 import { useEffect } from 'react'
 
 const TermsMenu: React.FC = () => {
-  const { policies, selectTerm } = PolicyStore()
+  const { terms, selectTerm } = PolicyStore()
   const pathName = usePathname()
 
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.replace('#', '')
       if (hash) {
-        const index = policies.findIndex((el) => el.name.includes(hash))
+        const index = terms.findIndex((el) => el.name.includes(hash))
         if (index !== -1) {
           selectTerm(index)
         }
@@ -25,16 +25,16 @@ const TermsMenu: React.FC = () => {
     return () => {
       window.removeEventListener('hashchange', handleHashChange)
     }
-  }, [pathName, selectTerm, policies.length])
+  }, [pathName, terms.length])
   return (
     <div className="w-1/2 sm:block hidden bg-[var(--custom-color)] p-5">
-      {policies.map((item, index) => (
+      {terms.map((item, index) => (
         <a
           href={`#${item.name}`}
           key={index}
           className={`${
-            item.isChecked ? 'font-bold text-white' : ''
-          } flex items-start text-[20px] cursor-pointer mb-2`}
+            item.isChecked ? 'font-bold' : ''
+          } flex items-start text-[20px] text-white cursor-pointer mb-2`}
         >
           <div className="w-5 h-5 mt-[6px] text-base flex items-center justify-center rounded-full mr-3 border border-[var(--custom-border)]">
             {index + 1}
@@ -43,7 +43,7 @@ const TermsMenu: React.FC = () => {
         </a>
       ))}
 
-      {policies.length === 0 && (
+      {terms.length === 0 && (
         <div className="relative flex justify-center">
           <div className="not_found_text">No Terms Found</div>
           <Image

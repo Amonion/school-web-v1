@@ -18,13 +18,13 @@ const PostStat: React.FC<PostProps> = ({ post }) => {
   const [isLiked, setIsLiked] = useState(false)
   const [isSaved, setIsSaved] = useState(false)
   const [copied, setCopied] = useState(false)
-  const postLink = `https://schoolingsocial.com/home/post/${post._id}?action=shared`
+  const postLink = `https://schoolingsocial.com/home/posts/${post._id}?action=shared`
 
   const handleLike = async () => {
     setIsLiked(true)
     PostStore.setState((state) => {
       const updatedPosts = state.postResults.map((p) =>
-        p._id === post._id
+        p.username === post.username
           ? {
               ...p,
               liked: !p.liked,
@@ -37,7 +37,7 @@ const PostStat: React.FC<PostProps> = ({ post }) => {
     })
 
     const updatedPost = PostStore.getState().postResults.find(
-      (p) => p._id === post._id
+      (p) => p.username === post.username
     )
 
     updatePost(
@@ -51,7 +51,7 @@ const PostStat: React.FC<PostProps> = ({ post }) => {
     setIsSaved(true)
     PostStore.setState((state) => {
       const updatedPosts = state.postResults.map((p) =>
-        p._id === post._id
+        p.username === post.username
           ? {
               ...p,
               bookmarked: !p.bookmarked,
@@ -64,7 +64,7 @@ const PostStat: React.FC<PostProps> = ({ post }) => {
     })
 
     const updatedPost = PostStore.getState().postResults.find(
-      (p) => p._id === post._id
+      (p) => p.username === post.username
     )
 
     updatePost(

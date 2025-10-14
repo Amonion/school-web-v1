@@ -9,6 +9,7 @@ import DownloadApp from './DownloadApp'
 import { getDeviceInfo } from '@/lib/helpers'
 import { validateSignUp, ValidationResult } from '@/lib/validateInputs'
 import { PostStore } from '@/src/zustand/post/Post'
+import Spinner from '../LoadingAnimations/Spinner'
 const LoginComponent: React.FC = () => {
   const router = useRouter()
   const [route, setRoute] = useState<string>('')
@@ -97,7 +98,6 @@ const LoginComponent: React.FC = () => {
       } else {
         setGeneralError('Unexpected error occurred')
       }
-    } finally {
       setLoading(false)
     }
   }
@@ -158,7 +158,7 @@ const LoginComponent: React.FC = () => {
           )}
         </div>
 
-        <div className="mb-2 mt-10">
+        <div className="mb-10 text-center mt-2">
           <div className="f-response-msg auth">
             Forgotten password?
             <Link
@@ -179,7 +179,7 @@ const LoginComponent: React.FC = () => {
             className="custom-btn "
             style={{ width: '100%' }}
           >
-            <i className="bi bi-opencollective spin text-lg mr-3 animate-spin"></i>
+            <Spinner size={30} />
 
             <div>Processing...</div>
           </button>
@@ -193,7 +193,7 @@ const LoginComponent: React.FC = () => {
           </button>
         )}
 
-        <div className="mt-3">
+        <div className="mt-3 text-center">
           Don&apos;t have an account?
           <Link
             href="/sign-up"

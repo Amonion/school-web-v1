@@ -45,15 +45,25 @@ const MainPost = () => {
   return (
     <>
       <div className="w-full relative bg-[var(--white)] overflow-hidden pb-2 mb-1">
-        <div className="post_card cursor-pointer">
+        <div className="bg-[var(--primary)] py-2">
           <PostHeader post={postForm} />
-          <div className="p-1 rounded-[5px] cursor-pointer text-[16px] text-[var(--text-title-color)]">
+          {postForm.backgroundColor ? (
             <div
+              style={{ backgroundColor: postForm.backgroundColor }}
+              className="w-full text-white text-lg sm:text-xl text-center flex justify-center items-center min-h-[300px]"
               dangerouslySetInnerHTML={{
                 __html: postForm.content,
               }}
             ></div>
-          </div>
+          ) : (
+            <div className="p-1 text-[16px] text-[var(--text-title-color)]">
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: postForm.content,
+                }}
+              ></div>
+            </div>
+          )}
 
           <MediaDisplay sources={postForm.media} />
           <Polls postId={postForm._id} />

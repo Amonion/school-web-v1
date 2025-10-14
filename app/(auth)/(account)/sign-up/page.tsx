@@ -8,9 +8,12 @@ import axios from 'axios'
 import { getDeviceInfo } from '@/lib/helpers'
 import DownloadApp from '@/components/Public/DownloadApp'
 import { validateInputs, ValidationResult } from '@/lib/validateInputs'
+import CompanyStore from '@/src/zustand/app/Company'
+import Spinner from '@/components/LoadingAnimations/Spinner'
 
 const SignIn: React.FC = () => {
   const router = useRouter()
+  const { companyForm } = CompanyStore()
   const [loading, setLoading] = useState<boolean>(false)
   const [error, setError] = useState<ValidationResult | null>(null)
   const [generalError, setGeneralError] = useState<string | null>(null)
@@ -78,7 +81,6 @@ const SignIn: React.FC = () => {
       } else {
         setGeneralError('Unexpected error occurred')
       }
-    } finally {
       setLoading(false)
     }
   }
@@ -96,7 +98,7 @@ const SignIn: React.FC = () => {
       (position) => {
         const { latitude, longitude } = position.coords
         setLocation({ lat: latitude, lng: longitude })
-        setLocating(false)
+        setLocating(true)
       },
       (error) => {
         console.error('Geolocation error:', error)
@@ -233,21 +235,33 @@ const SignIn: React.FC = () => {
             className=" custom-btn"
             style={{ width: '100%' }}
           >
-            <i className="bi bi-opencollective spin text-lg mr-3 animate-spin"></i>
+            <Spinner size={30} />
 
             <div>Processing...</div>
           </button>
         ) : (
-          <button
-            type="submit"
-            className="custom-btn "
-            style={{ width: '100%' }}
-          >
-            Submit
-          </button>
+          <>
+            {companyForm.allowSignUp ? (
+              <button
+                type="submit"
+                className="custom-btn "
+                style={{ width: '100%' }}
+              >
+                Submit
+              </button>
+            ) : (
+              <button
+                type="submit"
+                className="text-center rounded-[5px] py-[7px] px-4 flex justify-center text-white bg-slate-500 cursor-not-allowed"
+                style={{ width: '100%' }}
+              >
+                {`Account cannot be created now`}
+              </button>
+            )}
+          </>
         )}
 
-        <div className="mt-3">
+        <div className="mt-3 text-center">
           Already have an account?
           <Link
             href="/sign-in"

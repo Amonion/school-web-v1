@@ -30,13 +30,23 @@ const PostCard: React.FC<
         className="bg-[var(--primary)] py-2 mb-1 cursor-pointer"
       >
         <PostHeader post={post} />
-        <div className="px-2 cursor-pointer mb-1 text-[16px] text-[var(--text-title-color)]">
-          <TruncatedContent content={post.content} limit={200} post={post} />
-        </div>
-        {pathname === '/home' ? (
+        {post.backgroundColor ? (
+          <div
+            style={{ backgroundColor: post.backgroundColor }}
+            className="w-full text-white text-lg px-2 sm:text-xl text-center flex justify-center items-center min-h-[300px]"
+            dangerouslySetInnerHTML={{
+              __html: post.content,
+            }}
+          ></div>
+        ) : (
+          <div className="px-2 cursor-pointer mb-1 text-[16px] text-[var(--text-title-color)]">
+            <TruncatedContent content={post.content} limit={200} post={post} />
+          </div>
+        )}
+        {post.media.length > 0 && pathname === '/home' ? (
           <HomePostMedia sources={post.media} />
         ) : (
-          <UserPostMedia sources={post.media} />
+          post.media.length > 0 && <UserPostMedia sources={post.media} />
         )}
         <Polls postId={post._id} />
         <PostStat post={post} />

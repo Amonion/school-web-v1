@@ -42,6 +42,7 @@ export interface Post {
   username: string
   userId: string
   postId: string
+  backgroundColor: string
   displayName: string
   content: string
   media: Media[]
@@ -77,6 +78,7 @@ export const PostEmpty = {
   username: '',
   userId: '',
   postId: '',
+  backgroundColor: '',
   displayName: '',
   content: '',
   media: [],

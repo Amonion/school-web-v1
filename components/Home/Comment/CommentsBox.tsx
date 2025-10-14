@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react'
+import Image from 'next/image'
 import EachComment from './EachComment'
 import { AuthStore } from '@/src/zustand/user/AuthStore'
 import CommentStore from '@/src/zustand/post/Comment'
@@ -137,6 +138,25 @@ export default function CommentBox() {
       {comments.map((item, index) => (
         <EachComment key={index} comment={item} />
       ))}
+      {comments.length === 0 && (
+        <div className="relative flex-1 py-3 flex justify-center">
+          <Image
+            src="/images/not-found.png"
+            loading="lazy"
+            sizes="100vw"
+            className="w-full h-full object-contain"
+            width={0}
+            height={0}
+            style={{ height: 'auto', width: 200 }}
+            alt="Default Avatar"
+          />
+          <div className="bg-secondary w-full dark:bg-dark-secondary py-3 absoluteCenter">
+            <div className="text-xl uppercase text-center py-1 px-3 bg-[var(--secondary)]">
+              Be the first to comment
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

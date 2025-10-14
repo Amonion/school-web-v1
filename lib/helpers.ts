@@ -222,6 +222,11 @@ export const getAge = (dob: string | Date): number => {
   return age
 }
 
+export const countText = (content: string): number => {
+  const plainText = content.replace(/<[^>]+>/g, '')
+  return plainText.trim().length
+}
+
 export const isStringLengthValid = (
   content: string,
   length: number
@@ -232,6 +237,7 @@ export const isStringLengthValid = (
     return true
   }
 }
+
 export const getDeviceInfo = () => {
   const parser = new UAParser()
   const result = parser.getResult()

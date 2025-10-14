@@ -105,7 +105,7 @@ const PostOptions: React.FC<PostProps> = ({ post }) => {
             <i className="bi bi-pin mr-3 text-[18px]"></i>
             Pin Post
           </div>
-          {user?._id !== post.userId && (
+          {user?.username !== post.username && (
             <>
               <div onClick={() => repost(post._id)} className="post_card_item">
                 <i className="bi bi-repeat mr-3 text-[18px]"></i>
@@ -128,7 +128,7 @@ const PostOptions: React.FC<PostProps> = ({ post }) => {
             </>
           )}
 
-          {user?._id === post.userId && (
+          {user?.username === post.username && (
             <div
               onClick={() => deletePost(post._id)}
               className="post_card_item"

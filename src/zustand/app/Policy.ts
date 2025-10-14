@@ -1,5 +1,4 @@
 import { create } from 'zustand'
-import _debounce from 'lodash/debounce'
 import apiRequest from '@/lib/axios'
 
 interface FetchResponse {
@@ -22,14 +21,14 @@ export const PolicyEmpty = {
 interface PolicyState {
   policyForm: Policy
   policies: Policy[]
+  terms: Policy[]
   count: number
   isAllChecked: boolean
   loading: boolean
   page: number
   page_size: number
-  searchedPolicies: Policy[]
   selectedPolicies: Policy[]
-  selectedTerm: Policy
+  selectedTerms: Policy
   deletePolicy: (
     url: string,
     setMessage: (message: string, isError: boolean) => void
@@ -39,6 +38,10 @@ interface PolicyState {
     setMessage: (message: string, isError: boolean) => void
   ) => Promise<void>
   getPolicies: (
+    url: string,
+    setMessage: (message: string, isError: boolean) => void
+  ) => Promise<void>
+  getTerms: (
     url: string,
     setMessage: (message: string, isError: boolean) => void
   ) => Promise<void>
@@ -52,8 +55,8 @@ interface PolicyState {
   selectPolicy: (num: number) => void
   selectTerm: (num: number) => void
   setForm: (key: keyof Policy, value: Policy[keyof Policy]) => void
-  searchPolicy: (url: string) => void
   setProcessedResults: (data: FetchResponse) => void
+  processTerms: (data: FetchResponse) => void
   toggleChecked: (index: number) => void
   toggleActive: (index: number) => void
   toggleAllSelected: () => void
@@ -67,14 +70,14 @@ interface PolicyState {
 export const PolicyStore = create<PolicyState>((set) => ({
   policyForm: PolicyEmpty,
   policies: [],
+  terms: [],
   count: 0,
   isAllChecked: false,
   loading: false,
   page: 1,
   page_size: 20,
   selectedPolicies: [],
-  selectedTerm: PolicyEmpty,
-  searchedPolicies: [],
+  selectedTerms: PolicyEmpty,
 
   deletePolicy: async (
     url: string,
@@ -126,6 +129,21 @@ export const PolicyStore = create<PolicyState>((set) => ({
     }
   },
 
+  getTerms: async (
+    url: string,
+    setMessage: (message: string, isError: boolean) => void
+  ) => {
+    try {
+      const response = await apiRequest<FetchResponse>(url, { setMessage })
+      const data = response?.data
+      if (data) {
+        PolicyStore.getState().processTerms(data)
+      }
+    } catch (error: unknown) {
+      console.log(error)
+    }
+  },
+
   massDeletePolices: async (
     url: string,
     selectedPolicies: Policy[],
@@ -168,7 +186,7 @@ export const PolicyStore = create<PolicyState>((set) => ({
         })
       )
       return {
-        selectedPolicy: state.policies[num],
+        policyForm: state.policies[num],
         policies: updatedResults,
       }
     })
@@ -176,16 +194,14 @@ export const PolicyStore = create<PolicyState>((set) => ({
 
   selectTerm: (num: number) => {
     set((state) => {
-      const updatedResults = state.policies.map(
-        (item: Policy, index: number) => ({
-          ...item,
-          isChecked: num === index ? true : false,
-          isActive: false,
-        })
-      )
+      const updatedResults = state.terms.map((item: Policy, index: number) => ({
+        ...item,
+        isChecked: num === index ? true : false,
+        isActive: false,
+      }))
       return {
-        selectedTerm: state.policies[num],
-        policies: updatedResults,
+        selectedTerms: state.terms[num],
+        terms: updatedResults,
       }
     })
   },
@@ -197,23 +213,6 @@ export const PolicyStore = create<PolicyState>((set) => ({
         [key]: value,
       },
     })),
-
-  searchPolicy: _debounce(async (url: string) => {
-    try {
-      const response = await apiRequest<FetchResponse>(url)
-      if (response) {
-        const { results } = response?.data
-        const updatedResults = results.map((item: Policy) => ({
-          ...item,
-          isChecked: false,
-          isActive: false,
-        }))
-        set({ searchedPolicies: updatedResults })
-      }
-    } catch (error: unknown) {
-      console.log(error)
-    }
-  }, 1000),
 
   setProcessedResults: ({ count, page_size, results }: FetchResponse) => {
     const updatedResults = results.map((item: Policy) => ({
@@ -227,8 +226,26 @@ export const PolicyStore = create<PolicyState>((set) => ({
       count,
       page_size,
       policies: updatedResults,
+      policyForm: updatedResults[0],
     })
   },
+
+  processTerms: ({ count, page_size, results }: FetchResponse) => {
+    const updatedResults = results.map((item: Policy) => ({
+      ...item,
+      isChecked: false,
+      isActive: false,
+    }))
+
+    set({
+      loading: false,
+      count,
+      page_size,
+      terms: updatedResults,
+      selectedTerms: updatedResults[0],
+    })
+  },
+
   toggleActive: (index: number) => {
     set((state) => {
       const isCurrentlyActive = state.policies[index]?.isActive
@@ -241,6 +258,7 @@ export const PolicyStore = create<PolicyState>((set) => ({
       }
     })
   },
+
   toggleAllSelected: () => {
     set((state) => {
       const isAllChecked =
@@ -259,6 +277,7 @@ export const PolicyStore = create<PolicyState>((set) => ({
       }
     })
   },
+
   toggleChecked: (index: number) => {
     set((state) => {
       const updatedResults = state.policies.map((tertiary, idx) =>
@@ -281,6 +300,7 @@ export const PolicyStore = create<PolicyState>((set) => ({
       }
     })
   },
+
   updatePolicy: async (
     url: string,
     updatedItem: FormData | Record<string, unknown>,
