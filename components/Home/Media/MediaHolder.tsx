@@ -2,8 +2,8 @@
 import React from 'react'
 import { Media } from '@/src/zustand/post/UserPost'
 import { Post } from '@/src/zustand/post/Post'
-import MobileMediaViewer from '@/components/Home/Media/MobileMediaViewer'
 import DesktopMediaViewer from './DesktopMediaViewer'
+import MobileMediaView from '../Comment/MobileMediaView'
 
 interface MediaHolderProps {
   isMobile: boolean
@@ -29,7 +29,7 @@ const MediaHolder: React.FC<MediaHolderProps> = ({
   return (
     <>
       {selectedMedia && isMobile && (
-        <MobileMediaViewer
+        <MobileMediaView
           media={selectedMedia}
           postForm={postForm}
           onClose={closeFullScreen}
