@@ -4,8 +4,8 @@ import PostStore from '@/src/zustand/post/UserPost'
 import CommentStore from '@/src/zustand/post/Comment'
 import { Post } from '@/src/zustand/post/Post'
 import UserPostStore from '@/src/zustand/post/UserPost'
-import MobileMediaViewer from './MobileMediaViewer'
 import DesktopMediaViewer from './DesktopMediaViewer'
+import MobileMediaView from '../Comment/MobileMediaView'
 
 const UserMediaHolder: React.FC = () => {
   const { currentPage, page_size, showComments, setShowActions, getComments } =
@@ -122,7 +122,7 @@ const UserMediaHolder: React.FC = () => {
   return (
     <>
       {selectedUserMedia && isMobile && (
-        <MobileMediaViewer
+        <MobileMediaView
           media={selectedUserMedia}
           postForm={userPostForm}
           onClose={closeFullScreen}
