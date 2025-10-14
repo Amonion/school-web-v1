@@ -60,6 +60,11 @@ interface PolicyState {
   toggleChecked: (index: number) => void
   toggleActive: (index: number) => void
   toggleAllSelected: () => void
+  postPolicy: (
+    url: string,
+    updatedItem: FormData | Record<string, unknown>,
+    setMessage: (message: string, isError: boolean) => void
+  ) => Promise<void>
   updatePolicy: (
     url: string,
     updatedItem: FormData | Record<string, unknown>,
@@ -301,6 +306,22 @@ export const PolicyStore = create<PolicyState>((set) => ({
     })
   },
 
+  postPolicy: async (
+    url: string,
+    updatedItem: FormData | Record<string, unknown>,
+    setMessage: (message: string, isError: boolean) => void
+  ) => {
+    set({ loading: true })
+    const response = await apiRequest<FetchResponse>(url, {
+      method: 'PATCH',
+      body: updatedItem,
+      setMessage,
+    })
+    const data = response?.data
+    if (data) {
+      set({ policyForm: data.data })
+    }
+  },
   updatePolicy: async (
     url: string,
     updatedItem: FormData | Record<string, unknown>,

@@ -3,10 +3,9 @@ import Link from 'next/link'
 import { appendForm } from '@/lib/helpers'
 import { validateInputs } from '@/lib/validation'
 import { useState, useEffect } from 'react'
-import { MessageStore } from '@/src/zustand/msgStore'
-import { Policy } from '@/src/interface/team/interface'
 import QuillEditor from '@/components/Team/Editor/QuillEditor'
-import PolicyStore from '@/src/zustand/team/Policy'
+import { MessageStore } from '@/src/zustand/notification/Message'
+import { Policy, PolicyStore } from '@/src/zustand/app/Policy'
 
 const CreatePolicy: React.FC = () => {
   const url = '/company/policy/'
@@ -14,10 +13,10 @@ const CreatePolicy: React.FC = () => {
   const {
     policyForm,
     setForm,
-    getAPolicy,
+    getPolicy,
     loading,
-    postItem,
-    results,
+    postPolicy,
+    policies,
     updatePolicy,
   } = PolicyStore()
   const [isEditing, setIsEditing] = useState(false)
@@ -43,11 +42,11 @@ const CreatePolicy: React.FC = () => {
         setName(String(name))
         setId(itemId)
         setIsEditing(true)
-        const existingItem = results.find((item) => item._id === itemId)
+        const existingItem = policies.find((item) => item._id === itemId)
         if (existingItem) {
           populateFields(existingItem)
         } else {
-          await getAPolicy(`${url}`, setMessage)
+          await getPolicy(`${url}`, setMessage)
         }
       } else {
         setId(null)
@@ -57,7 +56,7 @@ const CreatePolicy: React.FC = () => {
     }
 
     initialize()
-  }, [itemId, results])
+  }, [itemId, policies])
 
   const populateFields = (item: Policy) => {
     setForm('title', item.title)
@@ -124,7 +123,7 @@ const CreatePolicy: React.FC = () => {
     if (isEditing) {
       updatePolicy(`${url}${id}${queryParams}`, data, setMessage)
     } else {
-      postItem(`${url}${queryParams}`, data, setMessage)
+      postPolicy(`${url}${queryParams}`, data, setMessage)
     }
   }
 
