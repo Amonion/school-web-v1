@@ -7,6 +7,7 @@ import {
 } from '@/src/zustand/post/Moment'
 import { AuthStore } from '@/src/zustand/user/AuthStore'
 import { MessageStore } from '@/src/zustand/notification/Message'
+import Link from 'next/link'
 
 export default function MomentActions() {
   const { user } = AuthStore()
@@ -17,9 +18,7 @@ export default function MomentActions() {
     activeMomentMediaIndex,
     showOptions,
     setIsPlaying,
-    setIsEditing,
     setShowOptions,
-    setShowMoment,
     deleteMoment,
   } = MomentStore()
 
@@ -31,12 +30,6 @@ export default function MomentActions() {
       activeMomentMediaIndex: 0,
     })
     setShowOptions(false)
-  }
-
-  const editMoment = (id: string) => {
-    setShowMoment(true)
-    onClose()
-    setIsEditing(true, id, activeMomentMediaIndex)
   }
 
   const toggleOptions = () => {
@@ -61,13 +54,13 @@ export default function MomentActions() {
           <i className="bi bi-three-dots-vertical "></i>{' '}
           {showOptions && (
             <div className="post_card_list font-normal text-[var(--text-primary)]">
-              <div
-                onClick={() => editMoment(activeMoment._id)}
+              <Link
+                href={`/home/moment/create-moment`}
                 className="post_card_item"
               >
                 <i className="bi bi-pen mr-3 text-[18px]"></i>
                 Edit
-              </div>
+              </Link>
               <div className="post_card_item">
                 <i className="bi bi-chat-dots mr-3 text-[18px]"></i>
                 Comments

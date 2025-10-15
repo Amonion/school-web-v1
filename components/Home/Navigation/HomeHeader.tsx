@@ -68,13 +68,13 @@ export default function HomeHeader() {
       </div>
       <div className="flex items-center justify-between">
         <Link href={`/home/following`} className="">
-          <i className={`bi bi-megaphone font-bold text-2xl`}></i>
+          <i className={`bi bi-megaphone font-bold text-xl`}></i>
         </Link>
         <Link href={`/news`} className="">
-          <i className={`bi bi-globe font-bold text-2xl`}></i>
+          <i className={`bi bi-globe font-bold text-xl`}></i>
         </Link>
         <Link href={`/home/following`} className="">
-          <i className={`bi bi-gift font-bold text-2xl`}></i>
+          <i className={`bi bi-gift font-bold text-xl`}></i>
         </Link>
 
         <Link href="/home/notifications" className="">
@@ -85,12 +85,12 @@ export default function HomeHeader() {
                 : unread + officialUnread + personalUnread}
             </span>
           )}
-          <i className={`bi bi-bell font-bold text-2xl`}></i>
+          <i className={`bi bi-bell font-bold text-xl`}></i>
         </Link>
 
         <i
           onClick={toggleAsideVNav}
-          className="bi bi-people text-2xl hidden sm:block md:hidden font-bold"
+          className="bi bi-people text-xl hidden sm:block md:hidden font-bold"
         ></i>
       </div>
     </div>

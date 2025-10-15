@@ -13,6 +13,9 @@ import PostBox from '@/components/Home/Posts/PostBox'
 import MainHeader from '@/components/Home/Navigation/MainHeader'
 import MobileNav from '@/components/Home/Navigation/MobileNav'
 import CommentBottomSheet from '@/components/Home/Comment/CommentBottomSheet'
+import { AuthStore } from '@/src/zustand/user/AuthStore'
+import { MomentStore } from '@/src/zustand/post/Moment'
+import { MessageStore } from '@/src/zustand/notification/Message'
 
 export default function RootLayout({
   children,
@@ -23,7 +26,10 @@ export default function RootLayout({
     NavStore()
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
   const lastScrollY = useRef(0)
+  const { getMoments } = MomentStore()
   const isOutOfView = useRef(false)
+  const { user } = AuthStore()
+  const { setMessage } = MessageStore()
   // const [isMd, setIsMd] = useState(false)
   const pathname = usePathname()
 
@@ -35,11 +41,9 @@ export default function RootLayout({
       const currentScrollY = container.scrollTop
 
       if (currentScrollY > lastScrollY.current && lastScrollY.current > 100) {
-        // Scrolling down
         setShowHeader(false)
         isOutOfView.current = true
       } else if (currentScrollY < lastScrollY.current && isOutOfView.current) {
-        // Scrolling up
         setShowHeader(true)
         isOutOfView.current = false
       }
@@ -54,13 +58,27 @@ export default function RootLayout({
   }, [])
 
   useEffect(() => {
+    if (user) {
+      getMoments(
+        `/posts/moments/?myId=${
+          user._id
+        }&page_size=20&page=${1}&ordering=-createdAt`,
+        setMessage
+      )
+    }
+  }, [])
+
+  useEffect(() => {
     if (pathname.includes('/home/friends')) {
       setHeaderHeight(0)
     }
     const media = window.matchMedia('(min-width: 767px)')
     // setIsMd(media.matches)
 
-    const handler = (e: MediaQueryListEvent) => console.log(e.matches)
+    const handler = (e: MediaQueryListEvent) => {
+      if (e) {
+      }
+    }
     media.addEventListener('change', handler)
 
     return () => media.removeEventListener('change', handler)

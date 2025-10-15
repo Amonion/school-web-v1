@@ -4,11 +4,11 @@ import React, { useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { Plus } from 'lucide-react'
 import { MomentStore } from '@/src/zustand/post/Moment'
-import { MessageStore } from '@/src/zustand/notification/Message'
 import { AuthStore } from '@/src/zustand/user/AuthStore'
 import MobileMomentView from './MobileMomentViewer'
 import CommentStore from '@/src/zustand/post/Comment'
 import DesktopMomentViewer from './DesktopMomentViewer'
+import Link from 'next/link'
 
 export default function Moments() {
   const {
@@ -17,25 +17,11 @@ export default function Moments() {
     activeMoment,
     openMomentModal,
     userHasMoment,
-    setShowMoment,
-    getMoments,
   } = MomentStore()
   const { isMobile } = CommentStore()
-  const { setMessage } = MessageStore()
   const { user } = AuthStore()
   const touchStartY = useRef(0)
   const touchEndY = useRef(0)
-
-  useEffect(() => {
-    if (user) {
-      getMoments(
-        `/posts/moments/?myId=${
-          user._id
-        }&page_size=20&page=${1}&ordering=-createdAt`,
-        setMessage
-      )
-    }
-  }, [])
 
   useEffect(() => {
     MomentStore.setState((prev) => {
@@ -70,8 +56,8 @@ export default function Moments() {
       <div className="w-full overflow-x-auto py-2 mb-2">
         <div className="flex gap-2 sm:gap-3 px-2 md:px-0">
           {!userHasMoment && (
-            <div
-              onClick={() => setShowMoment(true)}
+            <Link
+              href={`/home/moment/create-moment`}
               className="story bg-[var(--primary)] relative flex flex-col justify-between p-1 cursor-pointer"
             >
               <div className="absolute z-0 w-full h-2/3 top-0 left-0">
@@ -89,7 +75,7 @@ export default function Moments() {
               </div>
 
               <span className="text-[12px] mt-auto">Share moments</span>
-            </div>
+            </Link>
           )}
 
           {moments.map((moment, idx) => (

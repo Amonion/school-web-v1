@@ -5,7 +5,6 @@ import Post from '@/components/Home/Posts/Post'
 import { NavStore } from '@/src/zustand/notification/Navigation'
 import { useEffect } from 'react'
 import Moments from '@/components/Home/Moment/Moments'
-import CreateMoment from '@/components/Home/Moment/CreateMoment'
 const Home: React.FC = () => {
   const { togglePostBox, scrollUp } = NavStore()
 
@@ -47,7 +46,6 @@ const Home: React.FC = () => {
     <>
       <HomeMediaHolder />
       <HomeNews />
-      <CreateMoment />
       <Moments />
       <Post />
 
