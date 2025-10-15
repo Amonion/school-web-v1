@@ -66,7 +66,7 @@ export default function RootLayout({
         setMessage
       )
     }
-  }, [])
+  }, [user])
 
   useEffect(() => {
     if (pathname.includes('/home/friends')) {

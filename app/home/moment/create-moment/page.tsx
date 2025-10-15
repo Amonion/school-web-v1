@@ -34,8 +34,8 @@ interface MomentResponse {
 export default function CreateMoment() {
   const {
     editingIndex,
-    momentMedia,
     isEditing,
+    momentMedia,
     moments,
     setIsEditing,
     setShowMoment,
@@ -97,10 +97,10 @@ export default function CreateMoment() {
 
     socket.on(`moment_${user?.username}`, (data: MomentResponse) => {
       setLoading(false)
-      router.push('/home')
       MomentStore.setState((prev) => ({
         moments: [data.data, ...prev.moments],
       }))
+      router.push('/home')
       setMessage(data.message, true)
       setShowMoment(false)
       setEditingMoment(false)
@@ -108,7 +108,6 @@ export default function CreateMoment() {
 
     socket.on(`update_moment_${user?.username}`, (data: MomentResponse) => {
       setLoading(false)
-
       MomentStore.setState((prev) => {
         return {
           isPlaying: true,
@@ -117,7 +116,7 @@ export default function CreateMoment() {
           ),
         }
       })
-
+      router.push('/home')
       setMessage(data.message, true)
       setShowMoment(false)
       setEditingMoment(false)
@@ -465,7 +464,7 @@ export default function CreateMoment() {
 
   return (
     <>
-      <div className="w-full flex flex-col flex-1 sm:pt-3 min-h-full">
+      <div className="w-full flex flex-col flex-1 sm:pt-3">
         {/* <div className="w-full py-5 flex flex-col"> */}
         <div
           style={{

@@ -96,7 +96,7 @@ const MobileMomentView: React.FC<MobileMomentViewProps> = ({
             <img
               src={activeMomentMedia.src}
               alt={activeMomentMedia.content || ''}
-              className={` w-full h-full object-contain transition-all duration-300`}
+              className={`bg-black w-full h-full object-contain transition-all duration-300`}
             />
           ) : activeMomentMedia.type.includes('video') ? (
             <video

@@ -3,12 +3,13 @@
 import React, { useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { Plus } from 'lucide-react'
-import { MomentStore } from '@/src/zustand/post/Moment'
+import { MomentEmpty, MomentStore } from '@/src/zustand/post/Moment'
 import { AuthStore } from '@/src/zustand/user/AuthStore'
 import MobileMomentView from './MobileMomentViewer'
 import CommentStore from '@/src/zustand/post/Comment'
 import DesktopMomentViewer from './DesktopMomentViewer'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 export default function Moments() {
   const {
@@ -22,6 +23,11 @@ export default function Moments() {
   const { user } = AuthStore()
   const touchStartY = useRef(0)
   const touchEndY = useRef(0)
+  const pathname = usePathname()
+
+  useEffect(() => {
+    MomentStore.setState({ activeMoment: MomentEmpty })
+  }, [pathname])
 
   useEffect(() => {
     MomentStore.setState((prev) => {
@@ -89,7 +95,7 @@ export default function Moments() {
                   src={moment?.media[0].preview}
                   alt={moment?.username}
                   fill
-                  className="object-cover"
+                  className="object-cover w-full h-full"
                 />
               ) : (
                 moment.media && (
