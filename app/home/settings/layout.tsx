@@ -1,5 +1,5 @@
 'use client'
-import BankApplicationSheet from '@/components/Home/Verification/BankApplicationSheet'
+// import BankApplicationSheet from '@/components/Home/Verification/BankApplicationSheet'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
@@ -11,7 +11,7 @@ export default function RootLayout({
   const pathname = usePathname()
   return (
     <>
-      <div className="body-card pb-[55px] sm:pb-0 w-full max-w-[600px] mx-auto">
+      <div className="body-card pb-[55px] sm:pb-0 w-full mx-auto">
         <div className="post_card min-h-[85vh]">
           <div className="text-[var(--text-secondary)] pb-1 uppercase mb-4 border-b border-[var(--border)]">
             Settings
@@ -53,7 +53,7 @@ export default function RootLayout({
           {children}
         </div>
       </div>
-      <BankApplicationSheet />
+      {/* <BankApplicationSheet /> */}
     </>
   )
 }

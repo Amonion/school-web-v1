@@ -149,9 +149,7 @@ const FullMediaCommentSection: React.FC<FullMediaCommentSectionProps> = ({
       const maxHeight = 100
       const dragRatio = Math.min(Math.max(latestY / 300, 0), 1)
       const newHeight = minHeight + (maxHeight - minHeight) * dragRatio
-      if (!showGlassComments) {
-        setMediaHeight(`100vh`)
-      } else {
+      if (showGlassComments) {
         setMediaHeight(`${newHeight}vh`)
       }
     })

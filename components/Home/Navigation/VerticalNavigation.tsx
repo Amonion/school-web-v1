@@ -113,7 +113,12 @@ export default function VerticalNavigation() {
             </div>
           </Link>
 
-          <Link className="v_nav_items_user block" href="/home/settings">
+          <Link
+            className={`v_nav_items_user ${
+              pathname.includes('/home/settings') ? 'text-[var(--custom)]' : ''
+            } block`}
+            href="/home/settings"
+          >
             <div className="flex cursor-pointer items-center py-2">
               <i className="bi bi-gear mr-3"></i>
               Settings

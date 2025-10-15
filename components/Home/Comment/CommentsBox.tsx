@@ -134,7 +134,7 @@ export default function CommentBox() {
   }, [currentPage])
 
   return (
-    <div className="flex-1 py-3 max-h-[70vh] overflow-auto bg-[var(--secondary)] px-2">
+    <div className="flex-1 pt-3 pb-[100px] max-h-[70vh] overflow-auto bg-[var(--secondary)] px-2">
       {comments.map((item, index) => (
         <EachComment key={index} comment={item} />
       ))}

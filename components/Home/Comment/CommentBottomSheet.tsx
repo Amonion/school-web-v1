@@ -162,7 +162,7 @@ const CommentBottomSheet = () => {
                     <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mt-2 mb-3 cursor-pointer" />
 
                     <CommentBox />
-                    <div className="w-full bg-[var(--primary)] sticky bottom-0 left-0 mt-auto py-2 sm:px-[10px] px-[5px] ">
+                    <div className="w-full bg-[var(--primary)] z-10 sticky bottom-0 left-0 mt-auto py-2 sm:px-[10px] px-[5px] ">
                       {activeComment.username && (
                         <div className="flex w-full flex-wrap items-center mb-1 px-2">
                           <div className="">Replying to</div>

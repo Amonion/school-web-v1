@@ -654,7 +654,6 @@ export const PostStore = create<PostState>((set, get) => ({
     updatedItem: FormData | Record<string, unknown>
   ) => {
     try {
-      set({ loading: true, error: null })
       await apiRequest<PostResponse>(url, {
         method: 'POST',
         body: updatedItem,
@@ -662,7 +661,6 @@ export const PostStore = create<PostState>((set, get) => ({
     } catch (error) {
       console.log(error)
     } finally {
-      set({ loading: false, error: null })
     }
   },
 

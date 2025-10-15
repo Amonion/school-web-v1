@@ -115,7 +115,7 @@ const MobileMediaView: React.FC<MobileMediaViewProps> = ({
             )}
 
             {postForm._id && !showGlassComments && (
-              <div className="absolute bottom-0 pb-7 left-0 px-4 text-white w-full">
+              <div className="absolute bottom-0 pb-14 left-0 px-4 text-white w-full">
                 <div className="flex items-center relative mb-2 gap-2 z-10">
                   <img
                     src={postForm.picture}

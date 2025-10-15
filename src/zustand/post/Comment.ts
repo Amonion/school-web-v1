@@ -338,15 +338,17 @@ const CommentStore = create<CommentState>((set) => ({
     }
   },
 
-  updateComment: async (
-    url: string,
-    updatedItem: FormData | Record<string, unknown>
-  ) => {
-    await apiRequest<PostResponse>(url, {
-      method: 'PATCH',
-      body: updatedItem,
-    })
+  updateComment: async (url, updatedItem) => {
+    try {
+      await apiRequest<PostResponse>(url, {
+        method: 'PATCH',
+        body: updatedItem,
+      })
+    } catch (error) {
+      console.log(error)
+    }
   },
+
   updateItem: async (
     url: string,
     updatedItem: FormData | Record<string, unknown>,

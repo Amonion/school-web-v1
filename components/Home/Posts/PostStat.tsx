@@ -11,7 +11,7 @@ interface PostProps {
 
 const PostStat: React.FC<PostProps> = ({ post }) => {
   const { updatePost, loading } = PostStore()
-  const { setShowComment, getComments, setMainPost, showComments } =
+  const { setShowComment, getComments, setMainPost, comments, showComments } =
     CommentStore()
   const { setMessage } = MessageStore()
   const { user } = AuthStore()
@@ -85,9 +85,20 @@ const PostStat: React.FC<PostProps> = ({ post }) => {
   }
 
   const fetchComments = async () => {
+    CommentStore.setState({ comments: [] })
     getComments(
       `/posts/comments/?postId=${post._id}&level=1&myId=${user?._id}&page_size=30&page=1&ordering=-createdAt`
     )
+  }
+
+  const handleShowComments = () => {
+    setMainPost(post)
+    if (comments.length === 0) {
+      fetchComments()
+    } else if (comments.length > 0 && comments[0].postId !== post._id) {
+      fetchComments()
+    }
+    setShowComment(!showComments)
   }
 
   useEffect(() => {
@@ -120,9 +131,11 @@ const PostStat: React.FC<PostProps> = ({ post }) => {
       post_icon text-[16px] transition-transform duration-300`}
           ></i>
         )}
-        <span className="transition-opacity duration-300">
-          {formatCount(post.likes)}
-        </span>
+        {post.likes > 0 && (
+          <span className="transition-opacity duration-300">
+            {formatCount(post.likes)}
+          </span>
+        )}
       </div>
       <div className="post_stat cursor-pointer flex items-center space-x-1 transition-all duration-300">
         {loading && isSaved ? (
@@ -140,31 +153,30 @@ const PostStat: React.FC<PostProps> = ({ post }) => {
       post_icon text-[16px] transition-transform duration-300`}
           ></i>
         )}
-        <span className="transition-opacity duration-300">
-          {formatCount(post.bookmarks)}
-        </span>
+        {post.bookmarks > 0 && (
+          <span className="transition-opacity duration-300">
+            {formatCount(post.bookmarks)}
+          </span>
+        )}
       </div>
 
-      {/* <div className="post_stat">
-          <i className="bi bi-repeat post_icon text-[15px]"></i>
-          3.1K
-        </div> */}
-      <div
-        onClick={() => {
-          setMainPost(post)
-          fetchComments()
-          setShowComment(!showComments)
-        }}
-        className="post_stat"
-      >
+      <div onClick={handleShowComments} className="post_stat">
         <i className="bi bi-chat-left-text post_icon mt-1 text-[16px]"></i>
-        {formatCount(post.replies)}
+        {post.replies > 0 && (
+          <span className="transition-opacity duration-300">
+            {formatCount(post.replies)}
+          </span>
+        )}
       </div>
 
       <div className="post_stat">
         {/* <i className="bi bi-lightning-charge post_icon text-[18px]"></i> */}
         <i className="bi bi-eye post_icon text-[18px]"></i>
-        {formatCount(post.views)}
+        {post.views > 0 && (
+          <span className="transition-opacity duration-300">
+            {formatCount(post.views)}
+          </span>
+        )}
       </div>
       <div className="post_stat relative" onClick={handleCopy}>
         <i className="bi bi-share post_icon cursor-pointer"></i>

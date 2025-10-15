@@ -34,10 +34,12 @@ export default function SetSocial() {
   useEffect(() => {
     if (user) {
       setPreviewProfileUrl(String(user.picture))
-      setPreviewUrl(String(user.media))
       setIntro(user.intro)
       setDisplayName(user.displayName)
       setCanSend(false)
+    }
+    if (user && user.media) {
+      setPreviewUrl(String(user.media))
     }
   }, [user])
 
@@ -109,7 +111,7 @@ export default function SetSocial() {
 
   const setIntro = (content: string) => {
     setText(content)
-    if (content.length > 0) {
+    if (content && content.length > 0) {
       setCanSend(true)
     } else {
       setCanSend(false)
@@ -118,7 +120,7 @@ export default function SetSocial() {
 
   const setName = (content: string) => {
     setDisplayName(content)
-    if (content.length > 0) {
+    if (content && content.length > 0) {
       setCanSend(true)
     } else {
       setCanSend(false)
@@ -184,7 +186,6 @@ export default function SetSocial() {
           />
         )}
 
-        {/* Circular Upload Button */}
         <button
           onClick={handleUploadClick}
           className="absolute inset-0 m-auto z-20 mb-5 sm:w-16 sm:h-16 w-12 h-12 bg-[var(--primary)] hover:text-white hover:bg-[var(--custom)] rounded-full flex items-center justify-center backdrop-blur-sm border border-[var(--border)] transition"
@@ -228,7 +229,6 @@ export default function SetSocial() {
       </div>
 
       <div className="mb-3">
-        {' '}
         <div className="form-input mb-3">{user?.username}</div>
       </div>
       <div className="mb-3">

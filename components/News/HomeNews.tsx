@@ -79,15 +79,21 @@ const HomeNews: React.FC = () => {
                 >
                   <span className="actionIndicator">
                     <Eye size={18} />
-                    <div className="">{formatCount(item.views)}</div>
+                    {item.views > 0 && (
+                      <div className="">{formatCount(item.views)}</div>
+                    )}
                   </span>
                   <span className="actionIndicator">
                     <Heart size={18} />
-                    <div className="shadow-sm">{formatCount(item.likes)}</div>
+                    {item.views > 0 && (
+                      <div className="shadow-sm">{formatCount(item.likes)}</div>
+                    )}
                   </span>
                   <span className="actionIndicator">
                     <MessageCircle size={18} />
-                    <div className="">{formatCount(item.replies)}</div>
+                    {item.views > 0 && (
+                      <div className="">{formatCount(item.replies)}</div>
+                    )}
                   </span>
                 </div>
               </div>

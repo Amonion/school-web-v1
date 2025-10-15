@@ -29,7 +29,7 @@ const EachComment: React.FC<EachCommentProps> = ({
   hasMoreComments,
 }) => {
   const { user } = AuthStore()
-  const { setActiveComment, updateComment } = CommentStore()
+  const { setActiveComment, updateComment, showComments } = CommentStore()
   const [pageSize] = useState(20)
   const [currentPage, setCurrentPage] = useState(1)
   const [hasMore, setHasMore] = useState(false)
@@ -130,22 +130,28 @@ const EachComment: React.FC<EachCommentProps> = ({
     if (commentRef.current && onHeightChange) {
       onHeightChange(comment._id, commentRef.current.offsetHeight)
     }
-  }, [onHeightChange])
+  }, [onHeightChange, showComments, comment._id])
 
   useEffect(() => {
     if (commentRef.current) {
       setParentHeight(commentRef.current.offsetHeight)
     }
-  }, [lastHeight, comment, fetchedComments.length])
+  }, [
+    lastHeight,
+    comment.comments,
+    comment._id,
+    showComments,
+    fetchedComments.length,
+  ])
 
   const fetchComments = async () => {
     try {
       setCurrentPage(1)
       setLoading(true)
       const response = await apiRequest<FetchCommentResponse>(
-        `/posts/?replyToId=${comment._id}&level=${comment.level + 1}&myId=${
-          user?._id
-        }&page_size=${pageSize}&page=1&ordering=${sort}`
+        `/posts/comments/?replyToId=${comment._id}&level=${
+          comment.level + 1
+        }&myId=${user?._id}&page_size=${pageSize}&page=1&ordering=${sort}`
       )
 
       const data = response?.data?.results
@@ -166,7 +172,9 @@ const EachComment: React.FC<EachCommentProps> = ({
     try {
       setLoading(true)
       const response = await apiRequest<FetchCommentResponse>(
-        `/posts/?postId=${comment._id}&level=${comment.level + 1}&myId=${
+        `/posts/comments/?postId=${comment._id}&level=${
+          comment.level + 1
+        }&myId=${
           user?._id
         }&page_size=${pageSize}&page=${currentPage}&ordering=${sort}`
       )
@@ -194,21 +202,40 @@ const EachComment: React.FC<EachCommentProps> = ({
         ): typeof prev.comments => {
           return commentsList.map((comment) => {
             if (comment._id === targetId && comment.level === targetLevel) {
+              const isLiked = comment.liked
+              const isHated = comment.hated
+
+              const newLiked = !isLiked
+              const newLikes = newLiked
+                ? (comment.likes ?? 0) + 1
+                : (comment.likes ?? 0) - 1
+
+              let newHated = isHated
+              let newHates = comment.hates ?? 0
+
+              // 👇 If user is toggling like ON and it was hated, remove hate
+              if (newLiked && isHated) {
+                newHated = false
+                newHates = newHates - 1
+              }
+
               return {
                 ...comment,
-                liked: !comment.liked,
-                likes: !comment.liked ? comment.likes + 1 : comment.likes - 1,
-                hated: comment.hated ? false : comment.hated,
-                hates: comment.hated ? comment.hates - 1 : comment.hates,
+                liked: newLiked,
+                likes: newLikes,
+                hated: newHated,
+                hates: newHates,
               }
             }
 
+            // Recursive toggle for nested replies
             return {
               ...comment,
               comments: toggle(comment.comments),
             }
           })
         }
+
         return {
           comments: toggle(prev.comments),
         }
@@ -226,15 +253,33 @@ const EachComment: React.FC<EachCommentProps> = ({
         ): typeof prev.comments => {
           return commentsList.map((comment) => {
             if (comment._id === targetId && comment.level === targetLevel) {
+              const isHated = comment.hated
+              const isLiked = comment.liked
+
+              const newHated = !isHated
+              const newHates = newHated
+                ? (comment.hates ?? 0) + 1
+                : (comment.hates ?? 0) - 1
+
+              let newLiked = isLiked
+              let newLikes = comment.likes ?? 0
+
+              // 👇 If user is toggling hate ON and it was liked, remove like
+              if (newHated && isLiked) {
+                newLiked = false
+                newLikes = newLikes - 1
+              }
+
               return {
                 ...comment,
-                hated: !comment.hated,
-                hates: !comment.hated ? comment.hates + 1 : comment.hates - 1,
-                liked: comment.liked ? false : comment.liked,
-                likes: comment.liked ? comment.likes - 1 : comment.likes,
+                hated: newHated,
+                hates: newHates,
+                liked: newLiked,
+                likes: newLikes,
               }
             }
 
+            // recursive toggle for nested replies
             return {
               ...comment,
               comments: toggle(comment.comments),
@@ -280,19 +325,10 @@ const EachComment: React.FC<EachCommentProps> = ({
   }
 
   const handleLike = async (status: boolean) => {
-    if (status) {
-      updateComment(`/posts/stats`, {
-        likes: true,
-        id: comment._id,
-        userId: user?._id,
-      })
-    } else {
-      updateComment(`/posts/stats`, {
-        hates: true,
-        id: comment._id,
-        userId: user?._id,
-      })
-    }
+    updateComment(`/posts/${status ? 'like' : 'hate'}`, {
+      id: comment._id,
+      userId: user?._id,
+    })
   }
 
   return (
@@ -305,7 +341,7 @@ const EachComment: React.FC<EachCommentProps> = ({
                 comment.level === 1 ? 'mr-2' : 'mr-1'
               } relative z-10`}
             >
-              {comment.comments.length > 0 && (
+              {comment.comments.length > 0 && comment.level < 2 && (
                 <div
                   style={{
                     height:
@@ -315,17 +351,17 @@ const EachComment: React.FC<EachCommentProps> = ({
                     top: comment.level === 1 ? 40 : 28,
                     left: comment.level === 1 ? 20 : 16,
                   }}
-                  className={`absolute w-px bg-[var(--border)]`}
+                  className={`absolute w-px border-l border-[var(--border)]`}
                 />
               )}
 
-              {comment.level > 1 && (
+              {comment.level === 2 && (
                 <div
-                  className={`absolute border-l border-b bg-[var(--border)] rounded-bl-[18px]`}
+                  className={`absolute border-l border-b border-[var(--border)] rounded-bl-[20px]`}
                   style={{
                     height: 22,
                     width: 32,
-                    top: -12,
+                    top: -5,
                     left: comment.level === 2 ? -32 : -24,
                   }}
                 />
@@ -358,7 +394,7 @@ const EachComment: React.FC<EachCommentProps> = ({
                 <div className={`text-[var(--text-secondary)] mr-2`}>
                   {comment.displayName}
                 </div>
-                <div className="ml-auto text-sm">
+                <div className="ml-auto text-[12px]">
                   {formatRelativeDate(String(comment.createdAt))}
                 </div>
               </Link>
@@ -435,9 +471,11 @@ const EachComment: React.FC<EachCommentProps> = ({
                     comment.level > 1 ? 'text-sm' : ''
                   } bi bi-arrow-90deg-left cursor-pointer`}
                 ></i>
-                <div className="relative ml-auto">
-                  <i className="bi bi-three-dots-vertical cursor-pointer"></i>
-                </div>
+                {user?.username === comment.username && (
+                  <div className="relative ml-auto">
+                    <i className="bi bi-three-dots-vertical cursor-pointer"></i>
+                  </div>
+                )}
               </div>
 
               {comment.comments.map((item, index) => (
@@ -460,10 +498,10 @@ const EachComment: React.FC<EachCommentProps> = ({
                         parentHeight -
                         lastHeight -
                         (comment.level === 1 ? 65 : 30),
-                      top: comment.level === 1 ? -60 : 28,
+                      top: comment.level === 1 ? -1 * (parentHeight - 54) : 28,
                       left: comment.level === 1 ? -28 : 16,
                     }}
-                    className={`absolute z-0 w-[0.5px] bg-[var(--border)]`}
+                    className={`absolute z-0 w-px border-l border-[var(--border)]`}
                   />
                   <div
                     className={`absolute border-l border-b border-[var(--border)] rounded-bl-[18px]`}
