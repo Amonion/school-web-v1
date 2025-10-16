@@ -29,7 +29,7 @@ interface Test {
 
 const ExamStart = () => {
   const url = '/competitions/leagues/objectives/'
-  const { getItem, formData, attempt } = ExamStore()
+  const { getItem, formData } = ExamStore()
   const { user, bioUserState } = AuthStore()
   const { setMessage } = MessageStore()
   const { getObjectives, count, objectiveResults, reshuffleResults } =
@@ -396,49 +396,53 @@ const ExamStart = () => {
           </div>
         </div>
       ) : (
-        <div className="min-h-[85vh] relative py-5">
-          <div className={`paper_head relative ${attempt > 0 ? 'b' : ''}`}>
-            <div className="text-[var(--textSecondary)] text-lg">
-              {formData.title}
-            </div>
-            <div className="paper_subtitle">{formData.subtitle}</div>
-            <div className=" mb-2">{formData.instruction}</div>
-
-            <div className="flex w-full justify-center flex-wrap">
-              <div className="paper_info ">
-                {' '}
-                <i className="bi bi-hourglass-split text-sm block mr-[5px]"></i>
-                {formData.duration}min
+        <div className="min-h-[85vh] relative py-5 px-2 sm:px-0">
+          {exam && (
+            <div
+              className={`paper_head relative ${exam.attempts > 0 ? 'b' : ''}`}
+            >
+              <div className="text-[var(--textSecondary)] sm:text-lg">
+                {formData.title}
               </div>
-              {formData.type && (
-                <div className="paper_info">
-                  <i className="bi bi-file-earmark text-sm block mr-[5px]"></i>
-                  {truncateStringNormal(formData.type, 3)}
+              <div className="paper_subtitle">{formData.subtitle}</div>
+              <div className=" mb-2">{formData.instruction}</div>
+
+              <div className="flex w-full justify-center flex-wrap">
+                <div className="paper_info ">
+                  {' '}
+                  <i className="bi bi-hourglass-split text-sm block mr-[5px]"></i>
+                  {formData.duration}min
+                </div>
+                {formData.type && (
+                  <div className="paper_info">
+                    <i className="bi bi-file-earmark text-sm block mr-[5px]"></i>
+                    {truncateStringNormal(formData.type, 3)}
+                  </div>
+                )}
+
+                <div className="paper_info ">
+                  <i className="bi bi-clock text-sm block mr-[5px]"></i>
+                  {formatTimeTo12Hour(formData.publishedAt)}{' '}
+                </div>
+                <div className="paper_info ">
+                  <i className="bi bi-calendar-check text-sm block mr-[5px]"></i>
+                  {formatDateToDDMMYY(formData.publishedAt)}
+                </div>
+              </div>
+
+              {exam.attempts > 0 && (
+                <div className="flex justify-between w-full absolute left-0 bottom-[-30px]">
+                  <div className="search_btn">{exam.attempts} Attempts</div>
+                  <div
+                    onClick={toggleDisplayResult}
+                    className="search_btn active"
+                  >
+                    {isLastResults ? 'Hide Result' : 'Show Result'}{' '}
+                  </div>
                 </div>
               )}
-
-              <div className="paper_info ">
-                <i className="bi bi-clock text-sm block mr-[5px]"></i>
-                {formatTimeTo12Hour(formData.publishedAt)}{' '}
-              </div>
-              <div className="paper_info ">
-                <i className="bi bi-calendar-check text-sm block mr-[5px]"></i>
-                {formatDateToDDMMYY(formData.publishedAt)}
-              </div>
             </div>
-
-            {exam && exam.attempts > 0 && (
-              <div className="flex justify-between w-full absolute left-0 bottom-[-30px]">
-                <div className="search_btn">{exam.attempts} Attempts</div>
-                <div
-                  onClick={toggleDisplayResult}
-                  className="search_btn active"
-                >
-                  {isLastResults ? 'Hide Result' : 'Show Result'}{' '}
-                </div>
-              </div>
-            )}
-          </div>
+          )}
 
           {exam && isLastResults && isResultDisplayed && (
             <ExamResult exam={exam} setDisplayResult={setDisplayResult} />
@@ -458,7 +462,7 @@ const ExamStart = () => {
                       </div>
                     )}
                     <div className="question_bd flex-grow">
-                      <div className="question text-[var(--text-secondary)] font-medium">
+                      <div className="question text-[var(--text-secondary)]">
                         <div
                           dangerouslySetInnerHTML={{
                             __html: question.question,
@@ -542,7 +546,7 @@ const ExamStart = () => {
                 </div>
               ))}
 
-          <div className="flex items-center sm:mb-[100px] mb-[90px]">
+          <div className="flex items-center sm:mb-[100px] mb-[150px]">
             <div>Results {count}</div>
             {page_size && (
               <Pagination

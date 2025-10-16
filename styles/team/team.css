@@ -167,7 +167,7 @@ td {
 }
 
 .search_btn {
-  @apply text-[var(--text-secondary)] transition-all duration-500  flex  cursor-pointer rounded-[25px] border border-[var(--border-color)] px-3 pb-[3px] last:mr-0;
+  @apply text-[var(--text-secondary)] text-[12px] sm:text-base transition-all duration-500  flex  cursor-pointer rounded-[25px] border border-[var(--border-color)] px-3 pb-[3px] last:mr-0;
 }
 
 .search_btn.active {
