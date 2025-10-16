@@ -427,9 +427,9 @@ const ExamStart = () => {
               </div>
             </div>
 
-            {attempt > 0 && (
+            {exam && exam.attempts > 0 && (
               <div className="flex justify-between w-full absolute left-0 bottom-[-30px]">
-                <div className="search_btn">{attempt} Attempts</div>
+                <div className="search_btn">{exam.attempts} Attempts</div>
                 <div
                   onClick={toggleDisplayResult}
                   className="search_btn active"
