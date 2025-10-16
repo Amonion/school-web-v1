@@ -4,6 +4,7 @@ import { NavStore } from '@/src/zustand/notification/Navigation'
 import TraceHeader from './TraceHeader'
 import HomeHeader from './HomeHeader'
 import OtherHeader from './OtherHeader'
+import QuestionHeader from './QuestionHeader'
 
 export default function HeaderWrapper() {
   const { setHeaderHeight } = NavStore()
@@ -63,6 +64,8 @@ export default function HeaderWrapper() {
                 <TraceHeader />
               ) : pathname === '/home' ? (
                 <HomeHeader />
+              ) : pathname === '/home/questions' ? (
+                <QuestionHeader />
               ) : (
                 <OtherHeader />
               )}

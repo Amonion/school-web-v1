@@ -20,7 +20,7 @@ import Picker from '@emoji-mart/react'
 import { useTheme } from '@/context/ThemeProvider'
 import data from '@emoji-mart/data'
 import axios from 'axios'
-import { AlartStore, MessageStore } from '@/src/zustand/notification/Message'
+import { MessageStore } from '@/src/zustand/notification/Message'
 import { usePersonalNotificationContext } from '@/context/HomeContext/PersonalNotificationContext'
 import { AuthStore } from '@/src/zustand/user/AuthStore'
 import Spinner from '@/components/LoadingAnimations/Spinner'
@@ -52,7 +52,6 @@ export default function CreateMoment() {
   const [editingMoment, setEditingMoment] = useState(false)
   const [editingMomentId, setEditingMomentId] = useState('')
   const { user } = AuthStore()
-  const { setAlert } = AlartStore()
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
   const emojiPickerRef = useRef<HTMLDivElement>(null)
   const { theme } = useTheme()
@@ -126,6 +125,7 @@ export default function CreateMoment() {
       setLoading(false)
       socket.off(`moment_${user?.username}`)
       socket.off(`update_moment_${user?.username}`)
+      clearMoment()
     }
   }, [socket])
 
@@ -420,47 +420,6 @@ export default function CreateMoment() {
       momentMedia: MomentMediaEmpty,
     })
   }
-
-  const handleCloseMoment = () => {
-    if (canAdd || canSend) {
-      setAlert(
-        'Warning',
-        'You have changes in your moment that you have not shared, do you want to discard it?',
-        true,
-        () => clearMoment()
-      )
-    } else {
-      setShowMoment(false)
-      MomentStore.setState({
-        momentMedia: MomentMediaEmpty,
-      })
-    }
-  }
-
-  useEffect(() => {
-    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      if (canSend) {
-        handleCloseMoment()
-      }
-      event.preventDefault()
-      event.returnValue = ''
-    }
-    const handlePageHide = (event: BeforeUnloadEvent) => {
-      if (canSend) {
-        handleCloseMoment()
-      }
-      event.preventDefault()
-      event.returnValue = ''
-    }
-
-    window.addEventListener('beforeunload', handleBeforeUnload)
-    window.addEventListener('pagehide', handlePageHide)
-
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload)
-      window.removeEventListener('pagehide', handlePageHide)
-    }
-  }, [])
 
   return (
     <>
