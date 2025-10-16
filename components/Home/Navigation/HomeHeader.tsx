@@ -11,7 +11,7 @@ export default function HomeHeader() {
   const { unread, personalUnread, officialUnread } = UserNotificationStore()
   const { user } = AuthStore()
   const { setMessage } = MessageStore()
-  const { toggleVNav, togglePostBox, toggleAsideVNav, setScrollUp } = NavStore()
+  const { toggleVNav, toggleAsideVNav, setScrollUp } = NavStore()
   const { getPosts, page_size } = PostStore()
   const [sort] = useState('-createdAt')
 
@@ -31,10 +31,10 @@ export default function HomeHeader() {
         <span onClick={toggleVNav} className="sm:hidden">
           <i className="bi bi-text-left text-2xl mr-4"></i>
         </span>
-        <i
-          onClick={togglePostBox}
-          className="bi bi-pen text-2xl hidden sm:block cursor-pointer"
-        ></i>
+        <Link href={`/home/posts/create-post`}>
+          <i className="bi bi-pen text-2xl hidden sm:block cursor-pointer"></i>
+        </Link>
+
         <Link href="/home/questions/" className="mx-auto hidden sm:block">
           <Image
             style={{ height: 'auto' }}

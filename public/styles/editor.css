@@ -83,6 +83,14 @@ button i.active {
   justify-content: start;
 }
 
+.simple_toolbar button {
+  background: var(--white);
+  padding: 1px 5px;
+  margin-right: 5px;
+  margin-bottom: 5px;
+  cursor: pointer;
+}
+
 .tiptap-toolbar button {
   background: var(--white);
   border-radius: 3px;

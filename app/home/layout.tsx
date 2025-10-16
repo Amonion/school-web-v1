@@ -9,7 +9,6 @@ import { usePathname } from 'next/navigation'
 import AsideFriends from '@/components/Home/Navigation/AsideFriends'
 import VerticalNavigation from '@/components/Home/Navigation/VerticalNavigation'
 import { NavStore } from '@/src/zustand/notification/Navigation'
-import PostBox from '@/components/Home/Posts/PostBox'
 import MainHeader from '@/components/Home/Navigation/MainHeader'
 import MobileNav from '@/components/Home/Navigation/MobileNav'
 import CommentBottomSheet from '@/components/Home/Comment/CommentBottomSheet'
@@ -22,8 +21,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const { displayPostBox, headerHeight, setShowHeader, setHeaderHeight } =
-    NavStore()
+  const { headerHeight, setShowHeader, setHeaderHeight } = NavStore()
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
   const lastScrollY = useRef(0)
   const { getMoments } = MomentStore()
@@ -87,7 +85,6 @@ export default function RootLayout({
     <>
       <UserResponse />
       <UserAlert />
-      {displayPostBox && <PostBox />}
       <CommentBottomSheet />
 
       <div className=" w-full flex justify-center">

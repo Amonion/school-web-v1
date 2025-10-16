@@ -91,6 +91,10 @@ html.dark {
   background-color: var(--text-title-color) !important;
 }
 
+.simple_post .ProseMirror{
+  min-height: 100px;
+}
+
 /* Style for the table itself */
 .ProseMirror table {
   width: 100%;

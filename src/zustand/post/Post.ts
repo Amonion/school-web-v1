@@ -35,6 +35,7 @@ export interface IMedia {
   replies: number
   preview: string
   content: string
+  backgroundColor: string
 }
 
 export interface Post {
@@ -278,20 +279,35 @@ export const PostStore = create<PostState>((set, get) => ({
 
       const mediaResults: IMedia[] = []
       updatedResults.forEach((post) => {
-        if (Array.isArray(post.media) && post.media.length > 0) {
-          post.media.forEach((mediaItem) => {
+        if (
+          (Array.isArray(post.media) && post.media.length > 0) ||
+          post.backgroundColor
+        ) {
+          if (post.backgroundColor) {
             mediaResults.push({
               postId: post._id,
-              src: mediaItem.source,
-              preview: mediaItem.preview,
-              type: mediaItem.type,
+              src: '',
+              preview: '',
+              type: 'poster',
               content: post.content,
               replies: post.replies,
+              backgroundColor: post.backgroundColor,
             })
-          })
+          } else {
+            post.media.forEach((mediaItem) => {
+              mediaResults.push({
+                postId: post._id,
+                src: mediaItem.source,
+                preview: mediaItem.preview,
+                type: post.backgroundColor ? 'poster' : mediaItem.type,
+                content: post.content,
+                replies: post.replies,
+                backgroundColor: post.backgroundColor,
+              })
+            })
+          }
         }
       })
-
       return {
         hasMore: state.page_size === results.length,
         loading: false,
@@ -312,17 +328,33 @@ export const PostStore = create<PostState>((set, get) => ({
 
       const mediaResults: IMedia[] = []
       updatedResults.forEach((post) => {
-        if (Array.isArray(post.media) && post.media.length > 0) {
-          post.media.forEach((mediaItem) => {
+        if (
+          (Array.isArray(post.media) && post.media.length > 0) ||
+          post.backgroundColor
+        ) {
+          if (post.backgroundColor) {
             mediaResults.push({
               postId: post._id,
-              src: mediaItem.source,
-              preview: mediaItem.preview,
-              type: mediaItem.type,
+              src: '',
+              preview: '',
+              type: 'poster',
               content: post.content,
               replies: post.replies,
+              backgroundColor: post.backgroundColor,
             })
-          })
+          } else {
+            post.media.forEach((mediaItem) => {
+              mediaResults.push({
+                postId: post._id,
+                src: mediaItem.source,
+                preview: mediaItem.preview,
+                type: post.backgroundColor ? 'poster' : mediaItem.type,
+                content: post.content,
+                replies: post.replies,
+                backgroundColor: post.backgroundColor,
+              })
+            })
+          }
         }
       })
 

@@ -21,6 +21,7 @@ import Superscript from '@tiptap/extension-superscript'
 import Subscript from '@tiptap/extension-subscript'
 import Placeholder from '@tiptap/extension-placeholder'
 import Image from '@tiptap/extension-image'
+import { SimpleEditorMenuBar } from './SimpleEditorMenuBar'
 
 const CustomTableCell = TableCell.extend({
   addAttributes() {
@@ -184,7 +185,8 @@ const PostEditor: React.FC<MyEditorProps> = ({ value, onChange }) => {
   }, [value, editor])
 
   return (
-    <div className="mb-3 post">
+    <div className="mb-3 simple_post">
+      {editor && <SimpleEditorMenuBar editor={editor} />}
       <div ref={editorContainerRef} id="editor" />
     </div>
   )

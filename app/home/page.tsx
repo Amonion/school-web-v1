@@ -5,8 +5,9 @@ import Post from '@/components/Home/Posts/Post'
 import { NavStore } from '@/src/zustand/notification/Navigation'
 import { useEffect } from 'react'
 import Moments from '@/components/Home/Moment/Moments'
+import Link from 'next/link'
 const Home: React.FC = () => {
-  const { togglePostBox, scrollUp } = NavStore()
+  const { scrollUp } = NavStore()
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -49,12 +50,12 @@ const Home: React.FC = () => {
       <Moments />
       <Post />
 
-      <div
-        onClick={togglePostBox}
+      <Link
+        href={'/home/posts/create-post'}
         className="sm:hidden bg-[var(--custom)] w-10 h-10 rounded-full fixed text-white right-3 bottom-[80px] flex justify-center items-center cursor-pointer"
       >
         <i className="bi bi-pen common-icon"></i>
-      </div>
+      </Link>
     </>
   )
 }

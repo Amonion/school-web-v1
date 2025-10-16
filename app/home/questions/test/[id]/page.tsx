@@ -30,7 +30,7 @@ interface Test {
 const ExamStart = () => {
   const url = '/competitions/leagues/objectives/'
   const { getItem, formData } = ExamStore()
-  const { user, bioUserState } = AuthStore()
+  const { user, bioUser, bioUserState } = AuthStore()
   const { setMessage } = MessageStore()
   const { getObjectives, count, objectiveResults, reshuffleResults } =
     ObjectiveStore()
@@ -115,11 +115,12 @@ const ExamStart = () => {
     const startTime = started ? JSON.parse(started) : undefined
     const savedQuestions = savedItems ? JSON.parse(savedItems) : []
 
-    if (savedQuestions && savedQuestions.length > 0 && user) {
+    if (savedQuestions && savedQuestions.length > 0 && bioUser) {
       const form = new FormData()
-      form.append('username', user.username)
-      form.append('bioUserId', user.bioUserId)
-      form.append('picture', user.picture)
+      form.append('bioUserUsername', bioUser.bioUserUsername)
+      form.append('bioUserId', bioUser._id)
+      form.append('bioUserPicture', bioUser.bioUserPicture)
+      form.append('bioUserDisplayName', bioUser.bioUserDisplayName)
       form.append('instruction', formData.instruction)
       form.append('started', startTime)
       form.append('ended', String(new Date().getTime()))
@@ -129,7 +130,7 @@ const ExamStart = () => {
       try {
         setLoading(true)
         const response = await apiRequest(
-          `/user-competitions/exams?bioUserId=${user?.bioUserId}&paperId=${id}&page=${currentPage}&page_size=${page_size}`,
+          `/user-competitions/exams?bioUserId=${bioUser?._id}&paperId=${id}&page=${currentPage}&page_size=${page_size}`,
           {
             method: 'POST',
             body: form,
@@ -139,7 +140,6 @@ const ExamStart = () => {
         if (res.exam) {
           window.scrollTo({ top: 0, behavior: 'smooth' })
           showLastResults(true)
-          console.log(res)
           AuthStore.getState().setBioUserState(res.bioUserState)
           endExam()
           setExam(res.exam)

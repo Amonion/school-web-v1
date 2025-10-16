@@ -6,6 +6,7 @@ import PostStat from './PostStat'
 import { Post, PostStore } from '@/src/zustand/post/Post'
 import HomePostMedia from '../Media/HomePostMedia'
 import UserPostMedia from '../Media/UserPostMedia'
+import CommentStore from '@/src/zustand/post/Comment'
 
 interface PostCardProps {
   post: Post
@@ -17,11 +18,43 @@ const PostCard: React.FC<
 > = ({ post, lastRef }) => {
   const router = useRouter()
   const pathname = usePathname()
+  const { page_size, currentPage, getComments } = CommentStore()
+  const { mediaResults, setSelectedMedia, setCurrentIndex, setFitMode } =
+    PostStore()
   const moveToPost = (id: string) => {
     PostStore.setState({ postForm: post })
     router.push(`/home/posts/${id}`)
   }
 
+  const setMainPost = (index: number) => {
+    let comment: Post | undefined
+    PostStore.setState((prev) => {
+      comment = prev.postResults.find(
+        (item) => item._id === mediaResults[index].postId
+      )
+      return {
+        postForm: prev.postResults.find(
+          (item) => item._id === mediaResults[index].postId
+        ),
+      }
+    })
+    CommentStore.setState({ mainPost: comment })
+    if (mediaResults[index].postId) {
+      getComments(
+        `/posts/comments?page=${currentPage}&page_size=${page_size}&postType=comment&postId=${mediaResults[index].postId}&level=1`
+      )
+    }
+  }
+
+  const setMedia = () => {
+    const mediaIndex = mediaResults.findIndex(
+      (item) => item.postId === post._id
+    )
+    setMainPost(mediaIndex)
+    setCurrentIndex(mediaIndex)
+    setFitMode(false)
+    setSelectedMedia(mediaResults[mediaIndex])
+  }
   return (
     <>
       <div
@@ -32,6 +65,10 @@ const PostCard: React.FC<
         <PostHeader post={post} />
         {post.backgroundColor ? (
           <div
+            onClick={(e) => {
+              setMedia()
+              e.stopPropagation()
+            }}
             style={{ backgroundColor: post.backgroundColor }}
             className="w-full text-white text-lg px-2 sm:text-xl text-center flex justify-center items-center min-h-[300px]"
             dangerouslySetInnerHTML={{
