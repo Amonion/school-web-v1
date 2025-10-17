@@ -20,14 +20,11 @@ export default function MomentProgressBar() {
     if (!currentItem) return
 
     setProgress(0)
-
     const duration = currentItem.duration * 1000
     const step = 100
     const increment = (step / duration) * 100
-
     let interval: NodeJS.Timeout | null = null
 
-    // 👇 Only run the interval if it's playing
     if (isPlaying) {
       interval = setInterval(() => {
         setProgress((prev) => {

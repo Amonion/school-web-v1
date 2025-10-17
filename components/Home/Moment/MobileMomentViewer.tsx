@@ -16,7 +16,16 @@ const MobileMomentView: React.FC<MobileMomentViewProps> = ({
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [started, setStarted] = useState(false)
-  const { activeMoment, isPlaying, activeMomentMedia } = MomentStore()
+  const {
+    moments,
+    activeMoment,
+    isPlaying,
+    activeMomentIndex,
+    activeMomentMedia,
+    activeMomentMediaIndex,
+    openMomentModal,
+    changeActiveMomentMedia,
+  } = MomentStore()
 
   useEffect(() => {
     const video = videoRef.current
@@ -49,31 +58,35 @@ const MobileMomentView: React.FC<MobileMomentViewProps> = ({
     // setProgress(current)
   }
 
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const { clientX, currentTarget } = e
+    const width = currentTarget.clientWidth
+    const mediaLength = activeMoment.media.length
+    const momentLength = moments.length
+
+    if (clientX < width / 2) {
+      if (activeMomentMediaIndex > 0) {
+        changeActiveMomentMedia(activeMomentMediaIndex - 1, activeMomentIndex)
+      } else if (activeMomentIndex > 0) {
+        openMomentModal(activeMomentIndex - 1)
+      }
+    } else {
+      if (activeMomentMediaIndex + 1 < mediaLength) {
+        changeActiveMomentMedia(activeMomentMediaIndex + 1, activeMomentIndex)
+      } else if (activeMomentIndex + 1 < momentLength) {
+        openMomentModal(activeMomentIndex + 1)
+      }
+    }
+  }
+
   return (
     <>
       <motion.div
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
+        onClick={handleClick}
         className={`fixed left-0 top-0 inset-0 touch-none overflow-hidden w-full h-[100vh] z-40 transition-all duration-150`}
       >
-        {/* <div
-          style={{
-            gridTemplateColumns: `repeat(${activeMoment.media.length}, minmax(0, 1fr))`,
-          }}
-          className="grid gap-1 absolute top-1 left-0 px-2 w-full z-20"
-        >
-          {activeMoment.media.map((item, index) => (
-            <div key={index} className="h-1 bg-gray-300/20 rounded-full">
-              {activeMomentMediaIndex === index && (
-                <div
-                  key={index}
-                  className="h-full bg-gray-300 w-3 rounded-full"
-                ></div>
-              )}
-            </div>
-          ))}
-        </div> */}
-
         <MomentProgressBar />
         <div className="flex z-20 top-4 w-full right-0 px-3 items-center absolute">
           <div className="flex items-center text-white relative mb-2 gap-2 mr-auto">

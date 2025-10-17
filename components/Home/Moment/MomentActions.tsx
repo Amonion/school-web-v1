@@ -45,7 +45,12 @@ export default function MomentActions() {
   }
 
   return (
-    <>
+    <div
+      className="flex"
+      onClick={(e) => {
+        e.stopPropagation()
+      }}
+    >
       {activeMoment.username === user?.username && (
         <button
           onClick={() => toggleOptions()}
@@ -80,6 +85,6 @@ export default function MomentActions() {
       <button onClick={onClose} className="actionIconWrapper">
         ✕
       </button>
-    </>
+    </div>
   )
 }

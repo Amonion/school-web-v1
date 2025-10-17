@@ -10,10 +10,10 @@ import {
   Edit,
   ImageIcon,
   Palette,
-  Plus,
-  Send,
   Smile,
   Trash,
+  Type,
+  VideoIcon,
 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import Picker from '@emoji-mart/react'
@@ -47,7 +47,6 @@ export default function CreateMoment() {
   const [momentMedias, addMomentMedia] = useState<MomentMedia[]>([])
   const [isColor, setIsColor] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [canSend, setCanSend] = useState(false)
   const [canAdd, setCanAdd] = useState(false)
   const [editingMoment, setEditingMoment] = useState(false)
   const [editingMomentId, setEditingMomentId] = useState('')
@@ -72,23 +71,26 @@ export default function CreateMoment() {
     )
     if (moment) {
       addMomentMedia(moment?.media)
-      setCanSend(true)
       setEditingMoment(true)
       setEditingMomentId(moment._id)
     }
   }, [pathname, moments])
 
   useEffect(() => {
-    if (momentMedia?.content || momentMedia?.src) {
+    if (momentMedia?.content || momentMedia?.src || momentMedias.length) {
       setCanAdd(true)
-    } else if (!momentMedia?.content && !momentMedia?.src) {
+    } else if (
+      !momentMedia?.content &&
+      !momentMedia?.src &&
+      momentMedias.length === 0
+    ) {
       setCanAdd(false)
     }
-    if (momentMedias.length > 0) {
-      setCanSend(true)
-    } else {
-      setCanSend(false)
-    }
+    // if (momentMedias.length > 0) {
+    //   setCanAdd(true)
+    // } else {
+    //   setCanAdd(false)
+    // }
   }, [momentMedia])
 
   useEffect(() => {
@@ -425,66 +427,173 @@ export default function CreateMoment() {
     <>
       <div className="w-full flex flex-col flex-1 sm:pt-3">
         {/* <div className="w-full py-5 flex flex-col"> */}
-        <div
-          style={{
-            backgroundColor: momentMedia.backgroundColor,
-            backgroundImage: momentMedia?.preview
-              ? `url(${momentMedia.preview})`
-              : undefined,
-            backgroundSize: momentMedia?.preview ? 'cover' : undefined,
-            backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'center',
-          }}
-          className={`w-full sm:min-h-[400px] min-h-[250px] text-white relative  overflow-hidden flex flex-col pb-1 px-2 items-center text-xl`}
-        >
-          {momentMedias.length > 0 && (
-            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 p-3">
-              {momentMedias.map((item, index) => (
+        <div className="relative mb-auto">
+          <div
+            style={{
+              backgroundColor: momentMedia.backgroundColor,
+              backgroundImage: momentMedia?.preview
+                ? `url(${momentMedia.preview})`
+                : undefined,
+              backgroundSize: momentMedia?.preview ? 'cover' : undefined,
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'center',
+            }}
+            className={`w-full sm:min-h-[400px]  min-h-[250px] text-white relative  overflow-hidden flex flex-col pb-1 px-2 items-center text-xl`}
+          >
+            <textarea
+              className="outline-none my-auto resize-none w-full text-center border-none bg-transparent"
+              placeholder="Share a moment"
+              autoFocus
+              value={momentMedia.content}
+              ref={textareaRef}
+              onChange={(e) => {
+                MomentStore.setState((prev) => {
+                  return {
+                    momentMedia: {
+                      ...prev.momentMedia,
+                      content: e.target.value,
+                    },
+                  }
+                })
+                e.target.style.height = 'auto'
+                e.target.style.height = `${Math.min(
+                  e.target.scrollHeight,
+                  120
+                )}px`
+              }}
+            ></textarea>
+
+            {percents > 0 && (
+              <div className="rounded-full z-10 w-full h-1 bg-[var(--primary)] border border-[var(--border)]">
                 <div
-                  key={index}
-                  style={{
-                    backgroundColor: item.backgroundColor,
-                    backgroundImage: item?.preview
-                      ? `url(${item.preview})`
-                      : undefined,
-                    backgroundSize: item?.preview ? 'cover' : undefined,
-                    backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'center',
-                  }}
-                  className={`w-full h-[110px] relative px-1 text-center border border-white rounded-[5px] overflow-hidden flex justify-center items-center`}
-                >
-                  <div className="text-white textShadow line-clamp-3 overflow-ellipsis relative my-auto text-[12px] leading-[20px] z-10">
-                    {item.content}
-                  </div>
-                  <div className="absolute flex items-center bottom-1 right-0">
-                    <Edit
-                      onClick={() => editMoment(index)}
-                      size={14}
-                      className="mr-3 cursor-pointer textShadow"
-                    />
-                    <Trash
-                      onClick={() => removeMoment(index)}
-                      size={14}
-                      className="cursor-pointer textShadow"
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-          <div className="text-center px-2 relative my-auto z-10">
-            {momentMedia.content ? momentMedia.content : 'Share Your Moment'}
+                  style={{ width: `${percents}%` }}
+                  className="t h-full bg-[var(--success)]"
+                ></div>
+              </div>
+            )}
           </div>
-          {percents > 0 && (
-            <div className="rounded-full z-10 w-full h-1 bg-[var(--primary)] border border-[var(--border)]">
-              <div
-                style={{ width: `${percents}%` }}
-                className="t h-full bg-[var(--success)]"
-              ></div>
+          {loading ? (
+            <div className="mt-2 w-full flex justify-center items-center">
+              <Spinner size={25} /> Processing
+            </div>
+          ) : (
+            <div className="relative">
+              <div className="flex relative items-center px-2 mt-2">
+                <label className="cursor-pointer mr-3">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleFileUpload}
+                  />
+                  <ImageIcon size={20} className="" />
+                </label>
+                <label className="cursor-pointer mr-3">
+                  <input
+                    type="file"
+                    accept="video/*"
+                    className="hidden"
+                    onChange={handleFileUpload}
+                  />
+                  <VideoIcon size={22} className="" />
+                </label>
+                {canAdd && (
+                  <div
+                    onClick={submitMoment}
+                    className="rounded-[25px] px-3 bg-[var(--primary)] mr-3 cursor-pointer"
+                  >
+                    Post
+                  </div>
+                )}
+                {canAdd && (
+                  <div
+                    onClick={addMomemt}
+                    className="rounded-[25px] px-3 bg-[var(--primary)] cursor-pointer"
+                  >
+                    Add
+                  </div>
+                )}
+                <Type size={20} className="text-[var(--custom)] ml-auto" />
+                <Smile
+                  onClick={() => setShowEmojiPicker((prev) => !prev)}
+                  className="cursor-pointer ml-3"
+                />
+                <div className="cursor-pointer relative ml-3">
+                  <Palette
+                    onClick={() => setIsColor(!isColor)}
+                    size={22}
+                    className="cursor-pointer"
+                  />
+                  {isColor && (
+                    <div className="flex absolute -bottom-7 right-2">
+                      {colors.map((color, index) => (
+                        <div
+                          onClick={() => selectColor(color)}
+                          className="w-5 h-5 cursor-pointer rounded-full mr-3"
+                          style={{ backgroundColor: color }}
+                          key={index}
+                        ></div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                {showEmojiPicker && (
+                  <div
+                    ref={emojiPickerRef}
+                    className="w-full flex-1 absolute -bottom-[220px] mt-2 h-[200px] overflow-y-scroll"
+                  >
+                    <Picker
+                      data={data}
+                      onEmojiSelect={addEmoji}
+                      theme={`${theme}`}
+                      style={{ width: '100%' }}
+                    />
+                  </div>
+                )}
+              </div>
+              {momentMedias.length > 0 && (
+                <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 p-3">
+                  {momentMedias.map((item, index) => (
+                    <div
+                      key={index}
+                      style={{
+                        backgroundColor: item.backgroundColor,
+                        backgroundImage: item?.preview
+                          ? `url(${item.preview})`
+                          : undefined,
+                        backgroundSize: item?.preview ? 'cover' : undefined,
+                        backgroundRepeat: 'no-repeat',
+                        backgroundPosition: 'center',
+                      }}
+                      className={`w-full h-[110px] relative px-1 text-center rounded-[5px] overflow-hidden flex justify-center items-center`}
+                    >
+                      {
+                        <div className="text-white textShadow line-clamp-3 overflow-ellipsis relative my-auto text-[12px] leading-[20px] z-10">
+                          {item.content}
+                        </div>
+                      }
+                      <div className="absolute text-white flex items-center bottom-1 right-0">
+                        {!item.preview && (
+                          <Edit
+                            onClick={() => editMoment(index)}
+                            size={14}
+                            className="mr-3 cursor-pointer textShadow"
+                          />
+                        )}
+                        <Trash
+                          onClick={() => removeMoment(index)}
+                          size={14}
+                          className="cursor-pointer textShadow"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
-        <div className={`mt-auto bg-[var(--primary)] relative p-2 sm:p-3`}>
+        {/* <div className={`mt-auto bg-[var(--primary)] relative p-2 sm:p-3`}>
           {isColor && (
             <div className="flex absolute -top-7 left-0">
               {colors.map((color, index) => (
@@ -577,7 +686,7 @@ export default function CreateMoment() {
               </div>
             )}
           </div>
-        </div>
+        </div> */}
         {/* </div> */}
       </div>
     </>
