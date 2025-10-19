@@ -4,12 +4,13 @@ import { AuthStore } from '@/src/zustand/user/AuthStore'
 // import UsersList from '../Chat/UsersList'
 import Image from 'next/image'
 import { formatRelativeDate } from '@/lib/helpers'
+import { useRouter } from 'next/navigation'
 
 export default function AsideFriends() {
   const { asideNav, toggleAsideVNav } = NavStore()
   const { friendsResults } = FriendStore()
   const { user } = AuthStore()
-
+  const router = useRouter()
   return (
     <div
       onClick={toggleAsideVNav}
@@ -42,6 +43,15 @@ export default function AsideFriends() {
           <ul className="m-0 p-0">
             {friendsResults.map((friend, index) => (
               <li
+                onClick={() =>
+                  router.push(
+                    `/friends/chat/${
+                      user?.username === friend.receiverUsername
+                        ? friend.senderUsername
+                        : friend.receiverUsername
+                    }`
+                  )
+                }
                 key={index}
                 className="flex w-full items-start cursor-pointer"
               >
