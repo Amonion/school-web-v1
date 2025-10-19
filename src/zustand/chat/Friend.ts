@@ -1,36 +1,54 @@
 import { create } from 'zustand'
 import _debounce from 'lodash/debounce'
 import apiRequest from '@/lib/axios'
-import { Chat, ChatContent } from './Chat'
+import { initDB } from '@/lib/indexDB'
+
+export const saveOrUpdateFriendInDB = async (friend: Friend) => {
+  const db = await initDB()
+  await db.put('friends', {
+    ...friend,
+    updatedAt: new Date().toISOString(),
+  })
+}
+
+export const getAllFriendsFromDB = async (): Promise<Friend[]> => {
+  const db = await initDB()
+  return db.getAll('friends')
+}
+
+interface Friend {
+  senderDisplayName: string
+  senderUsername: string
+  senderPicture: string
+  receiverDisplayName: string
+  receiverUsername: string
+  receiverPicture: string
+  content: string
+  status: string
+  connection: string
+  createdAt: Date | null
+  isOnline: boolean
+  isActive?: boolean
+  isChecked?: boolean
+}
 
 interface FetchChatResponse {
   count: number
   message: string
   page_size: number
   totalUnread: number
-  results: ChatContent[]
+  results: Friend[]
 }
 
-interface FetchChat {
-  count: number
-  message: string
-  page_size: number
-  data: ChatContent
-}
-
-interface ChatState {
-  links: { next: string | null; previous: string | null } | null
+interface FriendState {
   count: number
   current: number
-  newCount: number
   totalUnread: number
   page_size: number
-  friendsResults: ChatContent[]
+  friendsResults: Friend[]
   loading: boolean
-  error: string | null
-  successs?: string | null
-  selectedItems: ChatContent[]
-  searchResult: ChatContent[]
+  selectedItems: Friend[]
+  searchResult: Friend[]
   isAllChecked: boolean
 
   getFriends: (
@@ -38,11 +56,13 @@ interface ChatState {
     setMessage: (message: string, isError: boolean) => void
   ) => Promise<void>
 
-  setProcessedResults: (data: ChatContent[], totalUnread: number) => void
+  getSavedFriends: () => Promise<void>
+
+  setProcessedResults: (data: Friend[], totalUnread: number) => void
   setLoading?: (loading: boolean) => void
   massDelete: (
     url: string,
-    selectedItems: ChatContent[],
+    selectedItems: Friend[],
     setMessage: (message: string, isError: boolean) => void
   ) => Promise<void>
   deleteItem: (
@@ -50,17 +70,8 @@ interface ChatState {
     setMessage: (message: string, isError: boolean) => void,
     refreshUrl?: string
   ) => Promise<void>
-  updateItem: (
-    url: string,
-    updatedItem: FormData | Record<string, unknown>,
-    setMessage: (message: string, isError: boolean) => void,
-    refreshUrl?: string
-  ) => Promise<void>
-
-  groupNewChatsByDay: (chats: ChatContent[], oldChats: Chat[]) => Chat[]
-  groupChatsByDay: (chats: ChatContent[]) => Chat[]
   selectFriends: (id: string) => void
-  addFriendsChat: (chats: ChatContent, increase?: boolean) => void
+  updateFriendsChat: (chats: Friend) => void
   toggleChecked: (index: number) => void
   toggleActive: (index: number) => void
   toggleAllSelected: () => void
@@ -68,11 +79,9 @@ interface ChatState {
   searchChats: (url: string) => void
 }
 
-const FriendStore = create<ChatState>((set) => ({
-  links: null,
+const FriendStore = create<FriendState>((set) => ({
   count: 1,
   current: 2,
-  newCount: 0,
   totalUnread: 0,
   page_size: 0,
   friendsResults: [],
@@ -81,6 +90,7 @@ const FriendStore = create<ChatState>((set) => ({
   selectedItems: [],
   searchResult: [],
   isAllChecked: false,
+
   setProcessedResults: (results, totalUnread) => {
     set({
       loading: false,
@@ -93,123 +103,47 @@ const FriendStore = create<ChatState>((set) => ({
     set({ loading: loadState })
   },
 
-  groupChatsByDay(chats: ChatContent[]): Chat[] {
-    const grouped: Record<string, ChatContent[]> = {}
-
-    chats.forEach((chat) => {
-      if (!grouped[chat.day]) {
-        grouped[chat.day] = []
-      }
-      grouped[chat.day].push(chat)
-    })
-
-    return Object.entries(grouped)
-      .map(([day, chats]) => ({
-        day,
-        chats: chats.sort(
-          (a, b) =>
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-        ),
-      }))
-      .sort((a, b) => new Date(a.day).getTime() - new Date(b.day).getTime())
-  },
-
-  groupNewChatsByDay(newChats: ChatContent[], oldGrouped: Chat[]): Chat[] {
-    const oldChats = oldGrouped.flatMap((group) => group.chats)
-    const combinedChats = [...newChats, ...oldChats]
-
-    const uniqueChatsMap = new Map<string, ChatContent>()
-
-    combinedChats.forEach((chat) => {
-      uniqueChatsMap.set(chat._id, chat)
-    })
-
-    const uniqueChats = Array.from(uniqueChatsMap.values())
-    set({
-      newCount: uniqueChats.length,
-    })
-    const grouped: Record<string, ChatContent[]> = {}
-
-    uniqueChats.forEach((chat) => {
-      if (!grouped[chat.day]) {
-        grouped[chat.day] = []
-      }
-      grouped[chat.day].push(chat)
-    })
-
-    return Object.entries(grouped)
-      .map(([day, chats]) => ({
-        day,
-        chats: chats.sort(
-          (a, b) =>
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-        ),
-      }))
-      .sort((a, b) => new Date(a.day).getTime() - new Date(b.day).getTime())
-  },
-
-  addFriendsChat: async (saved: ChatContent, increase?: boolean) => {
-    FriendStore.setState((prev) => {
-      const updatedFriends = prev.friendsResults.map((friend) => {
-        if (friend.connection === saved.connection) {
-          const newUnreadCount = increase
-            ? (friend.unreadCount || 0) + 1
-            : friend.unreadCount || 0
-
-          return {
-            ...friend,
-            ...saved,
-            unreadCount: newUnreadCount,
-          }
-        }
-        return friend
-      })
-
-      const exists = updatedFriends.some(
-        (friend) => friend.connection === saved.connection
+  updateFriendsChat: async (friendChat) => {
+    set((prev) => {
+      const existingIndex = prev.friendsResults.findIndex(
+        (item) => item.connection === friendChat.connection
       )
 
-      if (!exists) {
-        updatedFriends.push({
-          ...saved,
-          unreadCount: increase ? 1 : 0,
-        })
+      const updatedFriends = [...prev.friendsResults]
+
+      if (existingIndex >= 0) {
+        updatedFriends[existingIndex] = {
+          ...updatedFriends[existingIndex],
+          ...friendChat,
+          isOnline: updatedFriends[existingIndex].isOnline,
+        }
+
+        const [movedItem] = updatedFriends.splice(existingIndex, 1)
+        updatedFriends.unshift(movedItem)
+      } else {
+        updatedFriends.unshift(friendChat)
       }
 
-      return { friendsResults: updatedFriends }
+      saveOrUpdateFriendInDB(friendChat).catch(console.error)
+
+      return {
+        friendsResults: updatedFriends,
+      }
     })
   },
 
-  // addFriendsChat: async (saved: ChatContent, increase) => {
-  //   FriendStore.setState((prev) => {
-  //     const oldFriends = [...prev.friendsResults];
-  //     let exists = false;
+  getSavedFriends: async () => {
+    try {
+      const friends = await getAllFriendsFromDB()
+      if (friends) {
+        set({ friendsResults: friends })
+      }
+    } catch (error: unknown) {
+      console.log(error)
+    }
+  },
 
-  //     const updatedFriends = oldFriends.map((friend) => {
-  //       if (friend.connection === saved.connection) {
-  //         exists = true;
-  //         friend.unreadCount = increase
-  //           ? friend.unreadCount++
-  //           : friend.unreadCount;
-  //         return saved;
-  //       }
-  //       return friend;
-  //     });
-
-  //     if (!exists) {
-  //       updatedFriends.push(saved);
-  //     }
-
-  //     return {
-  //       friendsResults: updatedFriends,
-  //     };
-  //   });
-  // },
-
-  getFriends: async (
-    url: string,
-    setMessage: (message: string, isError: boolean) => void
-  ) => {
+  getFriends: async (url, setMessage) => {
     try {
       const response = await apiRequest<FetchChatResponse>(url, {
         setMessage,
@@ -217,10 +151,10 @@ const FriendStore = create<ChatState>((set) => ({
       })
       const data = response?.data
       if (data) {
-        FriendStore.getState().setProcessedResults(
-          data.results,
-          data.totalUnread
-        )
+        // FriendStore.getState().setProcessedResults(
+        //   data.results,
+        //   data.totalUnread
+        // )
       }
     } catch (error: unknown) {
       console.log(error)
@@ -229,7 +163,7 @@ const FriendStore = create<ChatState>((set) => ({
 
   reshuffleResults: async () => {
     set((state) => ({
-      friendsResults: state.friendsResults.map((item: ChatContent) => ({
+      friendsResults: state.friendsResults.map((item: Friend) => ({
         ...item,
         isChecked: false,
         isActive: false,
@@ -247,17 +181,12 @@ const FriendStore = create<ChatState>((set) => ({
     } catch (error: unknown) {
       console.log(error)
       set({
-        error: 'Failed to search items',
         loading: false,
       })
     }
   }, 1000),
 
-  massDelete: async (
-    url: string,
-    selectedItems: ChatContent[],
-    setMessage: (message: string, isError: boolean) => void
-  ) => {
+  massDelete: async (url, selectedItems, setMessage) => {
     set({
       loading: true,
     })
@@ -272,7 +201,7 @@ const FriendStore = create<ChatState>((set) => ({
       const ids = ['']
       set((state) => {
         const selectedUpdatedChats = state.friendsResults
-          .filter((chat) => !ids.includes(chat._id))
+          .filter((chat) => !ids.includes(chat.connection))
           .map((chat) => {
             return {
               ...chat,
@@ -305,23 +234,6 @@ const FriendStore = create<ChatState>((set) => ({
       setMessage,
     })
     if (response) {
-    }
-  },
-
-  updateItem: async (
-    url: string,
-    updatedItem: FormData | Record<string, unknown>,
-    setMessage: (message: string, isError: boolean) => void
-  ) => {
-    set({ loading: true, error: null })
-    const response = await apiRequest<FetchChat>(url, {
-      method: 'PATCH',
-      body: updatedItem,
-      setMessage,
-      setLoading: FriendStore.getState().setLoading,
-    })
-    const data = response?.data
-    if (data) {
     }
   },
 
@@ -361,10 +273,11 @@ const FriendStore = create<ChatState>((set) => ({
     console.log(index)
   },
 
-  selectFriends: (_id: string) => {
+  selectFriends: (connection: string) => {
     set((state) => {
       const updatedResults = state.friendsResults.map((chat) => {
-        const isChecked = chat._id === _id ? !chat.isChecked : chat.isChecked
+        const isChecked =
+          chat.connection === connection ? !chat.isChecked : chat.isChecked
         return {
           ...chat,
           isChecked,

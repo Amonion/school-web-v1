@@ -1,10 +1,10 @@
 'use client'
 import { useEffect, useRef } from 'react'
-import { useSearchParams } from 'next/navigation'
 import { NavStore } from '@/src/zustand/notification/Navigation'
 import { AuthStore } from '@/src/zustand/user/AuthStore'
 import ExamStore from '@/src/zustand/exam/Exam'
 import QuestionCard from '@/components/Home/Exam/QuestionResources/QuestionCard'
+import { MessageStore } from '@/src/zustand/notification/Message'
 
 export default function QuestionList() {
   const { query, searchedText, setPage, page } = NavStore()
@@ -14,15 +14,25 @@ export default function QuestionList() {
     hasMoreSearch,
     loading,
     page_size,
+    exams,
+    getItems,
     searchExams,
     clearSearchedExams,
     addMoreSearchItems,
-    getQueryExams,
   } = ExamStore()
   const url = '/competitions/exams/find'
-  const searchParams = useSearchParams()
   const { user } = AuthStore()
+  const { setMessage } = MessageStore()
   const lastCardRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    const findItems = async () => {
+      getItems(getUrl(searchedText, page), setMessage)
+    }
+    if (exams.length === 0) {
+      findItems()
+    }
+  }, [exams])
 
   useEffect(() => {
     const findItems = async () => {
@@ -37,21 +47,12 @@ export default function QuestionList() {
     const findResults = async () => {
       searchExams(getUrl(searchedText, 1))
     }
-    if (searchedText.length > 0 && user) {
+    if (searchedExams.length > 0 && user) {
       findResults()
     } else {
       clearSearchedExams()
     }
   }, [searchedText, query, user])
-
-  useEffect(() => {
-    const q = searchParams.get('q')
-    if (q) {
-      getQueryExams(getUrl(q, 1))
-    } else {
-      getQueryExams(getUrl('', 1))
-    }
-  }, [])
 
   useEffect(() => {
     if (!lastCardRef.current) return
@@ -82,8 +83,8 @@ export default function QuestionList() {
         </div>
       )}
 
-      {searchedExams.map((item, index) => {
-        const isLast = index === searchedExams.length - 1
+      {exams.map((item, index) => {
+        const isLast = index === exams.length - 1
         return (
           <QuestionCard
             key={item._id}

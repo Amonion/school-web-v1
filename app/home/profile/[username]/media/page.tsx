@@ -115,7 +115,7 @@ const MediaGrid: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto sm:px-2 sm:pb-2">
+    <div className="container sm:pb-2">
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-1">
         {userMediaResults.map((item, index) => (
           <div
@@ -129,6 +129,27 @@ const MediaGrid: React.FC = () => {
                 alt={item.content}
                 className="w-full h-full object-cover"
               />
+            ) : item.backgroundColor ? (
+              <div
+                key={index}
+                style={{
+                  backgroundColor: item.backgroundColor,
+                  backgroundImage: item?.preview
+                    ? `url(${item.preview})`
+                    : undefined,
+                  backgroundSize: item?.preview ? 'cover' : undefined,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'center',
+                }}
+                className={`w-full h-full relative px-1 text-center  flex justify-center items-center`}
+              >
+                <div
+                  className="text-white line-clamp-3 overflow-ellipsis relative my-auto text-[12px] leading-[20px] z-10"
+                  dangerouslySetInnerHTML={{
+                    __html: item.content,
+                  }}
+                ></div>
+              </div>
             ) : (
               <video
                 src={item.src}

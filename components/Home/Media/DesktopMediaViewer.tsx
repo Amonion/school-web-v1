@@ -69,7 +69,7 @@ const DesktopMediaViewer: React.FC<DesktopMediaViewerProps> = ({
             alt={media.content}
             className="w-full max-h-full object-contain"
           />
-        ) : (
+        ) : media.type.includes('video') ? (
           <video
             src={media.src}
             poster={media.preview}
@@ -78,6 +78,20 @@ const DesktopMediaViewer: React.FC<DesktopMediaViewerProps> = ({
             loop
             controls
           />
+        ) : (
+          <div
+            style={{
+              backgroundColor: media.backgroundColor,
+            }}
+            className="relative w-full flex justify-center items-center text-center h-[70vh]"
+          >
+            <div
+              className="z-10 relative text-white"
+              dangerouslySetInnerHTML={{
+                __html: media.content,
+              }}
+            />
+          </div>
         )}
 
         <button

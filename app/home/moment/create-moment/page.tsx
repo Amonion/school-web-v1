@@ -6,15 +6,7 @@ import {
   MomentMediaEmpty,
   MomentStore,
 } from '@/src/zustand/post/Moment'
-import {
-  Edit,
-  ImageIcon,
-  Palette,
-  Smile,
-  Trash,
-  Type,
-  VideoIcon,
-} from 'lucide-react'
+import { Edit, ImageIcon, Palette, Smile, Trash, VideoIcon } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import Picker from '@emoji-mart/react'
 import { useTheme } from '@/context/ThemeProvider'
@@ -48,6 +40,7 @@ export default function CreateMoment() {
   const [isColor, setIsColor] = useState(false)
   const [loading, setLoading] = useState(false)
   const [canAdd, setCanAdd] = useState(false)
+  const [canSend, setCanSend] = useState(false)
   const [editingMoment, setEditingMoment] = useState(false)
   const [editingMomentId, setEditingMomentId] = useState('')
   const { user } = AuthStore()
@@ -77,21 +70,21 @@ export default function CreateMoment() {
   }, [pathname, moments])
 
   useEffect(() => {
-    if (momentMedia?.content || momentMedia?.src || momentMedias.length) {
+    if (momentMedia?.content || momentMedia?.src) {
       setCanAdd(true)
-    } else if (
-      !momentMedia?.content &&
-      !momentMedia?.src &&
-      momentMedias.length === 0
-    ) {
+    } else {
       setCanAdd(false)
     }
-    // if (momentMedias.length > 0) {
-    //   setCanAdd(true)
-    // } else {
-    //   setCanAdd(false)
-    // }
-  }, [momentMedia])
+    if (
+      momentMedias.length > 0 &&
+      !momentMedia.content &&
+      !momentMedia.preview
+    ) {
+      setCanSend(true)
+    } else {
+      setCanSend(false)
+    }
+  }, [momentMedia, momentMedias])
 
   useEffect(() => {
     if (!socket) return
@@ -243,7 +236,6 @@ export default function CreateMoment() {
         picture: user?.picture,
         media: momentMedias,
       }
-
       setLoading(true)
       socket.emit('message', formData)
     } else {
@@ -479,7 +471,7 @@ export default function CreateMoment() {
           ) : (
             <div className="relative">
               <div className="flex relative items-center px-2 mt-2">
-                <label className="cursor-pointer mr-3">
+                <label className="cursor-pointer mr-4">
                   <input
                     type="file"
                     accept="image/*"
@@ -488,7 +480,7 @@ export default function CreateMoment() {
                   />
                   <ImageIcon size={20} className="" />
                 </label>
-                <label className="cursor-pointer mr-3">
+                <label className="cursor-pointer mr-4">
                   <input
                     type="file"
                     accept="video/*"
@@ -497,7 +489,7 @@ export default function CreateMoment() {
                   />
                   <VideoIcon size={22} className="" />
                 </label>
-                {canAdd && (
+                {canSend && (
                   <div
                     onClick={submitMoment}
                     className="rounded-[25px] px-3 bg-[var(--primary)] mr-3 cursor-pointer"
@@ -513,12 +505,11 @@ export default function CreateMoment() {
                     Add
                   </div>
                 )}
-                <Type size={20} className="text-[var(--custom)] ml-auto" />
                 <Smile
                   onClick={() => setShowEmojiPicker((prev) => !prev)}
-                  className="cursor-pointer ml-3"
+                  className="cursor-pointer ml-auto"
                 />
-                <div className="cursor-pointer relative ml-3">
+                <div className="cursor-pointer relative ml-4">
                   <Palette
                     onClick={() => setIsColor(!isColor)}
                     size={22}
@@ -568,7 +559,7 @@ export default function CreateMoment() {
                       className={`w-full h-[110px] relative px-1 text-center rounded-[5px] overflow-hidden flex justify-center items-center`}
                     >
                       {
-                        <div className="text-white textShadow line-clamp-3 overflow-ellipsis relative my-auto text-[12px] leading-[20px] z-10">
+                        <div className="text-white line-clamp-3 overflow-ellipsis relative my-auto text-[12px] leading-[20px] z-10">
                           {item.content}
                         </div>
                       }

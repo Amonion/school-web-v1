@@ -13,6 +13,7 @@ import PictureDisplay from '@/components/Home/Media/PictureDisplay'
 import ProfileBottomSheet from '@/components/Home/Profile/ProfileBottomSheet'
 import UserPostStore from '@/src/zustand/post/UserPost'
 import UserMediaHolder from '@/components/Home/Media/UserMediaHolder'
+import { MessageCircle } from 'lucide-react'
 
 const Profile = ({ children }: { children: React.ReactNode }) => {
   const { username } = useParams()
@@ -166,9 +167,9 @@ const Profile = ({ children }: { children: React.ReactNode }) => {
                 <div className="flex items-center">
                   <Link
                     className="mr-3 text-lg"
-                    href={`/home/friends/chat/${userForm.username}`}
+                    href={`/friends/chat/${userForm.username}`}
                   >
-                    <i className="bi bi-envelope text-[15px]"></i>
+                    <MessageCircle />
                   </Link>
                   <div
                     onClick={followAccount}

@@ -1,6 +1,7 @@
 'use client'
 import { initializeSound } from '@/lib/sound'
 import useSocket from '@/src/useSocket'
+import FriendStore from '@/src/zustand/chat/Friend'
 import { MessageStore } from '@/src/zustand/notification/Message'
 import SchoolStore from '@/src/zustand/school/School'
 import { AuthStore } from '@/src/zustand/user/AuthStore'
@@ -21,13 +22,14 @@ interface GeneralProviderProps {
 export const GeneralProvider = ({ children }: GeneralProviderProps) => {
   const socket = useSocket()
   const { setIp, setBaseUrl, setMessage, baseURL } = MessageStore()
+  const { getSavedFriends } = FriendStore()
   const { user } = AuthStore()
   const { getSchoolNotifications } = SchoolStore()
   const { officeForm } = OfficeStore()
 
   useEffect(() => {
     initializeSound()
-
+    getSavedFriends()
     const url =
       process.env.NODE_ENV === 'production'
         ? process.env.NEXT_PUBLIC_PROD_API_URL

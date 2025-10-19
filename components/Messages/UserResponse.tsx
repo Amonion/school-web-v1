@@ -7,7 +7,7 @@ export default function Response() {
   return (
     <AnimatePresence>
       {message !== null && (
-        <div className={`overlay z-50`} onClick={clearMessage}>
+        <div className={`overlay z-[100]`} onClick={clearMessage}>
           <motion.div
             className={`text-white ${
               isSuccess ? 'bg-green-500' : 'bg-[var(--custom)]'

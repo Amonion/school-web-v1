@@ -1,6 +1,23 @@
 import { create } from 'zustand'
 import _debounce from 'lodash/debounce'
 import apiRequest from '@/lib/axios'
+import { initDB } from '@/lib/indexDB'
+
+export const saveOrUpdateMessageInDB = async (message: ChatContent) => {
+  const db = await initDB()
+  await db.put('messages', {
+    ...message,
+    createdAt: new Date().toISOString(),
+  })
+}
+
+export const getMessagesByConnection = async (
+  connection: string
+): Promise<ChatContent[]> => {
+  const db = await initDB()
+  const index = db.transaction('messages').store.index('connection')
+  return index.getAll(connection)
+}
 
 interface FetchChatResponse {
   count: number
@@ -10,9 +27,17 @@ interface FetchChatResponse {
   results: ChatContent[]
 }
 
+interface FetchUserResponse {
+  count: number
+  message: string
+  page_size: number
+  data: ChatUserForm
+}
+
 interface ChatState {
   chatContentResults: ChatContent[]
   chatResults: Chat[]
+  connection: string
   count: number
   current: number
   favChatContentResults: ChatContent[]
@@ -30,7 +55,8 @@ interface ChatState {
   senderUsername: string
   successs?: string | null
   unread: number
-
+  chatUserForm: ChatUserForm
+  getSavedChats: (url: string) => Promise<void>
   getChats: (
     url: string,
     setMessage: (message: string, isError: boolean) => void
@@ -47,9 +73,13 @@ interface ChatState {
     url: string,
     setMessage: (message: string, isError: boolean) => void
   ) => Promise<void>
+  getChatUser: (
+    url: string,
+    setMessage: (message: string, isError: boolean) => void
+  ) => Promise<void>
   addSearchedChats: (url: string, createdAt: Date) => Promise<void>
   addFavSearchedChats: (url: string, createdAt: Date) => Promise<void>
-  setProcessedResults: (data: Chat[], unread: number) => void
+  setProcessedResults: (data: Chat[]) => void
   setProcessedFavResults: (data: Chat[]) => void
   setLoading?: (loading: boolean) => void
   massDelete: (
@@ -68,6 +98,7 @@ interface ChatState {
   groupNewChatsByDay: (chats: ChatContent[], oldChats: Chat[]) => Chat[]
   groupChatsByDay: (chats: ChatContent[]) => Chat[]
   selectChats: (id: string) => void
+  setConnection: (connection: string) => void
   addNewChat: (saved: ChatContent) => void
   updateChats: (chat: ChatContent[], message?: string) => void
   selectFavChats: (id: string) => void
@@ -78,6 +109,20 @@ interface ChatState {
   searchChats: (url: string) => void
   pendingReadIds: React.MutableRefObject<Set<string>>
   resetPendingReadIds: () => void
+}
+
+export interface ChatUserForm {
+  username: string
+  displayName: string
+  picture: string
+  _id: string
+}
+
+export const ChatUserFormEmpty = {
+  username: '',
+  displayName: '',
+  picture: '',
+  _id: '',
 }
 
 export const ChatContentEmpty = {
@@ -91,8 +136,6 @@ export const ChatContentEmpty = {
   isSavedUsernames: '',
   isReadUsernames: '',
   isPinned: false,
-  isFriends: false,
-  userId: '',
   from: '',
   username: '',
   picture: '',
@@ -100,12 +143,11 @@ export const ChatContentEmpty = {
   day: '',
   receiverUsername: '',
   receiverPicture: '',
-  message: '',
+  status: '',
   unread: 0,
   unreadCount: 0,
   unreadReceiver: 0,
   unreadUser: 0,
-  receiverId: '',
   senderTime: new Date(),
   createdAt: new Date(),
   time: new Date(),
@@ -115,8 +157,10 @@ export const ChatContentEmpty = {
 export const ChatStore = create<ChatState>((set) => ({
   chatContentResults: [],
   chatResults: [],
+  connection: '',
   count: 0,
   current: 0,
+  chatUserForm: ChatUserFormEmpty,
   favChatContentResults: [],
   favChatResults: [],
   isAllChecked: false,
@@ -140,13 +184,10 @@ export const ChatStore = create<ChatState>((set) => ({
     })
   },
 
-  setProcessedResults: (results, unread) => {
-    set((state) => {
-      return {
-        loading: false,
-        chatResults: results,
-        unread: unread === -1 ? state.unread : unread,
-      }
+  setProcessedResults: (results) => {
+    set({
+      loading: false,
+      chatResults: results,
     })
   },
 
@@ -159,6 +200,10 @@ export const ChatStore = create<ChatState>((set) => ({
 
   setLoading: (loadState: boolean) => {
     set({ loading: loadState })
+  },
+
+  setConnection: (connection: string) => {
+    set({ connection: connection })
   },
 
   groupChatsByDay(chats: ChatContent[]): Chat[] {
@@ -188,6 +233,23 @@ export const ChatStore = create<ChatState>((set) => ({
         (a, b) =>
           parseDayString(a.day).getTime() - parseDayString(b.day).getTime()
       )
+  },
+
+  getChatUser: async (url, setMessage) => {
+    try {
+      const response = await apiRequest<FetchUserResponse>(url, {
+        setMessage,
+      })
+      const data = response?.data
+      if (data) {
+        set({
+          chatUserForm: data.data,
+          loading: false,
+        })
+      }
+    } catch (error: unknown) {
+      if (error) return
+    }
   },
 
   groupNewChatsByDay(newChats: ChatContent[], oldGrouped: Chat[]): Chat[] {
@@ -242,15 +304,29 @@ export const ChatStore = create<ChatState>((set) => ({
       })
       const data = response?.data
       if (data) {
-        if (data.results.length > 0) {
-          ChatStore.setState({
-            isFriends: data.results[0].isFriends,
-            senderUsername: data.results[0].username,
-            chatContentResults: data.results,
-          })
-        }
-        const results = ChatStore.getState().groupChatsByDay(data.results)
-        ChatStore.getState().setProcessedResults(results, data.unread)
+        // if (data.results.length > 0) {
+        //   ChatStore.setState({
+        //     chatContentResults: data.results,
+        //   })
+        // }
+        // const results = ChatStore.getState().groupChatsByDay(data.results)
+        // ChatStore.getState().setProcessedResults(results)
+      }
+    } catch (error: unknown) {
+      console.log(error)
+    }
+  },
+
+  getSavedChats: async (connection) => {
+    try {
+      const chats = await getMessagesByConnection(connection)
+      console.log(chats)
+      if (chats) {
+        ChatStore.setState({
+          chatContentResults: chats,
+        })
+        const results = ChatStore.getState().groupChatsByDay(chats)
+        ChatStore.getState().setProcessedResults(results)
       }
     } catch (error: unknown) {
       console.log(error)
@@ -305,7 +381,7 @@ export const ChatStore = create<ChatState>((set) => ({
             current: state.current + 1,
           }
         })
-        ChatStore.getState().setProcessedResults(newResults, -1)
+        ChatStore.getState().setProcessedResults(newResults)
       }
     } catch (error: unknown) {
       console.log(error)
@@ -332,8 +408,9 @@ export const ChatStore = create<ChatState>((set) => ({
         })
       }
 
+      saveOrUpdateMessageInDB(saved)
+
       return {
-        isFriends: updateChats[updateChats.length - 1].isFriends,
         senderUsername: updateChats[updateChats.length - 1].username,
         chatResults: updatedResults,
         chatContentResults: updateChats,
@@ -436,7 +513,7 @@ export const ChatStore = create<ChatState>((set) => ({
           data.results,
           old
         )
-        ChatStore.getState().setProcessedResults(newResults, -1)
+        ChatStore.getState().setProcessedResults(newResults)
         set((state) => {
           return {
             count: data.count,
@@ -828,21 +905,17 @@ export interface ChatContent {
   isSavedUsernames: string[]
   isReadUsernames: string[]
   isPinned: boolean
-  isFriends: boolean
-  userId: string
-  from: string
   username: string
   picture: string
   media: FileType[]
   day: string
   receiverUsername: string
   receiverPicture: string
-  message: string
+  status: string
   unread: number
   unreadCount: number
   unreadReceiver: number
   unreadUser: number
-  receiverId: string
   senderTime: Date
   createdAt: Date
   time: Date
@@ -858,13 +931,11 @@ export interface RepliedChatContent {
   content: string
   isSent: boolean
   isRead: boolean
-  userId: string
   username: string
   picture: string
   media: FileType[]
   receiverUsername: string
   receiverPicture: string
-  receiverId: string
   senderTime: Date
   createdAt: Date
   time: Date

@@ -5,9 +5,11 @@ import TraceHeader from './TraceHeader'
 import HomeHeader from './HomeHeader'
 import OtherHeader from './OtherHeader'
 import QuestionHeader from './QuestionHeader'
+import { PostStore } from '@/src/zustand/post/Post'
 
 export default function HeaderWrapper() {
   const { setHeaderHeight } = NavStore()
+  const { postResults } = PostStore()
   const pathname = usePathname()
   const divRef = useRef<HTMLDivElement | null>(null)
   const [showHeader, setShowHeader] = useState(true)
@@ -22,10 +24,17 @@ export default function HeaderWrapper() {
       }
     }
 
-    updateHeaderHeight()
+    // Run once after render
+    const timeout = setTimeout(() => {
+      updateHeaderHeight()
+    }, 100)
+
     window.addEventListener('resize', updateHeaderHeight)
-    return () => window.removeEventListener('resize', updateHeaderHeight)
-  }, [pathname])
+    return () => {
+      clearTimeout(timeout)
+      window.removeEventListener('resize', updateHeaderHeight)
+    }
+  }, [pathname, postResults])
 
   useEffect(() => {
     const handleScroll = () => {

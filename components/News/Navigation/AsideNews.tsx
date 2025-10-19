@@ -27,7 +27,7 @@ export default function AsideNews() {
             type="search"
             // onChange={(e) => setSearchedText(e.target.value)}
             className={`bg-transparent border-none outline-none flex-1`}
-            placeholder={`Search friend or conversation...`}
+            placeholder={`Search news...`}
           />
           <i className="bi bi-search common-icon cursor-pointer"></i>
         </div>
