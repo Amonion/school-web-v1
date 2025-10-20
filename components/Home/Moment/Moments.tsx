@@ -98,7 +98,7 @@ export default function Moments() {
                   className="object-cover w-full h-full"
                 />
               ) : (
-                moment.media && (
+                moment.media.length > 0 && (
                   <div
                     style={{
                       backgroundColor: moment.media[0].backgroundColor,
