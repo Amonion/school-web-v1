@@ -90,7 +90,16 @@ export default function Moments() {
               onClick={() => openMomentModal(idx)}
               className="story"
             >
-              {moment.media.length > 0 && moment.media[0].preview ? (
+              {moment.media.length > 0 &&
+              moment.media[0].type.includes('image') ? (
+                <Image
+                  src={moment?.media[0].src}
+                  alt={moment?.username}
+                  fill
+                  className="object-cover w-full h-full"
+                />
+              ) : moment.media.length > 0 &&
+                moment.media[0].type.includes('video') ? (
                 <Image
                   src={moment?.media[0].preview}
                   alt={moment?.username}
