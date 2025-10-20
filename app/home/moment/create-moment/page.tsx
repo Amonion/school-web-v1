@@ -195,6 +195,8 @@ export default function CreateMoment() {
       textareaRef.current.style.height = 'auto'
     }
 
+    console.log(momentMedia)
+
     MomentStore.setState((prev) => {
       return {
         momentMedia: {
@@ -236,6 +238,7 @@ export default function CreateMoment() {
         picture: user?.picture,
         media: momentMedias,
       }
+      console.log(formData)
       setLoading(true)
       socket.emit('message', formData)
     } else {
@@ -381,6 +384,8 @@ export default function CreateMoment() {
           }
         })
       }
+
+      console.log(publicFileUrl)
 
       setPercents(0)
       return publicFileUrl
