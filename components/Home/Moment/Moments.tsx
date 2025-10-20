@@ -90,7 +90,7 @@ export default function Moments() {
               onClick={() => openMomentModal(idx)}
               className="story"
             >
-              {moment.media && moment.media[0].preview ? (
+              {moment.media.length > 0 && moment.media[0].preview ? (
                 <Image
                   src={moment?.media[0].preview}
                   alt={moment?.username}
