@@ -119,7 +119,7 @@ export default function Moments() {
               <div className="absolute top-3 left-1 flex items-center gap-1">
                 <div
                   className={`w-7 h-7 min-w-7 relative rounded-full overflow-hidden border-1 ${
-                    moment.media && moment.media[0].isViewed
+                    moment.media.length > 0 && moment.media[0].isViewed
                       ? 'border-[var(--custom)]'
                       : 'border-white/30'
                   }`}
