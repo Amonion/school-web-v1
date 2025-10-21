@@ -1,6 +1,7 @@
 'use client'
 import { initializeSound } from '@/lib/sound'
 import useSocket from '@/src/useSocket'
+import { ChatContent, ChatStore } from '@/src/zustand/chat/Chat'
 import FriendStore from '@/src/zustand/chat/Friend'
 import { MessageStore } from '@/src/zustand/notification/Message'
 import SchoolStore from '@/src/zustand/school/School'
@@ -19,13 +20,25 @@ interface GeneralProviderProps {
   children: ReactNode
 }
 
+type response = {
+  message: string
+  key: string
+  totalUnread: number
+  receiverId: string
+  userId: string
+  username: string
+  pending: boolean
+  data: ChatContent
+}
+
 export const GeneralProvider = ({ children }: GeneralProviderProps) => {
   const socket = useSocket()
   const { setIp, setBaseUrl, setMessage, baseURL } = MessageStore()
-  const { getSavedFriends } = FriendStore()
+  const { getSavedFriends, updatePendingFriendsChat } = FriendStore()
   const { user } = AuthStore()
   const { getSchoolNotifications } = SchoolStore()
   const { officeForm } = OfficeStore()
+  const { connection, updatePendingChat } = ChatStore()
 
   useEffect(() => {
     initializeSound()
@@ -102,6 +115,24 @@ export const GeneralProvider = ({ children }: GeneralProviderProps) => {
       setMessage
     )
   }, [officeForm])
+
+  useEffect(() => {
+    if (!socket) return
+
+    if (user) {
+      socket.on(`createdChat${connection}`, (data: response) => {
+        if (data.pending) {
+          console.log(data)
+          updatePendingChat(data.data)
+          updatePendingFriendsChat(data.data.connection)
+        }
+      })
+    }
+
+    return () => {
+      socket.off(`createdChat${connection}`)
+    }
+  }, [user, socket, connection])
 
   const updateUserPresence = async (ip: string, online: boolean) => {
     try {

@@ -60,7 +60,6 @@ export default function HeaderWrapper() {
   return (
     <>
       <div
-        ref={divRef}
         className={`w-full flex fixed top-0 z-40 sm:z-30 left-0 justify-center transition-transform duration-300 ease-in-out ${
           showHeader ? 'translate-y-0' : '-translate-y-full sm:-translate-y-0'
         }  `}
@@ -68,7 +67,10 @@ export default function HeaderWrapper() {
         <div className="custom_container">
           <div className="w-full flex">
             <div className="sm:w-[270px] sm:min-w-[270px] xl:w-[300px] w-0" />
-            <div className="flex-1 sm:px-4 py-2 overflow-x-auto sm:overflow-hidden border-b border-b-[var(--border)] relative sm:ml-5 md:mr-5  bg-[var(--primary)]">
+            <div
+              ref={divRef}
+              className="flex-1 max-h-[95px] sm:px-4 py-2 overflow-x-auto sm:overflow-hidden border-b border-b-[var(--border)] relative sm:ml-5 md:mr-5  bg-[var(--primary)]"
+            >
               {pathname.includes('/home/trace') ? (
                 <TraceHeader />
               ) : pathname === '/home' ? (

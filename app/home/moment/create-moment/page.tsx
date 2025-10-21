@@ -33,7 +33,7 @@ export default function CreateMoment() {
     setShowMoment,
   } = MomentStore()
   const { socket } = usePersonalNotificationContext()
-  const { setMessage } = MessageStore()
+  const { setMessage, baseURL } = MessageStore()
   const [percents, setPercents] = useState(0)
   const [showEmojiPicker, setShowEmojiPicker] = useState(false)
   const [momentMedias, addMomentMedia] = useState<MomentMedia[]>([])
@@ -195,8 +195,6 @@ export default function CreateMoment() {
       textareaRef.current.style.height = 'auto'
     }
 
-    console.log(momentMedia)
-
     MomentStore.setState((prev) => {
       return {
         momentMedia: {
@@ -238,7 +236,6 @@ export default function CreateMoment() {
         picture: user?.picture,
         media: momentMedias,
       }
-      console.log(formData)
       setLoading(true)
       socket.emit('message', formData)
     } else {
@@ -314,7 +311,7 @@ export default function CreateMoment() {
       })
 
       const { data: filePresign } = await axios.post(
-        `https://schoolingsocial-api-v1.onrender.com/api/v1/s3-presigned-url`,
+        `${baseURL}s3-presigned-url`,
         {
           fileName: file.name,
           fileType: file.type,
@@ -341,7 +338,7 @@ export default function CreateMoment() {
         const blob = await (await fetch(localThumbUrl)).blob()
         const thumbFileName = file.name.replace(/\.[^/.]+$/, '') + '-thumb.jpg'
         const { data: thumbPresign } = await axios.post(
-          `https://schoolingsocial-api-v1.onrender.com/api/v1/s3-presigned-url`,
+          `${baseURL}s3-presigned-url`,
           {
             fileName: thumbFileName,
             fileType: 'image/jpeg',
@@ -385,8 +382,6 @@ export default function CreateMoment() {
         })
       }
 
-      console.log(publicFileUrl)
-
       setPercents(0)
       return publicFileUrl
     } catch (error) {
@@ -399,10 +394,7 @@ export default function CreateMoment() {
   const handleRemoveFile = async (index: number, source: string) => {
     try {
       const fileKey = source.split('.com/')[1]
-      await axios.post(
-        `https://schoolingsocial-api-v1.onrender.com/api/v1/s3-delete-file`,
-        { fileKey }
-      )
+      await axios.post(`${baseURL}s3-delete-file`, { fileKey })
       addMomentMedia((prevFiles) => prevFiles.filter((_, i) => i !== index))
     } catch (error) {
       console.error('Failed to delete file from S3:', error)

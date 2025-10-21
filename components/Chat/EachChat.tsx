@@ -156,9 +156,9 @@ const EachChat = ({ e, isFirst }: ChatContentProps) => {
         onClick={(e) => {
           e.stopPropagation()
         }}
-        className={`${e.username === user?.username ? 'sender' : 'receiver'} ${
-          e.media[0] && e.media[0].type === 'audio' ? 'audio' : ''
-        } ${
+        className={`${
+          e.senderUsername === user?.username ? 'sender' : 'receiver'
+        } ${e.media[0] && e.media[0].type === 'audio' ? 'audio' : ''} ${
           e.media[0] &&
           (e.media[0].type === 'picture' || e.media[0].type === 'video')
             ? 'media'
@@ -169,7 +169,7 @@ const EachChat = ({ e, isFirst }: ChatContentProps) => {
           <div
             onClick={() => selectChats(String(e.repliedChat?.username))}
             className={`${
-              e.username === user?.username
+              e.senderUsername === user?.username
                 ? 'bg-[var(--secondary)]'
                 : 'bg-[var(--custom-dark)]'
             } flex  rounded-[10px] py-[1px] px-[5px] cursor-pointer w-full mb-2`}
@@ -223,7 +223,7 @@ const EachChat = ({ e, isFirst }: ChatContentProps) => {
                   target="_blank"
                   rel="noopener noreferrer"
                   className={`${
-                    username === e.username
+                    username === e.senderUsername
                       ? 'border-white text-white'
                       : 'border-[var(--text-primary)]'
                   } cursor-pointer ml-auto min-w-8 w-8 h-8 border rounded-full flex items-center justify-center`}
@@ -234,7 +234,7 @@ const EachChat = ({ e, isFirst }: ChatContentProps) => {
             ) : e.media[0].type === 'audio' ? (
               <AudioMessage
                 src={e.media[0].source}
-                isSender={e.username === user?.username}
+                isSender={e.senderUsername === user?.username}
                 name={e.media[0].name}
               />
             ) : (
@@ -248,7 +248,7 @@ const EachChat = ({ e, isFirst }: ChatContentProps) => {
         </div>
         <div className="flex leading-[15px] justify-between w-full items-center text-[11px]">
           <div className="flex items-end">
-            {e.username === user?.username ? (
+            {e.senderUsername === user?.username ? (
               <>
                 {formatTimeTo12Hour(e.senderTime)}{' '}
                 <div className="flex ml-3 text-[10px]">
@@ -281,7 +281,7 @@ const EachChat = ({ e, isFirst }: ChatContentProps) => {
         </div>
         {e.isSavedUsernames.includes(String(user?.username)) && (
           <>
-            {e.username === user?.username ? (
+            {e.senderUsername === user?.username ? (
               <div className="round absolute left-0 bottom-[-15px]">
                 <i className="bi bi-heart-fill text-[10px] mt-[2px] leading-none cursor-pointer text-red-600"></i>
               </div>

@@ -5,6 +5,7 @@ import { useParams, usePathname } from 'next/navigation'
 import { MessageStore } from '@/src/zustand/notification/Message'
 import { AuthStore } from '@/src/zustand/user/AuthStore'
 import { ChatStore } from '@/src/zustand/chat/Chat'
+import FriendStore from '@/src/zustand/chat/Friend'
 
 interface Media {
   name: string
@@ -14,6 +15,7 @@ export default function ChatHead() {
   const [isInputExpanded, setExpandInput] = useState(false)
   const [text, setText] = useState('')
   const { setMessage } = MessageStore()
+  const { friendsResults } = FriendStore()
   const inputRef = useRef<HTMLInputElement>(null)
   const pathname = usePathname()
   const {
@@ -51,7 +53,23 @@ export default function ChatHead() {
     if (chatUserForm.username !== username) {
       getChatUser(`/users/chat/${username}`, setMessage)
     }
-  }, [chatUserForm])
+  }, [chatUserForm, pathname])
+
+  useEffect(() => {
+    if (friendsResults.length > 0 && username) {
+      FriendStore.setState((prev) => {
+        const friend = prev.friendsResults.find(
+          (item) =>
+            item.senderUsername === username ||
+            item.receiverUsername === username
+        )
+        return {
+          friendForm: friend,
+        }
+      })
+      // getChatUser(`/users/chat/${username}`, setMessage)
+    }
+  }, [username, friendsResults])
 
   useEffect(() => {
     if (inputRef.current) {

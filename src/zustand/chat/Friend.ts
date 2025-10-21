@@ -16,7 +16,7 @@ export const getAllFriendsFromDB = async (): Promise<Friend[]> => {
   return db.getAll('friends')
 }
 
-interface Friend {
+export interface Friend {
   senderDisplayName: string
   senderUsername: string
   senderPicture: string
@@ -27,9 +27,25 @@ interface Friend {
   status: string
   connection: string
   createdAt: Date | null
+  isFriends: boolean
   isOnline: boolean
   isActive?: boolean
   isChecked?: boolean
+}
+
+export const FriendEmpty = {
+  senderDisplayName: '',
+  senderUsername: '',
+  senderPicture: '',
+  receiverDisplayName: '',
+  receiverUsername: '',
+  receiverPicture: '',
+  content: '',
+  status: '',
+  connection: '',
+  createdAt: null,
+  isFriends: false,
+  isOnline: false,
 }
 
 interface FetchChatResponse {
@@ -46,18 +62,16 @@ interface FriendState {
   totalUnread: number
   page_size: number
   friendsResults: Friend[]
+  friendForm: Friend
   loading: boolean
   selectedItems: Friend[]
   searchResult: Friend[]
   isAllChecked: boolean
-
   getFriends: (
     url: string,
     setMessage: (message: string, isError: boolean) => void
   ) => Promise<void>
-
   getSavedFriends: () => Promise<void>
-
   setProcessedResults: (data: Friend[], totalUnread: number) => void
   setLoading?: (loading: boolean) => void
   massDelete: (
@@ -72,6 +86,7 @@ interface FriendState {
   ) => Promise<void>
   selectFriends: (id: string) => void
   updateFriendsChat: (chats: Friend) => void
+  updatePendingFriendsChat: (connection: string) => void
   toggleChecked: (index: number) => void
   toggleActive: (index: number) => void
   toggleAllSelected: () => void
@@ -85,6 +100,7 @@ const FriendStore = create<FriendState>((set) => ({
   totalUnread: 0,
   page_size: 0,
   friendsResults: [],
+  friendForm: FriendEmpty,
   loading: false,
   error: null,
   selectedItems: [],
@@ -128,6 +144,18 @@ const FriendStore = create<FriendState>((set) => ({
 
       return {
         friendsResults: updatedFriends,
+      }
+    })
+  },
+
+  updatePendingFriendsChat: async (connection) => {
+    set((prev) => {
+      const friends = prev.friendsResults.map((item) =>
+        item.connection === connection ? { ...item, status: 'sent' } : item
+      )
+
+      return {
+        friendsResults: friends,
       }
     })
   },

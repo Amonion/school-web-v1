@@ -21,6 +21,8 @@ import { OfficialMessageProvider } from '@/context/HomeContext/OfficialMessageCo
 import { PersonalNotificationProvider } from '@/context/HomeContext/PersonalNotificationContext'
 import { usePathname } from 'next/navigation'
 import CompanyStore from '@/src/zustand/app/Company'
+import { getPendingMessages } from '@/lib/indexDB'
+import useSocket from '@/src/useSocket'
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -40,39 +42,62 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   const [isMounted, setIsMounted] = useState(false)
+  const [counter, setCounter] = useState(2)
   const { setOnline, setBoxVisibility, setMessage } = MessageStore()
   const { getCompany } = CompanyStore()
   const pathname = usePathname()
+  const socket = useSocket()
 
   useEffect(() => {
     setBoxVisibility(false)
   }, [pathname])
 
+  const checkInternetAccess = async () => {
+    try {
+      await fetch('https://1.1.1.1/cdn-cgi/trace', {
+        cache: 'no-store',
+      })
+      setOnline('', true)
+      setCounter((prev) => {
+        return prev + 1
+      })
+    } catch {
+      setCounter(0)
+    }
+  }
+
+  const sendPendingMessages = async () => {
+    const messages = await getPendingMessages()
+    if (messages.length > 0 && socket) {
+      const form = {
+        messages,
+        to: 'pendingChat',
+      }
+      socket.emit('message', form)
+    }
+  }
+
+  useEffect(() => {
+    if (counter === 1 && socket) {
+      sendPendingMessages()
+      setOnline('You are back online', true)
+    } else if (counter === 0) {
+      setOnline("Sorry, you're now offline", false)
+    }
+  }, [counter, socket])
+
+  useEffect(() => {
+    if (socket) {
+      sendPendingMessages()
+    }
+  }, [socket])
+
   useEffect(() => {
     setIsMounted(true)
     getCompany('/company', setMessage)
-
-    if (navigator.onLine) {
-      setOnline('', true)
-    } else {
-      setOnline("Sorry, you're now offline", false)
-    }
-
-    const updateStatusOnline = () => {
-      setOnline("Cool! You're now back online", true)
-    }
-
-    const updateStatusOffline = () => {
-      setOnline("Sorry, you're now offline", false)
-    }
-
-    window.addEventListener('online', updateStatusOnline)
-    window.addEventListener('offline', updateStatusOffline)
-
-    return () => {
-      window.removeEventListener('online', updateStatusOnline)
-      window.removeEventListener('offline', updateStatusOffline)
-    }
+    checkInternetAccess()
+    const interval = setInterval(checkInternetAccess, 1000)
+    return () => clearInterval(interval)
   }, [])
 
   //------------INITIALIZE SOUND, GET USER IP & INTERNET CONNECTION -------------//

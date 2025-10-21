@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import _debounce from 'lodash/debounce'
 import apiRequest from '@/lib/axios'
-import { initDB } from '@/lib/indexDB'
+import { initDB, updatePendingMessageStatus } from '@/lib/indexDB'
 
 export const saveOrUpdateMessageInDB = async (message: ChatContent) => {
   const db = await initDB()
@@ -95,6 +95,7 @@ interface ChatState {
     refreshUrl?: string
   ) => Promise<void>
 
+  updatePendingChat: (chats: ChatContent) => void
   groupNewChatsByDay: (chats: ChatContent[], oldChats: Chat[]) => Chat[]
   groupChatsByDay: (chats: ChatContent[]) => Chat[]
   selectChats: (id: string) => void
@@ -137,8 +138,8 @@ export const ChatContentEmpty = {
   isReadUsernames: '',
   isPinned: false,
   from: '',
-  username: '',
-  picture: '',
+  senderUsername: '',
+  senderPicture: '',
   media: [],
   day: '',
   receiverUsername: '',
@@ -304,13 +305,18 @@ export const ChatStore = create<ChatState>((set) => ({
       })
       const data = response?.data
       if (data) {
-        // if (data.results.length > 0) {
-        //   ChatStore.setState({
-        //     chatContentResults: data.results,
-        //   })
-        // }
+        if (data.results.length > 0) {
+          ChatStore.setState({
+            chatContentResults: data.results,
+          })
+        }
         // const results = ChatStore.getState().groupChatsByDay(data.results)
-        // ChatStore.getState().setProcessedResults(results)
+        const oldChats = ChatStore.getState().chatResults
+        const results = ChatStore.getState().groupNewChatsByDay(
+          data.results,
+          oldChats
+        )
+        ChatStore.getState().setProcessedResults(results)
       }
     } catch (error: unknown) {
       console.log(error)
@@ -320,7 +326,6 @@ export const ChatStore = create<ChatState>((set) => ({
   getSavedChats: async (connection) => {
     try {
       const chats = await getMessagesByConnection(connection)
-      console.log(chats)
       if (chats) {
         ChatStore.setState({
           chatContentResults: chats,
@@ -411,10 +416,29 @@ export const ChatStore = create<ChatState>((set) => ({
       saveOrUpdateMessageInDB(saved)
 
       return {
-        senderUsername: updateChats[updateChats.length - 1].username,
+        senderUsername: updateChats[updateChats.length - 1].senderUsername,
         chatResults: updatedResults,
         chatContentResults: updateChats,
       }
+    })
+  },
+
+  updatePendingChat: async (newChat) => {
+    ChatStore.setState((prev) => {
+      const updatedResults: Chat[] = [...prev.chatResults]
+      updatePendingMessageStatus(
+        newChat.connection,
+        Number(newChat.timeNumber),
+        'sent'
+      )
+
+      updatedResults.forEach((group) => {
+        group.chats = group.chats.map((chat) =>
+          chat.timeNumber === newChat.timeNumber ? newChat : chat
+        )
+      })
+
+      return { chatResults: updatedResults }
     })
   },
 
@@ -896,6 +920,7 @@ export interface FileType {
 
 export interface ChatContent {
   _id: string
+  uniqueId: string
   connection: string
   content: string
   isSent: boolean
@@ -905,12 +930,10 @@ export interface ChatContent {
   isSavedUsernames: string[]
   isReadUsernames: string[]
   isPinned: boolean
-  username: string
-  picture: string
+  senderUsername: string
   media: FileType[]
   day: string
   receiverUsername: string
-  receiverPicture: string
   status: string
   unread: number
   unreadCount: number

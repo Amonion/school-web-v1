@@ -29,6 +29,7 @@ type response = {
   receiverId: string
   userId: string
   username: string
+  pending: boolean
   data: ChatContent
   chats: ChatContent[]
 }
@@ -36,7 +37,7 @@ type response = {
 const UserChat = () => {
   const chatContainerRef = useRef<HTMLDivElement | null>(null)
   const { loading } = UserStore()
-  const { updateFriendsChat } = FriendStore()
+  const { updateFriendsChat, friendForm } = FriendStore()
   const { socket } = useGeneralContext()
   const {
     chatResults,
@@ -51,7 +52,6 @@ const UserChat = () => {
     getChats,
     setConnection,
     addNewChat,
-    updateChats,
   } = ChatStore()
   const { user } = AuthStore()
   const { username } = useParams()
@@ -264,9 +264,7 @@ const UserChat = () => {
 
     if (user) {
       socket.on(`createdChat${connection}`, (data: response) => {
-        if (data.message === 'online') {
-          updateChats([data.data], data.message)
-        } else {
+        if (!data.pending) {
           addNewChat(data.data)
         }
 
@@ -404,19 +402,16 @@ const UserChat = () => {
         day: formatDateToDDMMYY(new Date()),
         connection: connection,
         repliedChat: repliedChat,
-        displayName: user?.displayName,
-        username: user?.username,
-        picture: user?.picture,
+        isFriends: friendForm.isFriends,
+        senderUsername: user?.username,
         receiverUsername: chatUserForm.username,
-        receiverPicture: chatUserForm.picture,
-        receiverDisplayName: chatUserForm.displayName,
         senderTime: new Date().toISOString(),
         time: new Date().getTime(),
         media: files,
         uniqueId: uniqueId,
       }
 
-      const friendForm = {
+      const friendChat = {
         content: text,
         connection: connection,
         senderDisplayName: String(user?.displayName),
@@ -429,6 +424,7 @@ const UserChat = () => {
         senderTime: new Date().toISOString(),
         createdAt: new Date(),
         media: files,
+        isFriends: friendForm.isFriends,
         isOnline: false,
       }
 
@@ -444,12 +440,10 @@ const UserChat = () => {
         isSavedUsernames: [],
         isReadUsernames: [],
         isPinned: false,
-        username: String(user?.username),
-        picture: String(user?.picture),
+        senderUsername: String(user?.username),
         media: form.media,
         day: form.day,
         receiverUsername: form.receiverUsername,
-        receiverPicture: String(form.receiverPicture),
         unread: 0,
         unreadCount: 0,
         unreadReceiver: 0,
@@ -462,7 +456,7 @@ const UserChat = () => {
         receiverTime: new Date(),
       }
 
-      updateFriendsChat(friendForm)
+      updateFriendsChat(friendChat)
       addNewChat(saved)
       // socket.emit('message', form)
       setFiles([])
