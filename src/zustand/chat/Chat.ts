@@ -847,19 +847,13 @@ export interface ChatContent {
 }
 
 export interface RepliedChatContent {
-  _id: string
   content: string
-  isSent: boolean
-  isRead: boolean
-  username: string
-  picture: string
+  senderUsername: string
   media: FileType[]
   receiverUsername: string
-  receiverPicture: string
-  senderTime: Date
-  createdAt: Date
-  time: Date
-  receiverTime: Date
+  senderTime?: Date
+  receiverTime?: Date
+  _id?: string
 }
 
 export interface socketResponse {

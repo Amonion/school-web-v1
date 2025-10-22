@@ -113,14 +113,14 @@ export default function ChatHead() {
     return participants.join('')
   }
 
-  const handleSelectChat = (id: string) => {
+  const handleSelectChat = (id: string, time: number) => {
     if (inputRef.current) {
       inputRef.current.value = ''
       setText('')
     }
     setExpandInput(false)
     if (pathname.includes('favourites')) {
-      selectFavChats(id)
+      selectFavChats(time)
     } else {
       selectChats(id)
     }
@@ -251,7 +251,9 @@ export default function ChatHead() {
 
                     return (
                       <div
-                        onClick={() => handleSelectChat(item._id)}
+                        onClick={() =>
+                          handleSelectChat(String(item._id), item.timeNumber)
+                        }
                         key={index}
                         className="chat_search_list line-clamp-1 overflow-ellipsis"
                       >

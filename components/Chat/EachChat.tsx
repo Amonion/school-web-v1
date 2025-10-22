@@ -171,7 +171,7 @@ const EachChat = ({ e, isFirst, isGroupEnd }: ChatContentProps) => {
       >
         {e.repliedChat && e.repliedChat !== null && (
           <div
-            onClick={() => selectChats(String(e.repliedChat?.username))}
+            onClick={() => selectChats(String(e.repliedChat?.senderUsername))}
             className={`${
               isSender ? 'bg-[var(--secondary)]' : 'bg-[var(--custom-dark)]'
             } flex  rounded-[10px] py-[1px] px-[5px] cursor-pointer w-full mb-2`}

@@ -40,7 +40,7 @@ const ChatActions = ({ e }: ChatContentProps) => {
       repliedChat: e,
     })
     if (e) {
-      setIsActive(e._id)
+      setIsActive(String(e._id))
     }
   }
 
@@ -78,7 +78,7 @@ const ChatActions = ({ e }: ChatContentProps) => {
           onClick={() => {
             const cleanedText = e.content.replace(/<[^>]*>/g, '')
             navigator.clipboard.writeText(cleanedText)
-            setIsActive(e._id)
+            setIsActive(String(e._id))
           }}
           className="chat_list_item"
         >
@@ -90,18 +90,24 @@ const ChatActions = ({ e }: ChatContentProps) => {
         <i className="bi bi-reply mr-2"></i>
         Reply
       </div>
-      <div onClick={() => startSelectItem(e._id)} className="chat_list_item">
+      <div
+        onClick={() => startSelectItem(String(e._id))}
+        className="chat_list_item"
+      >
         <i className="bi bi-check2-square mr-2"></i>
         Select
       </div>
       <div
-        onClick={() => deleteChat(e._id, e.username, e.day)}
+        onClick={() => deleteChat(String(e._id), e.senderUsername, e.day)}
         className="chat_list_item"
       >
         <i className="bi bi-trash mr-2"></i>
         Delete
       </div>
-      <div onClick={() => setIsActive(e._id)} className="chat_list_item">
+      <div
+        onClick={() => setIsActive(String(e._id))}
+        className="chat_list_item"
+      >
         <i className="bi bi-x-circle mr-2"></i>
         Close
       </div>
