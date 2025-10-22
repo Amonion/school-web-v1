@@ -3,9 +3,11 @@ import Image from 'next/image'
 import { UserNotificationStore } from '@/src/zustand/notification/UserNotification'
 import { NavStore } from '@/src/zustand/notification/Navigation'
 import { useRouter } from 'next/navigation'
+import { SocialNotificationStore } from '@/src/zustand/notification/SocialNotification'
 
 export default function OtherHeader() {
-  const { unread, personalUnread, officialUnread } = UserNotificationStore()
+  const { personalUnread } = UserNotificationStore()
+  const { unreadNotifications } = SocialNotificationStore()
   const { toggleVNav, toggleAsideVNav } = NavStore()
   const router = useRouter()
 
@@ -32,12 +34,12 @@ export default function OtherHeader() {
           />
         </Link>
 
-        <Link href="/home/notifications" className="ml-auto">
-          {unread + officialUnread + personalUnread > 0 && (
+        <Link href="/home/notifications" className="ml-auto relative">
+          {unreadNotifications + personalUnread > 0 && (
             <span className="dot_notification">
-              {unread + officialUnread + personalUnread > 9
+              {unreadNotifications + personalUnread > 9
                 ? `9+`
-                : unread + officialUnread + personalUnread}
+                : unreadNotifications + personalUnread}
             </span>
           )}
           <i className={`bi bi-bell font-bold text-2xl`}></i>

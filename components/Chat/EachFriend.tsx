@@ -10,73 +10,75 @@ interface EachFriendProps {
 }
 
 export default function EachFriend({ friend }: EachFriendProps) {
+  const friendState = FriendStore((state) =>
+    state.friendsResults.find((f) => f.connection === friend.connection)
+  )
+  const currentFriend = friendState ?? friend
   const { user } = AuthStore()
   const router = useRouter()
+  const isSender = friend.senderUsername === user?.username
 
   const selectFriend = () => {
-    FriendStore.setState((prev) => {
-      const chat = prev.friendsResults.find(
-        (item) => item.connection === friend.connection
-      )
-      return {
-        friendForm: chat,
-      }
-    })
+    FriendStore.setState(() => ({
+      friendForm: currentFriend,
+    }))
     router.push(
       `/friends/chat/${
-        user?.username === friend.receiverUsername
-          ? friend.senderUsername
-          : friend.receiverUsername
+        user?.username === currentFriend.receiverUsername
+          ? currentFriend.senderUsername
+          : currentFriend.receiverUsername
       }`
     )
   }
+
   return (
     <li
-      onClick={() => selectFriend()}
+      onClick={selectFriend}
       className="flex w-full items-start cursor-pointer"
     >
       <div className="rounded-full w-12 h-12 relative overflow-hidden">
         <Image
           src={
-            user?.username === friend.senderUsername
-              ? friend.receiverPicture
-              : friend.senderPicture
+            isSender
+              ? currentFriend.receiverPicture
+              : currentFriend.senderPicture
           }
           alt="Media"
           fill
           className="object-cover w-full h-full"
         />
       </div>
+
       <div className="flex-1 pl-2">
         <div className="flex w-full items-center mb-1">
-          <div className="font-semibold line-clamp-1 overflow-ellipsis text-[var(--text-secondary)] mr-auto">
-            {user?.username === friend.senderUsername
-              ? friend.receiverDisplayName
-              : friend.senderDisplayName}
+          <div className="font-semibold line-clamp-1 text-[var(--text-secondary)] mr-auto">
+            {isSender
+              ? currentFriend.receiverDisplayName
+              : currentFriend.senderDisplayName}
           </div>
           <div className="text-[12px] ml-2 block">
-            {formatRelativeDate(String(friend.createdAt))}
+            {formatRelativeDate(String(currentFriend.createdAt))}
           </div>
         </div>
+
         <div className="flex items-end w-full">
           <div
-            className="text-sm mr-auto line-clamp-1 overflow-ellipsis"
-            dangerouslySetInnerHTML={{
-              __html: friend.content,
-            }}
+            className="text-sm mr-auto line-clamp-1"
+            dangerouslySetInnerHTML={{ __html: currentFriend.content }}
           />
-          {friend.status}
-          <div className="ml-1 text-[12px]">
-            {friend.status === 'pending' ? (
-              <i className="bi bi-clock-history"></i>
-            ) : friend.status === 'sent' ? (
-              <i className="bi bi-check2"></i>
-            ) : friend.status === 'delivered' ? (
-              <i className="bi bi-clock-history"></i>
-            ) : (
-              <i className="bi bi-clock-history"></i>
-            )}
-          </div>
+          {isSender && (
+            <div className="ml-1 text-[12px]">
+              {currentFriend.status === 'pending' ? (
+                <i className="bi bi-clock-history"></i>
+              ) : currentFriend.status === 'sent' ? (
+                <i className="bi bi-check2"></i>
+              ) : currentFriend.status === 'delivered' ? (
+                <i className="bi bi-check2-all"></i>
+              ) : (
+                <i className="bi bi-clock-history"></i>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </li>

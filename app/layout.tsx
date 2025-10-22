@@ -14,15 +14,12 @@ import { useEffect, useState } from 'react'
 import { ThemeProvider } from '@/context/ThemeProvider'
 import { MessageStore } from '@/src/zustand/notification/Message'
 import { GeneralProvider } from '@/context/GeneralContext'
-import { SchoolStaffProvider } from '@/context/SchoolContext/SchoolStaffContext'
-import { SchoolMessageProvider } from '@/context/SchoolContext/SchoolMessageContext'
-import { SchoolSocialProvider } from '@/context/SchoolContext/SchoolSocialContext'
-import { OfficialMessageProvider } from '@/context/HomeContext/OfficialMessageContext'
 import { PersonalNotificationProvider } from '@/context/HomeContext/PersonalNotificationContext'
 import { usePathname } from 'next/navigation'
 import CompanyStore from '@/src/zustand/app/Company'
 import { getPendingMessages } from '@/lib/indexDB'
 import useSocket from '@/src/useSocket'
+import { SocialNotificationProvider } from '@/context/SocialNotificationContext'
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -171,15 +168,9 @@ export default function RootLayout({
       >
         <GeneralProvider>
           <PersonalNotificationProvider>
-            <SchoolStaffProvider>
-              <OfficialMessageProvider>
-                <SchoolMessageProvider>
-                  <SchoolSocialProvider>
-                    <ThemeProvider>{isMounted && children}</ThemeProvider>
-                  </SchoolSocialProvider>
-                </SchoolMessageProvider>
-              </OfficialMessageProvider>
-            </SchoolStaffProvider>
+            <SocialNotificationProvider>
+              <ThemeProvider>{isMounted && children}</ThemeProvider>
+            </SocialNotificationProvider>
           </PersonalNotificationProvider>
         </GeneralProvider>
       </body>

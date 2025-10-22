@@ -7,12 +7,10 @@ import {
   getExtension,
   handleFileUpload,
 } from '@/lib/helpers'
-import { v4 as uuidv4 } from 'uuid'
 import { useParams, usePathname } from 'next/navigation'
 import { Smile } from 'lucide-react'
 import { GlobalWorkerOptions, getDocument } from 'pdfjs-dist'
 import { User, UserStore } from '@/src/zustand/user/User'
-import { useGeneralContext } from '@/context/GeneralContext'
 import { AuthStore } from '@/src/zustand/user/AuthStore'
 import { MessageStore } from '@/src/zustand/notification/Message'
 import { ChatContent, ChatStore, FileType } from '@/src/zustand/chat/Chat'
@@ -20,6 +18,7 @@ import ChatEditor from '@/components/Chat/ChatEditor'
 import FriendStore from '@/src/zustand/chat/Friend'
 import ChatBody from '@/components/Chat/ChatBody'
 import Spinner from '@/components/LoadingAnimations/Spinner'
+import useSocket from '@/src/useSocket'
 // import ChatBody from '@/components/Chat/ChatBody'
 
 type response = {
@@ -30,7 +29,7 @@ type response = {
   userId: string
   username: string
   pending: boolean
-  data: ChatContent
+  chat: ChatContent
   chats: ChatContent[]
 }
 
@@ -38,7 +37,7 @@ const UserChat = () => {
   const chatContainerRef = useRef<HTMLDivElement | null>(null)
   const { loading } = UserStore()
   const { updateFriendsChat, friendForm } = FriendStore()
-  const { socket } = useGeneralContext()
+  const socket = useSocket()
   const {
     chatResults,
     current,
@@ -64,7 +63,7 @@ const UserChat = () => {
   const [isOptions, setOptions] = useState(false)
   const [percents, setPercents] = useState<number[]>([])
   const pathname = usePathname()
-  const pendingReadIds = useRef<Set<string>>(new Set())
+  const pendingReadIds = useRef<Set<number>>(new Set())
 
   useEffect(() => {
     if (!moveUp) return
@@ -263,20 +262,16 @@ const UserChat = () => {
     if (!socket) return
 
     if (user) {
-      socket.on(`createdChat${connection}`, (data: response) => {
-        if (!data.pending) {
-          addNewChat(data.data)
-        }
-
-        if (data.data.receiverUsername === user.username) {
-          pendingReadIds.current.add(data.data._id)
+      socket.on(`addCreatedChat${user.username}`, (data: response) => {
+        if (data.chat.receiverUsername === user.username) {
+          pendingReadIds.current.add(data.chat.timeNumber)
         }
       })
     }
 
     return () => {
       setLoading(false)
-      socket.off(`createdChat${connection}`)
+      socket.off(`createdChat${user?.username}`)
     }
   }, [user, socket])
   //***********LISTEN TO SENT & RECEIVED CHAT****************//
@@ -392,7 +387,6 @@ const UserChat = () => {
       setMessage(`No message to send to `, false)
       return
     }
-    const uniqueId = uuidv4()
 
     if (socket) {
       const form = {
@@ -403,12 +397,16 @@ const UserChat = () => {
         connection: connection,
         repliedChat: repliedChat,
         isFriends: friendForm.isFriends,
-        senderUsername: user?.username,
+        senderDisplayName: String(user?.displayName),
+        senderUsername: String(user?.username),
+        senderPicture: String(user?.picture),
         receiverUsername: chatUserForm.username,
+        receiverPicture: String(chatUserForm.picture),
+        receiverDisplayName: chatUserForm.displayName,
         senderTime: new Date().toISOString(),
         time: new Date().getTime(),
+        timeNumber: new Date().getTime(),
         media: files,
-        uniqueId: uniqueId,
       }
 
       const friendChat = {
@@ -422,6 +420,7 @@ const UserChat = () => {
         receiverDisplayName: chatUserForm.displayName,
         status: 'pending',
         senderTime: new Date().toISOString(),
+        timeNumber: new Date().getTime(),
         createdAt: new Date(),
         media: files,
         isFriends: friendForm.isFriends,
@@ -429,36 +428,23 @@ const UserChat = () => {
       }
 
       const saved = {
-        _id: uniqueId,
-        uniqueId: uniqueId,
         connection: connection,
         content: form.content,
-        isSent: false,
-        isRead: false,
-        deletedUsername: '',
         repliedChat: form.repliedChat,
-        isSavedUsernames: [],
-        isReadUsernames: [],
-        isPinned: false,
         senderUsername: String(user?.username),
         media: form.media,
         day: form.day,
         receiverUsername: form.receiverUsername,
-        unread: 0,
-        unreadCount: 0,
-        unreadReceiver: 0,
-        unreadUser: 0,
         status: 'pending',
         senderTime: new Date(),
         createdAt: new Date(),
-        time: new Date(),
         timeNumber: new Date().getTime(),
         receiverTime: new Date(),
       }
 
       updateFriendsChat(friendChat)
       addNewChat(saved)
-      // socket.emit('message', form)
+      socket.emit('message', form)
       setFiles([])
       setText('')
 
@@ -479,10 +465,9 @@ const UserChat = () => {
         className="flex-1 sm:px-[5px] overflow-auto chat_scrollbar"
       >
         <ChatBody />
-        {/* <ChatBody socket={socket} pendingReadIds={pendingReadIds} /> */}
       </div>
 
-      <div className="w-full mt-auto relative flex items-end bg-[var(--primary)] py-1 px-2">
+      <div className="w-full sticky bottom-0 left-0 flex items-end bg-[var(--primary)] py-1 px-2">
         {!isNearBottom && unread > 0 && (
           <div
             onClick={scrollDown}
@@ -544,7 +529,7 @@ const UserChat = () => {
             {loading || isLoading ? (
               <Spinner size={30} />
             ) : (
-              <div className="flex items-center mb-[10px]">
+              <div className="flex items-center mb-3">
                 <Smile className="w-5 h-5 cursor-pointer text-[var(--custom)] ml-2" />
                 {(files.length > 0 ||
                   text.replace(/<[^>]*>/g, '').trim().length > 0) && (

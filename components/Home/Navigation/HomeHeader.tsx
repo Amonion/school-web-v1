@@ -6,9 +6,11 @@ import { MessageStore } from '@/src/zustand/notification/Message'
 import { UserNotificationStore } from '@/src/zustand/notification/UserNotification'
 import { NavStore } from '@/src/zustand/notification/Navigation'
 import { PostStore } from '@/src/zustand/post/Post'
+import { SocialNotificationStore } from '@/src/zustand/notification/SocialNotification'
 
 export default function HomeHeader() {
-  const { unread, personalUnread, officialUnread } = UserNotificationStore()
+  const { personalUnread, officialUnread } = UserNotificationStore()
+  const { unreadNotifications } = SocialNotificationStore()
   const { user } = AuthStore()
   const { setMessage } = MessageStore()
   const { toggleVNav, toggleAsideVNav, setScrollUp } = NavStore()
@@ -77,12 +79,12 @@ export default function HomeHeader() {
           <i className={`bi bi-gift font-bold text-xl`}></i>
         </Link>
 
-        <Link href="/home/notifications" className="">
-          {unread + officialUnread + personalUnread > 0 && (
+        <Link href="/home/notifications" className="relative">
+          {unreadNotifications + officialUnread + personalUnread > 0 && (
             <span className="dot_notification">
-              {unread + officialUnread + personalUnread > 9
+              {unreadNotifications + officialUnread + personalUnread > 9
                 ? `9+`
-                : unread + officialUnread + personalUnread}
+                : unreadNotifications + officialUnread + personalUnread}
             </span>
           )}
           <i className={`bi bi-bell font-bold text-xl`}></i>

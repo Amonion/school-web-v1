@@ -67,8 +67,6 @@ const LoginComponent: React.FC = () => {
           bioUser,
           bioUserState,
           bioUserSchoolInfo,
-          activeOffice,
-          userOffices,
           token,
           posts,
         } = response.data
@@ -80,7 +78,6 @@ const LoginComponent: React.FC = () => {
           bioUserSchoolInfo,
           token
         )
-        AuthStore.getState().setOfficeState(activeOffice, userOffices)
         PostStore.setState({ postResults: posts })
         setTimeout(() => {
           if (user.isFirstTime) {

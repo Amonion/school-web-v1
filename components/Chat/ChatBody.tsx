@@ -3,9 +3,11 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ChatStore } from '@/src/zustand/chat/Chat'
 import EachChat from './EachChat'
+import FriendStore from '@/src/zustand/chat/Friend'
 
 const ChatBody = () => {
-  const { chatResults, chatUserForm, loading, isFriends } = ChatStore()
+  const { chatContentResults, chatUserForm, loading } = ChatStore()
+  const { friendForm } = FriendStore()
   //--------------------MARK READ CHATS----------------------//
 
   // useEffect(() => {
@@ -94,7 +96,7 @@ const ChatBody = () => {
   return (
     <>
       <div className="flex flex-1 flex-col mb-auto ">
-        {chatResults.length === 0 && !loading && (
+        {chatContentResults.length === 0 && !loading && (
           <div className="w-full flex-1 flex flex-col items-center px-[10px] mt-10">
             <Link
               href={`/home/profile/${chatUserForm.username}`}
@@ -126,19 +128,42 @@ const ChatBody = () => {
           </div>
         )}
 
-        {chatResults.map((item, index) => (
-          <div key={index} className="flex flex-col w-full">
-            <div className="mx-auto mb-2 rounded-[25px] py-1 px-3 bg-[var(--primary)]">
-              {item.day}
+        {chatContentResults.map((chat, index) => {
+          const prevChat = chatContentResults[index - 1]
+          const nextChat = chatContentResults[index + 1]
+
+          const showDate =
+            index === 0 ||
+            new Date(chat.day).toDateString() !==
+              new Date(prevChat.day).toDateString()
+
+          const isSameSenderAsPrev =
+            prevChat && prevChat.senderUsername === chat.senderUsername
+          const isSameSenderAsNext =
+            nextChat && nextChat.senderUsername === chat.senderUsername
+
+          const isGroupStart = !isSameSenderAsPrev // First message in a sender's sequence
+          const isGroupEnd = !isSameSenderAsNext
+
+          return (
+            <div key={chat._id} className={`w-full flex flex-col`}>
+              {showDate && (
+                <div className="mx-auto mb-2 rounded-[25px] py-1 px-3 bg-[var(--primary)]">
+                  {chat.day}
+                </div>
+              )}
+              <EachChat
+                e={chat}
+                isFirst={index === 0}
+                isGroupStart={isGroupStart}
+                isGroupEnd={isGroupEnd}
+                index={index}
+              />
             </div>
+          )
+        })}
 
-            {item.chats.map((e, i) => (
-              <EachChat key={i} e={e} isFirst={index === 0 && i === 0} />
-            ))}
-          </div>
-        ))}
-
-        {!isFriends && chatResults.length > 0 && (
+        {!friendForm.isFriends && chatContentResults.length > 0 && (
           <div className="w-full flex flex-col items-center px-[10px] mt-10">
             <div className="text-center max-w-[400px] text-lg leading-[25px]">
               <span className="text-[var(--custom)]">

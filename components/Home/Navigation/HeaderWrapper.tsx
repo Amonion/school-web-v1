@@ -81,7 +81,7 @@ export default function HeaderWrapper() {
                 <OtherHeader />
               )}
             </div>
-            <div className="md:right-0 z-0 w-0 md:min-w-[270px] md:w-[270px] xl:w-[300px]" />
+            <div className="md:right-0 z-0 w-0 md:min-w-[300px] md:w-[300px] xl:w-[300px]" />
           </div>
         </div>
       </div>

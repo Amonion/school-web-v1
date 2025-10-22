@@ -2,17 +2,16 @@ import { ChatContent } from '@/src/zustand/chat/Chat'
 import { openDB } from 'idb'
 
 const DB_NAME = 'chatDB'
-const DB_VERSION = 4
+const DB_VERSION = 1
 const MESSAGES_STORE = 'messages'
 const FRIENDS_STORE = 'friends'
 
 export const initDB = async () => {
   return openDB(DB_NAME, DB_VERSION, {
     upgrade(db, oldVersion, newVersion, transaction) {
-      // ✅ Create messages store if missing
       if (!db.objectStoreNames.contains(MESSAGES_STORE)) {
         const store = db.createObjectStore(MESSAGES_STORE, {
-          keyPath: 'uniqueId',
+          keyPath: 'timeNumber',
         })
         store.createIndex('connection', 'connection')
         store.createIndex('sender', 'username')
@@ -45,7 +44,7 @@ export const getPendingMessages = async () => {
 export const updatePendingMessageStatus = async (
   connection: string,
   timeNumber: number,
-  newStatus: 'delivered' | 'read' | 'sent'
+  newStatus: string
 ) => {
   const db = await initDB()
   const tx = db.transaction(MESSAGES_STORE, 'readwrite')
@@ -74,41 +73,35 @@ export const updatePendingMessageStatus = async (
   await store.put(updatedMessage)
   await tx.done
 
-  console.log(`✅ Message ${connection} updated to '${newStatus}'`)
   return true
 }
 
 export const updatePendingFriendMessageStatus = async (
   connection: string,
-  newStatus: 'delivered' | 'read' | 'sent'
+  newStatus: string
 ) => {
   const db = await initDB()
   const tx = db.transaction(FRIENDS_STORE, 'readwrite')
   const store = tx.objectStore(FRIENDS_STORE)
 
-  const index = store.index('connection')
-  const messages = await index.getAll(connection)
+  const friend = await store.get(connection)
 
-  if (!messages.length) {
+  if (!friend) {
+    console.warn(`⚠️ No friend found for connection: ${connection}`)
     await tx.done
     return false
   }
 
-  console.log(messages)
-
-  for (const msg of messages) {
-    const updatedMessage = {
-      ...msg,
-      status: newStatus,
-      updatedAt: new Date().toISOString(),
-    }
-    await store.put(updatedMessage)
+  const updatedFriend = {
+    ...friend,
+    status: newStatus,
+    updatedAt: new Date().toISOString(),
   }
 
+  await store.put(updatedFriend)
   await tx.done
-  console.log(
-    `✅ Updated ${messages.length} messages for '${connection}' to '${newStatus}'`
-  )
+
+  console.log(`✅ Friend '${connection}' updated to '${newStatus}'`)
   return true
 }
 

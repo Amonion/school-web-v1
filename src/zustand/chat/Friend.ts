@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import _debounce from 'lodash/debounce'
 import apiRequest from '@/lib/axios'
-import { initDB } from '@/lib/indexDB'
+import { initDB, updatePendingFriendMessageStatus } from '@/lib/indexDB'
 
 export const saveOrUpdateFriendInDB = async (friend: Friend) => {
   const db = await initDB()
@@ -27,8 +27,9 @@ export interface Friend {
   status: string
   connection: string
   createdAt: Date | null
+  timeNumber: number
   isFriends: boolean
-  isOnline: boolean
+  isOnline?: boolean
   isActive?: boolean
   isChecked?: boolean
 }
@@ -44,6 +45,7 @@ export const FriendEmpty = {
   status: '',
   connection: '',
   createdAt: null,
+  timeNumber: 0,
   isFriends: false,
   isOnline: false,
 }
@@ -86,7 +88,7 @@ interface FriendState {
   ) => Promise<void>
   selectFriends: (id: string) => void
   updateFriendsChat: (chats: Friend) => void
-  updatePendingFriendsChat: (connection: string) => void
+  updatePendingFriendsChat: (data: Friend) => void
   toggleChecked: (index: number) => void
   toggleActive: (index: number) => void
   toggleAllSelected: () => void
@@ -148,15 +150,17 @@ const FriendStore = create<FriendState>((set) => ({
     })
   },
 
-  updatePendingFriendsChat: async (connection) => {
+  updatePendingFriendsChat: async (data) => {
     set((prev) => {
-      const friends = prev.friendsResults.map((item) =>
-        item.connection === connection ? { ...item, status: 'sent' } : item
-      )
+      const friends = prev.friendsResults.map((item) => {
+        if (item.connection === data.connection) {
+          return { ...item, status: data.status }
+        }
+        return { ...item }
+      })
 
-      return {
-        friendsResults: friends,
-      }
+      updatePendingFriendMessageStatus(data.connection, data.status)
+      return { friendsResults: friends }
     })
   },
 

@@ -2,20 +2,20 @@
 import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import { formatDateToDDMMYY, formatTimeTo12Hour } from '@/lib/helpers'
-import { UserNotificationStore } from '@/src/zustand/notification/UserNotification'
 import { MessageStore } from '@/src/zustand/notification/Message'
 import { AuthStore } from '@/src/zustand/user/AuthStore'
+import { SocialNotificationStore } from '@/src/zustand/notification/SocialNotification'
 // import TruncatedText from "@/components/Users/Notifications/TruncateText";
 
 const SocialNotifications: React.FC = () => {
   const {
-    setSocialPage,
+    setCurrentPage,
     addMoreSocialNotifications,
-    hasMoreSocialNotifications,
+    hasMore,
     page_size,
-    socialPage,
+    currentPage,
     socialNotifications,
-  } = UserNotificationStore()
+  } = SocialNotificationStore()
   const lastCardRef = useRef<HTMLDivElement | null>(null)
   const [sort] = useState('-createdAt')
   const { setMessage } = MessageStore()
@@ -23,21 +23,21 @@ const SocialNotifications: React.FC = () => {
   const url = '/user-notifications/'
 
   useEffect(() => {
-    if (socialPage > 1 && user) {
+    if (currentPage > 1 && user) {
       addMoreSocialNotifications(
-        `${url}?page_size=${page_size}&page=${socialPage}&ordering=${sort}&receiverUsername=${user?.username}&senderUsername=${user?.username}`,
+        `${url}?page_size=${page_size}&page=${currentPage}&ordering=${sort}&receiverUsername=${user?.username}&senderUsername=${user?.username}`,
         setMessage
       )
     }
-  }, [socialPage, user])
+  }, [currentPage, user])
 
   useEffect(() => {
     if (!lastCardRef.current) return
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasMoreSocialNotifications) {
-          setSocialPage(socialPage + 1)
+        if (entries[0].isIntersecting && hasMore) {
+          setCurrentPage(currentPage + 1)
         }
       },
       { threshold: 0.5 }
@@ -56,7 +56,7 @@ const SocialNotifications: React.FC = () => {
             className="flex items-start mb-2"
             key={index}
           >
-            <div className="w-[40px] min-w-[40px] mr-2 h-[40px]">
+            <div className="w-[40px] rounded-full overflow-hidden min-w-[40px] mr-2 h-[40px]">
               {item.senderUsername === 'Schooling' ? (
                 <Image
                   src="/images/active-icon.png"
@@ -103,7 +103,7 @@ const SocialNotifications: React.FC = () => {
               </div>
               <div className="flex items-center">
                 <div
-                  className="line-clamp-1 text-sm sm:text-base overflow-ellipsis"
+                  className="text-sm sm:text-base"
                   dangerouslySetInnerHTML={{ __html: item.content }}
                 ></div>{' '}
               </div>

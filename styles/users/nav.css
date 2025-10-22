@@ -127,7 +127,7 @@
 }
 
 .v_nav.aside {
-  @apply md:right-0 justify-end md:sticky z-30 w-full md:min-w-[270px] md:w-[270px] xl:w-[300px] md:bg-transparent sm:bg-black/20;
+  @apply md:right-0 justify-end md:sticky z-30 w-full md:min-w-[300px] md:w-[300px] xl:w-[300px] md:bg-transparent sm:bg-black/20;
 }
 
 .v_nav.news {

@@ -2,13 +2,20 @@
 import { initializeSound } from '@/lib/sound'
 import useSocket from '@/src/useSocket'
 import { ChatContent, ChatStore } from '@/src/zustand/chat/Chat'
-import FriendStore from '@/src/zustand/chat/Friend'
+import FriendStore, { Friend } from '@/src/zustand/chat/Friend'
 import { MessageStore } from '@/src/zustand/notification/Message'
 import SchoolStore from '@/src/zustand/school/School'
 import { AuthStore } from '@/src/zustand/user/AuthStore'
 import OfficeStore from '@/src/zustand/utility/Office'
 import axios from 'axios'
-import { createContext, useEffect, useContext, ReactNode, useMemo } from 'react'
+import {
+  createContext,
+  useEffect,
+  useContext,
+  ReactNode,
+  useMemo,
+  useState,
+} from 'react'
 
 const GeneralContext = createContext<{
   socket: ReturnType<typeof useSocket> | null
@@ -21,24 +28,26 @@ interface GeneralProviderProps {
 }
 
 type response = {
-  message: string
+  friend: Friend
   key: string
   totalUnread: number
-  receiverId: string
+  isFriends: boolean
   userId: string
   username: string
   pending: boolean
-  data: ChatContent
+  chat: ChatContent
 }
 
 export const GeneralProvider = ({ children }: GeneralProviderProps) => {
   const socket = useSocket()
   const { setIp, setBaseUrl, setMessage, baseURL } = MessageStore()
-  const { getSavedFriends, updatePendingFriendsChat } = FriendStore()
+  const { getSavedFriends, updateFriendsChat, updatePendingFriendsChat } =
+    FriendStore()
   const { user } = AuthStore()
   const { getSchoolNotifications } = SchoolStore()
   const { officeForm } = OfficeStore()
-  const { connection, updatePendingChat } = ChatStore()
+  const { connection, updatePendingChat, addNewChat } = ChatStore()
+  const [chat, setChat] = useState<ChatContent | null>(null)
 
   useEffect(() => {
     initializeSound()
@@ -120,19 +129,67 @@ export const GeneralProvider = ({ children }: GeneralProviderProps) => {
     if (!socket) return
 
     if (user) {
-      socket.on(`createdChat${connection}`, (data: response) => {
-        if (data.pending) {
-          console.log(data)
-          updatePendingChat(data.data)
-          updatePendingFriendsChat(data.data.connection)
-        }
+      socket.on(`updatePendingChat${user.username}`, (data: response) => {
+        updatePendingChat(data.chat)
+        updatePendingFriendsChat(data.friend)
+        FriendStore.setState((prev) => {
+          return {
+            friendForm: { ...prev.friendForm, isFriends: data.isFriends },
+          }
+        })
       })
     }
 
     return () => {
-      socket.off(`createdChat${connection}`)
+      socket.off(`updatePendingChat${connection}`)
     }
-  }, [user, socket, connection])
+  }, [user, socket])
+
+  useEffect(() => {
+    if (!socket) return
+
+    if (user) {
+      socket.on(`addCreatedChat${user.username}`, (data: response) => {
+        setChat(data.chat)
+        addNewChat(data.chat)
+        updateFriendsChat(data.friend)
+        FriendStore.setState((prev) => {
+          return {
+            friendForm: { ...prev.friendForm, isFriends: data.isFriends },
+          }
+        })
+      })
+    }
+
+    return () => {
+      socket.off(`addCreatedChat${user?.username}`)
+    }
+  }, [user, socket])
+
+  useEffect(() => {
+    if (!socket) return
+    if (chat) {
+      socket.emit(`message`, { to: 'deliveredChat', chat })
+    }
+    return () => {
+      socket.off(`deliveredChat${user?.username}`)
+    }
+  }, [chat, socket])
+
+  useEffect(() => {
+    if (!socket) return
+
+    if (user) {
+      socket.on(`updateDeliveredChat${user.username}`, (data: response) => {
+        updatePendingChat(data.chat)
+        updatePendingFriendsChat(data.friend)
+      })
+    }
+
+    return () => {
+      socket.off(`updateDeliveredChat${user?.username}`)
+    }
+  }, [user, socket])
 
   const updateUserPresence = async (ip: string, online: boolean) => {
     try {

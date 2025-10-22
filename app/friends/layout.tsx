@@ -88,7 +88,7 @@ export default function RootLayout({
           <div className="flex w-full">
             <VerticalNavigation />
 
-            <div className="flex-1 overflow-x-auto sm:overflow-hidden relative sm:ml-5 md:mr-5 flex flex-col">
+            <div className="flex-1 overflow-x-auto h-[100vh] sm:ml-5 md:mr-5 flex flex-col">
               <div className={`flex flex-col flex-1 w-full`}>{children}</div>
             </div>
             <AsideFriends />

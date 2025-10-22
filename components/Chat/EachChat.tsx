@@ -13,15 +13,19 @@ import ChatActions from './ChatActions'
 type ChatContentProps = {
   e: ChatContent
   isFirst: boolean
+  isGroupStart: boolean
+  isGroupEnd: boolean
+  index: number
 }
 
-const EachChat = ({ e, isFirst }: ChatContentProps) => {
+const EachChat = ({ e, isFirst, isGroupEnd }: ChatContentProps) => {
   const { selectChats, selectedItems } = ChatStore()
   const { user } = AuthStore()
   const { username } = useParams()
   const optionsRef = useRef<HTMLDivElement | null>(null)
   const firstCardRef = useRef<HTMLDivElement | null>(null)
   const messageRefs = useRef<Record<string, HTMLDivElement | null>>({})
+  const isSender = e.senderUsername === user?.username
 
   const setIsActive = (id: string) => {
     ChatStore.setState((prev) => {
@@ -137,13 +141,13 @@ const EachChat = ({ e, isFirst }: ChatContentProps) => {
 
   return (
     <div
-      onClick={() => selectItem(e._id)}
-      className={`${e.isChecked ? 'selected' : ''} ${
+      onClick={() => selectItem(String(e._id))}
+      className={` ${e.isChecked ? 'selected' : ''} ${
         e.isAlert ? 'cursor-pointer' : 'cursor-default'
-      } full_chat_wrapper`}
+      } ${isGroupEnd ? 'mb-3' : 'mb-1'} full_chat_wrapper`}
       ref={(el) => {
         if (el) {
-          messageRefs.current[e._id] = el
+          messageRefs.current[String(e._id)] = el
           if (isFirst) {
             firstCardRef.current = el
           }
@@ -156,22 +160,20 @@ const EachChat = ({ e, isFirst }: ChatContentProps) => {
         onClick={(e) => {
           e.stopPropagation()
         }}
-        className={`${
-          e.senderUsername === user?.username ? 'sender' : 'receiver'
-        } ${e.media[0] && e.media[0].type === 'audio' ? 'audio' : ''} ${
+        className={` ${isSender ? 'sender' : 'receiver'} ${
+          e.media[0] && e.media[0].type === 'audio' ? 'audio' : ''
+        } ${
           e.media[0] &&
           (e.media[0].type === 'picture' || e.media[0].type === 'video')
             ? 'media'
             : ''
-        }  chat_wrapper cursor-default`}
+        } chat_wrapper cursor-default`}
       >
         {e.repliedChat && e.repliedChat !== null && (
           <div
             onClick={() => selectChats(String(e.repliedChat?.username))}
             className={`${
-              e.senderUsername === user?.username
-                ? 'bg-[var(--secondary)]'
-                : 'bg-[var(--custom-dark)]'
+              isSender ? 'bg-[var(--secondary)]' : 'bg-[var(--custom-dark)]'
             } flex  rounded-[10px] py-[1px] px-[5px] cursor-pointer w-full mb-2`}
           >
             {/* <RepliedChat
@@ -234,7 +236,7 @@ const EachChat = ({ e, isFirst }: ChatContentProps) => {
             ) : e.media[0].type === 'audio' ? (
               <AudioMessage
                 src={e.media[0].source}
-                isSender={e.senderUsername === user?.username}
+                isSender={isSender}
                 name={e.media[0].name}
               />
             ) : (
@@ -248,25 +250,21 @@ const EachChat = ({ e, isFirst }: ChatContentProps) => {
         </div>
         <div className="flex leading-[15px] justify-between w-full items-center text-[11px]">
           <div className="flex items-end">
-            {e.senderUsername === user?.username ? (
+            {isSender ? (
               <>
-                {formatTimeTo12Hour(e.senderTime)}{' '}
+                {formatTimeTo12Hour(e.senderTime ?? null)}
                 <div className="flex ml-3 text-[10px]">
                   {e.status === 'pending' ? (
                     <i className="bi bi-clock-history"></i>
-                  ) : e.status === 'delevered' ? (
-                    <i
-                      className={`bi text-[15px] bi-check2-all ${
-                        e.isRead ? 'text-[var(--custom)] ' : ''
-                      }`}
-                    ></i>
+                  ) : e.status === 'delivered' ? (
+                    <i className={`bi text-[15px] bi-check2-all`}></i>
                   ) : (
                     <i className="bi bi-check2 text-[15px]"></i>
                   )}
                 </div>
               </>
             ) : (
-              formatTimeTo12Hour(e.receiverTime)
+              formatTimeTo12Hour(e.receiverTime ?? null)
             )}
           </div>
 
@@ -274,14 +272,14 @@ const EachChat = ({ e, isFirst }: ChatContentProps) => {
             {e.isActive && <ChatActions e={e} />}
 
             <i
-              onClick={() => setIsActive(e._id)}
+              onClick={() => setIsActive(String(e._id))}
               className="bi bi-three-dots-vertical text-sm cursor-pointer"
             ></i>
           </div>
         </div>
-        {e.isSavedUsernames.includes(String(user?.username)) && (
+        {e.isSavedUsernames?.includes(String(user?.username)) && (
           <>
-            {e.senderUsername === user?.username ? (
+            {isSender ? (
               <div className="round absolute left-0 bottom-[-15px]">
                 <i className="bi bi-heart-fill text-[10px] mt-[2px] leading-none cursor-pointer text-red-600"></i>
               </div>

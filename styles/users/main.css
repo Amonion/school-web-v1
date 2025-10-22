@@ -84,7 +84,7 @@ ol li{
 }
 
 .chat_wrapper {
-  @apply leading-[20px] min-w-[150px] w-auto py-[6px] max-w-[80%] relative;
+  @apply leading-[20px] min-w-[150px] rounded-[8px] w-auto py-[6px] max-w-[80%] relative;
 }
 
 .chat_wrapper.reply {
@@ -110,11 +110,11 @@ ol li{
 }
 
 .chat_wrapper.sender {
-  @apply pl-[10px] pr-[10px] ml-auto sm:rounded-r-[10px] rounded-l-[10px] bg-[var(--primary)];
+  @apply px-[10px] ml-auto bg-[var(--primary)];
 }
 
 .chat_wrapper.receiver {
-  @apply text-white mr-auto px-[10px] sm:rounded-l-[10px] rounded-r-[10px] bg-[var(--custom)];
+  @apply text-white mr-auto px-[10px] bg-[var(--custom)];
 }
 
 .checkbox {
@@ -217,7 +217,7 @@ ol li{
 }
 
 .full_chat_wrapper {
-  @apply flex py-[6px] rounded-[10px] mb-[2px];
+  @apply flex;
 }
 .full_chat_wrapper.inner {
   @apply relative px-0 py-1;

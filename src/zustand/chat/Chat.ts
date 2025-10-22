@@ -78,8 +78,9 @@ interface ChatState {
     setMessage: (message: string, isError: boolean) => void
   ) => Promise<void>
   addSearchedChats: (url: string, createdAt: Date) => Promise<void>
-  addFavSearchedChats: (url: string, createdAt: Date) => Promise<void>
-  setProcessedResults: (data: Chat[]) => void
+  addFavSearchedChats: (url: number, createdAt: Date) => Promise<void>
+  setProcessedResults: (data: ChatContent[]) => void
+  processMoreResults: (data: ChatContent[]) => void
   setProcessedFavResults: (data: Chat[]) => void
   setLoading?: (loading: boolean) => void
   massDelete: (
@@ -96,13 +97,11 @@ interface ChatState {
   ) => Promise<void>
 
   updatePendingChat: (chats: ChatContent) => void
-  groupNewChatsByDay: (chats: ChatContent[], oldChats: Chat[]) => Chat[]
-  groupChatsByDay: (chats: ChatContent[]) => Chat[]
   selectChats: (id: string) => void
   setConnection: (connection: string) => void
   addNewChat: (saved: ChatContent) => void
   updateChats: (chat: ChatContent[], message?: string) => void
-  selectFavChats: (id: string) => void
+  selectFavChats: (id: number) => void
   toggleChecked: (index: number) => void
   toggleActive: (index: number) => void
   toggleAllSelected: () => void
@@ -185,10 +184,30 @@ export const ChatStore = create<ChatState>((set) => ({
     })
   },
 
-  setProcessedResults: (results) => {
+  processMoreResults: (results) => {
     set({
       loading: false,
-      chatResults: results,
+      chatContentResults: results,
+    })
+  },
+
+  setProcessedResults: (newResults) => {
+    set((prev) => {
+      const combined = [...prev.chatContentResults, ...newResults]
+
+      // Remove duplicates based on `timeNumber`
+      const unique = combined.filter(
+        (chat, index, self) =>
+          index === self.findIndex((c) => c.timeNumber === chat.timeNumber)
+      )
+
+      // Sort by timeNumber (optional but recommended)
+      unique.sort((a, b) => a.timeNumber - b.timeNumber)
+
+      return {
+        loading: false,
+        chatContentResults: unique,
+      }
     })
   },
 
@@ -205,35 +224,6 @@ export const ChatStore = create<ChatState>((set) => ({
 
   setConnection: (connection: string) => {
     set({ connection: connection })
-  },
-
-  groupChatsByDay(chats: ChatContent[]): Chat[] {
-    const grouped: Record<string, ChatContent[]> = {}
-
-    chats.forEach((chat) => {
-      if (!grouped[chat.day]) {
-        grouped[chat.day] = []
-      }
-      grouped[chat.day].push(chat)
-    })
-
-    function parseDayString(day: string): Date {
-      const [dd, mm, yy] = day.split('/').map(Number)
-      return new Date(2000 + yy, mm - 1, dd)
-    }
-
-    return Object.entries(grouped)
-      .map(([day, chats]) => ({
-        day,
-        chats: chats.sort(
-          (a, b) =>
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-        ),
-      }))
-      .sort(
-        (a, b) =>
-          parseDayString(a.day).getTime() - parseDayString(b.day).getTime()
-      )
   },
 
   getChatUser: async (url, setMessage) => {
@@ -253,47 +243,6 @@ export const ChatStore = create<ChatState>((set) => ({
     }
   },
 
-  groupNewChatsByDay(newChats: ChatContent[], oldGrouped: Chat[]): Chat[] {
-    const oldChats = oldGrouped.flatMap((group) => group.chats)
-    const combinedChats = [...newChats, ...oldChats]
-    const uniqueChatsMap = new Map<string, ChatContent>()
-
-    combinedChats.forEach((chat) => {
-      uniqueChatsMap.set(chat._id, chat)
-    })
-    const uniqueChats = Array.from(uniqueChatsMap.values())
-
-    set({
-      newCount: uniqueChats.length,
-    })
-    const grouped: Record<string, ChatContent[]> = {}
-
-    uniqueChats.forEach((chat) => {
-      if (!grouped[chat.day]) {
-        grouped[chat.day] = []
-      }
-      grouped[chat.day].push(chat)
-    })
-
-    function parseDayString(day: string): Date {
-      const [dd, mm, yy] = day.split('/').map(Number)
-      return new Date(2000 + yy, mm - 1, dd)
-    }
-
-    return Object.entries(grouped)
-      .map(([day, chats]) => ({
-        day,
-        chats: chats.sort(
-          (a, b) =>
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-        ),
-      }))
-      .sort(
-        (a, b) =>
-          parseDayString(a.day).getTime() - parseDayString(b.day).getTime()
-      )
-  },
-
   getChats: async (
     url: string,
     setMessage: (message: string, isError: boolean) => void
@@ -305,18 +254,7 @@ export const ChatStore = create<ChatState>((set) => ({
       })
       const data = response?.data
       if (data) {
-        if (data.results.length > 0) {
-          ChatStore.setState({
-            chatContentResults: data.results,
-          })
-        }
-        // const results = ChatStore.getState().groupChatsByDay(data.results)
-        const oldChats = ChatStore.getState().chatResults
-        const results = ChatStore.getState().groupNewChatsByDay(
-          data.results,
-          oldChats
-        )
-        ChatStore.getState().setProcessedResults(results)
+        ChatStore.getState().setProcessedResults(data.results)
       }
     } catch (error: unknown) {
       console.log(error)
@@ -327,11 +265,7 @@ export const ChatStore = create<ChatState>((set) => ({
     try {
       const chats = await getMessagesByConnection(connection)
       if (chats) {
-        ChatStore.setState({
-          chatContentResults: chats,
-        })
-        const results = ChatStore.getState().groupChatsByDay(chats)
-        ChatStore.getState().setProcessedResults(results)
+        ChatStore.getState().setProcessedResults(chats)
       }
     } catch (error: unknown) {
       console.log(error)
@@ -349,8 +283,6 @@ export const ChatStore = create<ChatState>((set) => ({
       })
       const data = response?.data
       if (data) {
-        const results = ChatStore.getState().groupChatsByDay(data.results)
-        ChatStore.getState().setProcessedFavResults(results)
       }
     } catch (error: unknown) {
       console.log(error)
@@ -373,20 +305,13 @@ export const ChatStore = create<ChatState>((set) => ({
       )
       const data = response?.data
       if (data) {
-        const old = ChatStore.getState().chatResults
-
-        const newResults = ChatStore.getState().groupNewChatsByDay(
-          data.results,
-          old
-        )
-
         set((state) => {
           return {
             count: data.count,
             current: state.current + 1,
           }
         })
-        ChatStore.getState().setProcessedResults(newResults)
+        ChatStore.getState().processMoreResults(data.results)
       }
     } catch (error: unknown) {
       console.log(error)
@@ -424,21 +349,17 @@ export const ChatStore = create<ChatState>((set) => ({
   },
 
   updatePendingChat: async (newChat) => {
+    updatePendingMessageStatus(
+      newChat.connection,
+      Number(newChat.timeNumber),
+      newChat.status
+    )
+
     ChatStore.setState((prev) => {
-      const updatedResults: Chat[] = [...prev.chatResults]
-      updatePendingMessageStatus(
-        newChat.connection,
-        Number(newChat.timeNumber),
-        'sent'
+      const updatedResults = prev.chatContentResults.map((chat) =>
+        chat.timeNumber === newChat.timeNumber ? newChat : chat
       )
-
-      updatedResults.forEach((group) => {
-        group.chats = group.chats.map((chat) =>
-          chat.timeNumber === newChat.timeNumber ? newChat : chat
-        )
-      })
-
-      return { chatResults: updatedResults }
+      return { chatContentResults: updatedResults }
     })
   },
 
@@ -453,7 +374,7 @@ export const ChatStore = create<ChatState>((set) => ({
         updatedResults.forEach((group) => {
           group.chats = group.chats.map((chat) => {
             const replacement = newChats.find(
-              (newChat) => Number(newChat.time) === chat.timeNumber
+              (newChat) => Number(newChat.timeNumber) === chat.timeNumber
             )
             if (replacement) {
               shouldUpdate = true
@@ -501,18 +422,12 @@ export const ChatStore = create<ChatState>((set) => ({
       )
       const data = response?.data
       if (data) {
-        const old = ChatStore.getState().favChatResults
-        const newResults = ChatStore.getState().groupNewChatsByDay(
-          data.results,
-          old
-        )
         set((state) => {
           return {
             count: data.count,
             current: state.current + 1,
           }
         })
-        ChatStore.getState().setProcessedFavResults(newResults)
       }
     } catch (error: unknown) {
       console.log(error)
@@ -532,12 +447,6 @@ export const ChatStore = create<ChatState>((set) => ({
 
       const data = response?.data
       if (data) {
-        const old = ChatStore.getState().chatResults
-        const newResults = ChatStore.getState().groupNewChatsByDay(
-          data.results,
-          old
-        )
-        ChatStore.getState().setProcessedResults(newResults)
         set((state) => {
           return {
             count: data.count,
@@ -546,14 +455,14 @@ export const ChatStore = create<ChatState>((set) => ({
             moveUp: true,
           }
         })
-        ChatStore.getState().selectChats(data.results[0]._id)
+        ChatStore.getState().selectChats(String(data.results[0]._id))
       }
     } catch (error: unknown) {
       console.log(error)
     }
   },
 
-  addFavSearchedChats: async (id: string, createdAt: Date) => {
+  addFavSearchedChats: async (id, createdAt) => {
     try {
       const response = await apiRequest<FetchChatResponse>(
         `/user-messages/add-searched/?chatId=${id}&oldest=${new Date(
@@ -563,15 +472,8 @@ export const ChatStore = create<ChatState>((set) => ({
           setLoading: ChatStore.getState().setLoading,
         }
       )
-
       const data = response?.data
       if (data) {
-        const old = ChatStore.getState().chatResults
-        const newResults = ChatStore.getState().groupNewChatsByDay(
-          data.results,
-          old
-        )
-        ChatStore.getState().setProcessedFavResults(newResults)
         set((state) => {
           return {
             count: data.count,
@@ -580,7 +482,7 @@ export const ChatStore = create<ChatState>((set) => ({
             moveUp: true,
           }
         })
-        ChatStore.getState().selectFavChats(data.results[0]._id)
+        ChatStore.getState().selectFavChats(data.results[0].timeNumber)
       }
     } catch (error: unknown) {
       console.log(error)
@@ -626,12 +528,12 @@ export const ChatStore = create<ChatState>((set) => ({
     })
     const data = response?.data
     if (data) {
-      const ids = ['']
+      const ids = [0]
       set((state) => {
         const selectedUpdatedChats = state.chatResults.map((group) => ({
           ...group,
           chats: group.chats
-            .filter((chat) => !ids.includes(chat._id))
+            .filter((chat) => !ids.includes(chat.timeNumber))
             .map((chat) => {
               return {
                 ...chat,
@@ -763,7 +665,7 @@ export const ChatStore = create<ChatState>((set) => ({
 
           ChatStore.getState().chatResults.forEach((group) => {
             group.chats.forEach((chat) => {
-              const chatDate = new Date(chat.time)
+              const chatDate = new Date(chat.timeNumber)
               if (!oldest || chatDate < oldest) {
                 oldest = chatDate
               }
@@ -815,10 +717,10 @@ export const ChatStore = create<ChatState>((set) => ({
     })
   },
 
-  selectFavChats: (_id: string) => {
+  selectFavChats: (timeNumber) => {
     set((state) => {
       const chatExists = state.favChatResults.some((group) =>
-        group.chats.some((chat) => chat._id === _id)
+        group.chats.some((chat) => chat.timeNumber === timeNumber)
       )
 
       if (!chatExists) {
@@ -827,7 +729,7 @@ export const ChatStore = create<ChatState>((set) => ({
 
           ChatStore.getState().favChatResults.forEach((group) => {
             group.chats.forEach((chat) => {
-              const chatDate = new Date(chat.time)
+              const chatDate = new Date(chat.timeNumber)
               if (!oldest || chatDate < oldest) {
                 oldest = chatDate
               }
@@ -838,7 +740,7 @@ export const ChatStore = create<ChatState>((set) => ({
         })()
 
         if (oldestCreatedAt) {
-          ChatStore.getState().addFavSearchedChats(_id, oldestCreatedAt)
+          ChatStore.getState().addFavSearchedChats(timeNumber, oldestCreatedAt)
         }
         return {}
       }
@@ -846,7 +748,8 @@ export const ChatStore = create<ChatState>((set) => ({
       const updatedResults = state.favChatResults.map((group) => ({
         ...group,
         chats: group.chats.map((chat) => {
-          const isChecked = chat._id === _id ? !chat.isChecked : chat.isChecked
+          const isChecked =
+            chat.timeNumber === timeNumber ? !chat.isChecked : chat.isChecked
           return {
             ...chat,
             isChecked,
@@ -919,31 +822,25 @@ export interface FileType {
 }
 
 export interface ChatContent {
-  _id: string
-  uniqueId: string
   connection: string
   content: string
-  isSent: boolean
-  isRead: boolean
-  deletedUsername: string
-  repliedChat: RepliedChatContent | null
-  isSavedUsernames: string[]
-  isReadUsernames: string[]
-  isPinned: boolean
   senderUsername: string
   media: FileType[]
   day: string
   receiverUsername: string
   status: string
-  unread: number
-  unreadCount: number
-  unreadReceiver: number
-  unreadUser: number
-  senderTime: Date
-  createdAt: Date
-  time: Date
-  receiverTime: Date
-  timeNumber?: number
+  timeNumber: number
+  deletedUsername?: string
+  repliedChat?: RepliedChatContent | null
+  isPinned?: boolean
+  unread?: number
+  unreadCount?: number
+  unreadReceiver?: number
+  unreadUser?: number
+  senderTime?: Date
+  receiverTime?: Date
+  isSavedUsernames?: string[]
+  _id?: string
   isChecked?: boolean
   isActive?: boolean
   isAlert?: boolean
