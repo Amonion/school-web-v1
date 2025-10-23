@@ -4,12 +4,23 @@ import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import FriendStore from '@/src/zustand/chat/Friend'
 import { useTheme } from '@/context/ThemeProvider'
+import { useEffect, useState } from 'react'
 
 export default function MobileNav() {
   const pathname = usePathname()
   const { theme } = useTheme()
-  // const [unread, setUnread] = useState(0);
-  const { totalUnread } = FriendStore()
+  const [unread, setUnread] = useState(0)
+  const { friendsResults } = FriendStore()
+
+  useEffect(() => {
+    setUnread(0)
+    for (let i = 0; i < friendsResults.length; i++) {
+      const el = friendsResults[i]
+      setUnread((prev) => {
+        return prev + Number(el.totalUnread)
+      })
+    }
+  }, [friendsResults])
 
   return (
     <>
@@ -69,10 +80,16 @@ export default function MobileNav() {
         <i className="bi bi-music-note-beamed text-lg text-[var(--text-primary)]"></i>
       </span> */}
           <Link href={`/home/friends/`} className="mobile_navs">
-            {totalUnread > 0 && (
-              <span className="dot_notification">
-                {totalUnread > 9 ? `9+` : totalUnread}{' '}
-              </span>
+            {unread > 0 && (
+              <div
+                className={`${
+                  unread >= 100
+                    ? 'w-[20px] h-[20px] text-[10px]'
+                    : 'w-[15px] h-[15px] text-[12px]'
+                } flex items-center  text-white absolute right-0 top-0 z-30 justify-center rounded-full bg-[var(--custom)]`}
+              >
+                {unread >= 100 ? '99+' : unread}
+              </div>
             )}
             <i
               className={`bi bi-people text-lg ${

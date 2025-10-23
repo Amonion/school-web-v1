@@ -78,7 +78,8 @@ export const updatePendingMessageStatus = async (
 
 export const updatePendingFriendMessageStatus = async (
   connection: string,
-  newStatus: string
+  newStatus: string,
+  isFriends: boolean
 ) => {
   const db = await initDB()
   const tx = db.transaction(FRIENDS_STORE, 'readwrite')
@@ -95,6 +96,7 @@ export const updatePendingFriendMessageStatus = async (
   const updatedFriend = {
     ...friend,
     status: newStatus,
+    isFriends: isFriends,
     updatedAt: new Date().toISOString(),
   }
 

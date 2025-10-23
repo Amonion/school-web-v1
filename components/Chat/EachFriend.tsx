@@ -4,6 +4,7 @@ import { AuthStore } from '@/src/zustand/user/AuthStore'
 import Image from 'next/image'
 import { formatRelativeDate } from '@/lib/helpers'
 import { useRouter } from 'next/navigation'
+import { ChatStore } from '@/src/zustand/chat/Chat'
 
 interface EachFriendProps {
   friend: Friend
@@ -15,10 +16,17 @@ export default function EachFriend({ friend }: EachFriendProps) {
   )
   const currentFriend = friendState ?? friend
   const { user } = AuthStore()
+  const { friendForm } = FriendStore()
+  const { getSavedChats } = ChatStore()
   const router = useRouter()
   const isSender = friend.senderUsername === user?.username
 
   const selectFriend = () => {
+    if (friendForm.connection !== friend.connection) {
+      ChatStore.setState({ chatContentResults: [] })
+      getSavedChats(friend.connection)
+    }
+
     FriendStore.setState(() => ({
       friendForm: currentFriend,
     }))
@@ -34,9 +42,13 @@ export default function EachFriend({ friend }: EachFriendProps) {
   return (
     <li
       onClick={selectFriend}
-      className="flex w-full items-start cursor-pointer"
+      className={`${
+        friendForm && currentFriend.connection === friendForm.connection
+          ? 'bg-[var(--primary)]'
+          : ''
+      } hover:bg-[var(--primary)] px-1 py-2 rounded-[10px] mb-2 flex w-full items-start cursor-pointer`}
     >
-      <div className="rounded-full w-12 h-12 relative overflow-hidden">
+      <div className="rounded-full w-10 h-10 relative overflow-hidden">
         <Image
           src={
             isSender
@@ -61,13 +73,9 @@ export default function EachFriend({ friend }: EachFriendProps) {
           </div>
         </div>
 
-        <div className="flex items-end w-full">
-          <div
-            className="text-sm mr-auto line-clamp-1"
-            dangerouslySetInnerHTML={{ __html: currentFriend.content }}
-          />
+        <div className="flex relative items-end w-full">
           {isSender && (
-            <div className="ml-1 text-[12px]">
+            <div className="mr-1 text-[12px]">
               {currentFriend.status === 'pending' ? (
                 <i className="bi bi-clock-history"></i>
               ) : currentFriend.status === 'sent' ? (
@@ -79,6 +87,23 @@ export default function EachFriend({ friend }: EachFriendProps) {
               )}
             </div>
           )}
+          {currentFriend.totalUnread && currentFriend.totalUnread > 0 && (
+            <div
+              className={`${
+                currentFriend.totalUnread >= 100
+                  ? 'w-[20px] h-[20px] text-[10px]'
+                  : 'w-[15px] h-[15px] text-[12px]'
+              } flex items-center  text-white absolute right-0 bottom-1 z-30 justify-center rounded-full bg-[var(--custom)]`}
+            >
+              {currentFriend.totalUnread >= 100
+                ? '99+'
+                : currentFriend.totalUnread}
+            </div>
+          )}
+          <div
+            className="text-sm mr-auto line-clamp-1"
+            dangerouslySetInnerHTML={{ __html: currentFriend.content }}
+          />
         </div>
       </div>
     </li>

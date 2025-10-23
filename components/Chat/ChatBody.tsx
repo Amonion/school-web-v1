@@ -132,23 +132,20 @@ const ChatBody = () => {
           const prevChat = chatContentResults[index - 1]
           const nextChat = chatContentResults[index + 1]
 
-          const showDate =
-            index === 0 ||
-            new Date(chat.day).toDateString() !==
-              new Date(prevChat.day).toDateString()
+          const showDate = index === 0 || chat.day !== prevChat.day
 
           const isSameSenderAsPrev =
             prevChat && prevChat.senderUsername === chat.senderUsername
           const isSameSenderAsNext =
             nextChat && nextChat.senderUsername === chat.senderUsername
 
-          const isGroupStart = !isSameSenderAsPrev // First message in a sender's sequence
+          const isGroupStart = !isSameSenderAsPrev
           const isGroupEnd = !isSameSenderAsNext
 
           return (
             <div key={chat._id} className={`w-full flex flex-col`}>
               {showDate && (
-                <div className="mx-auto mb-2 rounded-[25px] py-1 px-3 bg-[var(--primary)]">
+                <div className="mx-auto my-3 rounded-[25px] py-1 px-3 bg-[var(--primary)]">
                   {chat.day}
                 </div>
               )}
@@ -169,7 +166,7 @@ const ChatBody = () => {
               <span className="text-[var(--custom)]">
                 {chatUserForm.username}
               </span>{' '}
-              will not see you as friend until you send a reply.
+              will not see you as friend until you send a reply.{' '}
             </div>
           </div>
         )}

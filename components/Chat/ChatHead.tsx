@@ -5,7 +5,7 @@ import { useParams, usePathname } from 'next/navigation'
 import { MessageStore } from '@/src/zustand/notification/Message'
 import { AuthStore } from '@/src/zustand/user/AuthStore'
 import { ChatStore } from '@/src/zustand/chat/Chat'
-import FriendStore from '@/src/zustand/chat/Friend'
+import FriendStore, { FriendEmpty } from '@/src/zustand/chat/Friend'
 
 interface Media {
   name: string
@@ -64,12 +64,14 @@ export default function ChatHead() {
             item.receiverUsername === username
         )
         return {
-          friendForm: friend,
+          friendForm: friend ? friend : FriendEmpty,
         }
       })
       // getChatUser(`/users/chat/${username}`, setMessage)
+    } else {
+      FriendStore.setState({ friendForm: FriendEmpty })
     }
-  }, [username, friendsResults])
+  }, [username, friendsResults.length])
 
   useEffect(() => {
     if (inputRef.current) {

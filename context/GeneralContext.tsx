@@ -29,7 +29,7 @@ interface GeneralProviderProps {
 
 type response = {
   friend: Friend
-  key: string
+  connection: string
   totalUnread: number
   isFriends: boolean
   userId: string
@@ -134,7 +134,10 @@ export const GeneralProvider = ({ children }: GeneralProviderProps) => {
         updatePendingFriendsChat(data.friend)
         FriendStore.setState((prev) => {
           return {
-            friendForm: { ...prev.friendForm, isFriends: data.isFriends },
+            friendForm: {
+              ...prev.friendForm,
+              isFriends: data.isFriends,
+            },
           }
         })
       })
@@ -151,20 +154,17 @@ export const GeneralProvider = ({ children }: GeneralProviderProps) => {
     if (user) {
       socket.on(`addCreatedChat${user.username}`, (data: response) => {
         setChat(data.chat)
-        addNewChat(data.chat)
-        updateFriendsChat(data.friend)
-        FriendStore.setState((prev) => {
-          return {
-            friendForm: { ...prev.friendForm, isFriends: data.isFriends },
-          }
-        })
+        updateFriendsChat({ ...data.friend, totalUnread: data.totalUnread })
+        if (data.connection === connection) {
+          addNewChat(data.chat)
+        }
       })
     }
 
     return () => {
       socket.off(`addCreatedChat${user?.username}`)
     }
-  }, [user, socket])
+  }, [user, socket, connection])
 
   useEffect(() => {
     if (!socket) return

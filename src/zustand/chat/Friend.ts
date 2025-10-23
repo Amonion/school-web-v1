@@ -29,6 +29,7 @@ export interface Friend {
   createdAt: Date | null
   timeNumber: number
   isFriends: boolean
+  totalUnread?: number
   isOnline?: boolean
   isActive?: boolean
   isChecked?: boolean
@@ -46,6 +47,7 @@ export const FriendEmpty = {
   connection: '',
   createdAt: null,
   timeNumber: 0,
+  totalUnread: 0,
   isFriends: false,
   isOnline: false,
 }
@@ -159,7 +161,11 @@ const FriendStore = create<FriendState>((set) => ({
         return { ...item }
       })
 
-      updatePendingFriendMessageStatus(data.connection, data.status)
+      updatePendingFriendMessageStatus(
+        data.connection,
+        data.status,
+        data.isFriends
+      )
       return { friendsResults: friends }
     })
   },

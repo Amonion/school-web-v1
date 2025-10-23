@@ -254,7 +254,7 @@ const UserChat = () => {
     }
 
     return () => container.removeEventListener('scroll', handleScroll)
-  }, [username, user])
+  }, [username, user, pathname])
   //***********FETCH OLDER CHATS WHEN USER SCROLL UP****************//
 
   //////////////LISTEN TO SENT & RECEIVED CHAT//////////////////
@@ -442,6 +442,18 @@ const UserChat = () => {
         receiverTime: new Date(),
       }
 
+      if (
+        !friendForm.isFriends &&
+        chatContentResults.length > 0 &&
+        user?.username === chatContentResults[0].receiverUsername
+      ) {
+        FriendStore.setState((prev) => {
+          return {
+            friendForm: { ...prev.friendForm, isFriends: true },
+          }
+        })
+      }
+
       updateFriendsChat(friendChat)
       addNewChat(saved)
       socket.emit('message', form)
@@ -462,7 +474,7 @@ const UserChat = () => {
     <>
       <div
         ref={chatContainerRef}
-        className="flex-1 sm:px-[5px] overflow-auto chat_scrollbar"
+        className="flex-1 sm:px-0 px-1 overflow-auto chat_scrollbar"
       >
         <ChatBody />
       </div>

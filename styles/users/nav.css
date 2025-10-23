@@ -142,7 +142,7 @@
   @apply  bg-transparent px-0;
 }
 .v_nav_card.news {
-  @apply px-0 bg-transparent flex flex-col pr-2 xl:pr-0 sm:px-0;
+  @apply pl-0 bg-transparent flex flex-col pr-2 sm:pl-0 xl:pr-0;
 }
 
 .v_nav_card.nav {

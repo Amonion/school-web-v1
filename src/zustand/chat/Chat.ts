@@ -263,12 +263,15 @@ export const ChatStore = create<ChatState>((set) => ({
 
   getSavedChats: async (connection) => {
     try {
+      set({ loading: true })
       const chats = await getMessagesByConnection(connection)
       if (chats) {
         ChatStore.getState().setProcessedResults(chats)
       }
     } catch (error: unknown) {
       console.log(error)
+    } finally {
+      set({ loading: false })
     }
   },
 
