@@ -5,28 +5,19 @@ import '../../styles/users/onboard.css'
 import UserResponse from '../../components/Messages/UserResponse'
 import UserAlert from '@/components/Messages/UserAlert'
 import { useEffect, useRef } from 'react'
-import { usePathname } from 'next/navigation'
 import AsideFriends from '@/components/Home/Navigation/AsideFriends'
 import VerticalNavigation from '@/components/Home/Navigation/VerticalNavigation'
 import { NavStore } from '@/src/zustand/notification/Navigation'
-import { AuthStore } from '@/src/zustand/user/AuthStore'
-import { MomentStore } from '@/src/zustand/post/Moment'
-import { MessageStore } from '@/src/zustand/notification/Message'
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const { setShowHeader, setHeaderHeight } = NavStore()
+  const { setShowHeader } = NavStore()
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
   const lastScrollY = useRef(0)
-  const { getMoments } = MomentStore()
   const isOutOfView = useRef(false)
-  const { user } = AuthStore()
-  const { setMessage } = MessageStore()
-  // const [isMd, setIsMd] = useState(false)
-  const pathname = usePathname()
 
   useEffect(() => {
     const container = scrollContainerRef.current
@@ -52,32 +43,6 @@ export default function RootLayout({
     }
   }, [])
 
-  useEffect(() => {
-    if (user) {
-      getMoments(
-        `/posts/moments/?myId=${
-          user._id
-        }&page_size=20&page=${1}&ordering=-createdAt`,
-        setMessage
-      )
-    }
-  }, [user])
-
-  useEffect(() => {
-    if (pathname.includes('/home/friends')) {
-      setHeaderHeight(0)
-    }
-    const media = window.matchMedia('(min-width: 767px)')
-    // setIsMd(media.matches)
-
-    const handler = (e: MediaQueryListEvent) => {
-      if (e) {
-      }
-    }
-    media.addEventListener('change', handler)
-
-    return () => media.removeEventListener('change', handler)
-  }, [pathname])
   return (
     <>
       <UserResponse />

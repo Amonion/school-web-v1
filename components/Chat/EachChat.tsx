@@ -1,6 +1,6 @@
 'use client'
 import Image from 'next/image'
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { useParams } from 'next/navigation'
 import { formatTimeTo12Hour, getExtension } from '@/lib/helpers'
 import AudioMessage from './Audio'
@@ -19,7 +19,7 @@ type ChatContentProps = {
 }
 
 const EachChat = ({ e, isFirst, isGroupEnd }: ChatContentProps) => {
-  const { selectChats, selectedItems } = ChatStore()
+  const { selectChats, chats, selectedItems } = ChatStore()
   const { user } = AuthStore()
   const { username } = useParams()
   const optionsRef = useRef<HTMLDivElement | null>(null)
@@ -29,22 +29,10 @@ const EachChat = ({ e, isFirst, isGroupEnd }: ChatContentProps) => {
 
   const setIsActive = (id: string) => {
     ChatStore.setState((prev) => {
-      let willBeActive = false
-      for (const group of prev.chatResults) {
-        const chat = group.chats.find((c) => c._id === id)
-        if (chat) {
-          willBeActive = !chat.isActive
-          break
-        }
-      }
-      const updatedResults = prev.chatResults.map((group) => ({
-        ...group,
-        chats: group.chats.map((chat) => ({
-          ...chat,
-          isActive: chat._id === id ? willBeActive : false,
-        })),
-      }))
-      return { chatResults: updatedResults }
+      const updatedChats = prev.chats.map((c) =>
+        c._id === id ? { ...c, isActive: true } : c
+      )
+      return { chats: updatedChats }
     })
   }
 
@@ -54,90 +42,62 @@ const EachChat = ({ e, isFirst, isGroupEnd }: ChatContentProps) => {
     }
   }
 
-  //--------------------MARK READ CHATS----------------------//
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const chatId = Number(entry.target.getAttribute('data-id'))
+            const chat = chats.find(
+              (c) =>
+                c.timeNumber === chatId &&
+                c.receiverUsername === user?.username &&
+                c.status !== 'read'
+            )
+            if (chat) {
+              ChatStore.setState((prev) => {
+                const updatedIds = new Set([
+                  ...prev.unseenChatIds,
+                  Number(chat.timeNumber),
+                ])
+                return {
+                  unseenChatIds: Array.from(updatedIds),
+                }
+              })
+            }
 
-  // useEffect(() => {
-  //   const observer = new IntersectionObserver(
-  //     (entries) => {
-  //       let hasNew = false
+            const userChat = chats.find(
+              (c) => c.timeNumber === chatId && c.status !== 'read'
+            )
+            if (userChat) {
+              ChatStore.setState((prev) => {
+                const updatedIds = new Set([
+                  ...prev.unseenCheckIds,
+                  Number(userChat.timeNumber),
+                ])
+                return {
+                  unseenCheckIds: Array.from(updatedIds),
+                }
+              })
+            }
+          }
+        })
+      },
+      { threshold: 0.5 } // Trigger when 50% of the element is visible
+    )
 
-  //       entries.forEach((entry) => {
-  //         const messageId = (entry.target as HTMLElement).dataset.id
-  //         if (
-  //           messageId &&
-  //           entry.isIntersecting &&
-  //           !observedChats.current.has(messageId)
-  //         ) {
-  //           const chat = allMessages.find((c) => c._id === messageId)
-  //           if (chat && chat.receiverUsername === user?.username) {
-  //             observedChats.current.set(messageId, chat)
-  //             hasNew = true
+    // Observe all chat elements
+    Object.values(messageRefs.current).forEach((el) => {
+      if (el) observer.observe(el)
+    })
 
-  //             if (pendingReadIds.current.has(messageId)) {
-  //               const form = {
-  //                 to: 'read',
-  //                 ids: [messageId],
-  //                 receiverId: user?._id,
-  //                 receiverUsername: user?.username,
-  //                 username: chat.username,
-  //                 isRead: true,
-  //               }
-  //               socket?.emit('message', form)
-  //               pendingReadIds.current.delete(messageId)
-  //             }
-  //           }
-  //         }
-  //       })
-
-  //       if (hasNew && user && socket) {
-  //         if (debounceTimeout.current) {
-  //           clearTimeout(debounceTimeout.current)
-  //         }
-
-  //         debounceTimeout.current = setTimeout(() => {
-  //           const chatsToSend = Array.from(observedChats.current.values())
-  //           if (chatsToSend.length > 0) {
-  //             const unreadChatIds = chatsToSend
-  //               .filter(
-  //                 (e) =>
-  //                   !e.isRead &&
-  //                   e.receiverUsername === user.username &&
-  //                   e.isFriends
-  //               )
-  //               .map((e) => e._id)
-  //             if (unreadChatIds.length > 0) {
-  //               const form = {
-  //                 to: 'read',
-  //                 ids: unreadChatIds,
-  //                 connection: connection,
-  //                 username: username,
-  //                 receiverUsername: user?.username,
-  //                 receiverMainId: user?.userId,
-  //                 isRead: true,
-  //               }
-  //               socket.emit('message', form)
-  //               observedChats.current.clear()
-  //             }
-  //           }
-  //         }, 1000)
-  //       }
-  //     },
-  //     {
-  //       threshold: 0.5,
-  //     }
-  //   )
-
-  //   Object.values(messageRefs.current).forEach((el) => {
-  //     if (el) observer.observe(el)
-  //   })
-
-  //   return () => {
-  //     observer.disconnect()
-  //     if (debounceTimeout.current) {
-  //       clearTimeout(debounceTimeout.current)
-  //     }
-  //   }
-  // }, [chatResults, user, socket])
+    // Clean up observer
+    return () => {
+      Object.values(messageRefs.current).forEach((el) => {
+        if (el) observer.unobserve(el)
+      })
+    }
+  }, [chats, user])
 
   return (
     <div
@@ -147,13 +107,13 @@ const EachChat = ({ e, isFirst, isGroupEnd }: ChatContentProps) => {
       } ${isGroupEnd ? 'mb-3' : 'mb-1'} full_chat_wrapper`}
       ref={(el) => {
         if (el) {
-          messageRefs.current[String(e._id)] = el
+          messageRefs.current[String(e.timeNumber)] = el
           if (isFirst) {
             firstCardRef.current = el
           }
         }
       }}
-      data-id={e._id}
+      data-id={e.timeNumber}
       // ref={isFirst ? firstCardRef : messageRefs}
     >
       <div
@@ -252,12 +212,17 @@ const EachChat = ({ e, isFirst, isGroupEnd }: ChatContentProps) => {
           <div className="flex items-end">
             {isSender ? (
               <>
+                {e.status}
                 {formatTimeTo12Hour(e.senderTime ?? null)}
                 <div className="flex ml-3 text-[10px]">
                   {e.status === 'pending' ? (
                     <i className="bi bi-clock-history"></i>
                   ) : e.status === 'delivered' ? (
                     <i className={`bi text-[15px] bi-check2-all`}></i>
+                  ) : e.status === 'read' ? (
+                    <i
+                      className={`bi text-[15px] bi-check2-all text-[var(--custom)]`}
+                    ></i>
                   ) : (
                     <i className="bi bi-check2 text-[15px]"></i>
                   )}

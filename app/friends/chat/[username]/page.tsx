@@ -39,15 +39,17 @@ const UserChat = () => {
   const { updateFriendsChat, friendForm } = FriendStore()
   const socket = useSocket()
   const {
-    chatResults,
     current,
-    chatContentResults,
+    chats,
     unread,
     moveUp,
     repliedChat,
     connection,
     chatUserForm,
+    unseenChatIds,
+    unseenCheckIds,
     getSavedChats,
+    updateChatsToRead,
     getChats,
     setConnection,
     addNewChat,
@@ -173,7 +175,7 @@ const UserChat = () => {
         media.removeEventListener('loadeddata', handleLoad)
       })
     }
-  }, [chatContentResults.length])
+  }, [chats.length])
   //***********SCROLL DOWN ON NEW CHAT****************//
 
   //////////////ALLOW FIRST SCROLL DOWN ON CHAT LOAD//////////////////
@@ -227,7 +229,7 @@ const UserChat = () => {
         media.removeEventListener('loadeddata', handleMediaLoad)
       })
     }
-  }, [chatResults, chatContentResults, current, pathname])
+  }, [chats, current, pathname])
   //***********ALLOW FIRST SCROLL DOWN ON CHAT LOAD****************//
 
   //////////////FETCH OLDER CHATS WHEN USER SCROLL UP//////////////////
@@ -275,6 +277,54 @@ const UserChat = () => {
     }
   }, [user, socket])
   //***********LISTEN TO SENT & RECEIVED CHAT****************//
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (unseenChatIds.length > 0) {
+        updateChatStatus()
+        updateChatsToRead(unseenChatIds, connection)
+      }
+    }, 1000)
+
+    return () => clearTimeout(timer)
+  }, [unseenChatIds])
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (unseenCheckIds.length > 0) {
+        checkChatStatus()
+      }
+    }, 1000)
+
+    return () => clearTimeout(timer)
+  }, [unseenCheckIds])
+
+  const updateChatStatus = () => {
+    if (socket) {
+      const form = {
+        to: 'read',
+        ids: unseenChatIds,
+        senderUsername: chatUserForm.username,
+        receiverUsername: user?.username,
+        connection: connection,
+      }
+
+      socket.emit('message', form)
+    }
+  }
+
+  const checkChatStatus = () => {
+    if (socket) {
+      const form = {
+        to: 'checkRead',
+        ids: unseenCheckIds,
+        senderUsername: user?.username,
+        connection: connection,
+      }
+
+      socket.emit('message', form)
+    }
+  }
 
   const handleFetchOlderChats = async (user: User) => {
     const container = chatContainerRef.current
@@ -389,6 +439,8 @@ const UserChat = () => {
     }
 
     if (socket) {
+      const timeNumber = new Date().getTime()
+
       const form = {
         to: 'chat',
         action: 'post',
@@ -405,7 +457,7 @@ const UserChat = () => {
         receiverDisplayName: chatUserForm.displayName,
         senderTime: new Date().toISOString(),
         time: new Date().getTime(),
-        timeNumber: new Date().getTime(),
+        timeNumber: timeNumber,
         media: files,
       }
 
@@ -420,7 +472,7 @@ const UserChat = () => {
         receiverDisplayName: chatUserForm.displayName,
         status: 'pending',
         senderTime: new Date().toISOString(),
-        timeNumber: new Date().getTime(),
+        timeNumber: timeNumber,
         createdAt: new Date(),
         media: files,
         isFriends: friendForm.isFriends,
@@ -438,14 +490,14 @@ const UserChat = () => {
         status: 'pending',
         senderTime: new Date(),
         createdAt: new Date(),
-        timeNumber: new Date().getTime(),
+        timeNumber: timeNumber,
         receiverTime: new Date(),
       }
 
       if (
         !friendForm.isFriends &&
-        chatContentResults.length > 0 &&
-        user?.username === chatContentResults[0].receiverUsername
+        chats.length > 0 &&
+        user?.username === chats[0].receiverUsername
       ) {
         FriendStore.setState((prev) => {
           return {

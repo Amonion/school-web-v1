@@ -16,6 +16,11 @@ export const getAllFriendsFromDB = async (): Promise<Friend[]> => {
   return db.getAll('friends')
 }
 
+interface UnreadMessage {
+  username: string
+  unread: number
+}
+
 export interface Friend {
   senderDisplayName: string
   senderUsername: string
@@ -29,6 +34,7 @@ export interface Friend {
   createdAt: Date | null
   timeNumber: number
   isFriends: boolean
+  unreadMessages?: UnreadMessage[]
   totalUnread?: number
   isOnline?: boolean
   isActive?: boolean
@@ -76,7 +82,7 @@ interface FriendState {
     setMessage: (message: string, isError: boolean) => void
   ) => Promise<void>
   getSavedFriends: () => Promise<void>
-  setProcessedResults: (data: Friend[], totalUnread: number) => void
+  setProcessedResults: (data: Friend[]) => void
   setLoading?: (loading: boolean) => void
   massDelete: (
     url: string,
@@ -111,11 +117,19 @@ const FriendStore = create<FriendState>((set) => ({
   searchResult: [],
   isAllChecked: false,
 
-  setProcessedResults: (results, totalUnread) => {
-    set({
-      loading: false,
-      friendsResults: results,
-      totalUnread: totalUnread,
+  setProcessedResults: (results) => {
+    set((prev) => {
+      const combined = [...results, ...prev.friendsResults]
+      const unique = combined.filter(
+        (chat, index, self) =>
+          index === self.findIndex((c) => c.connection === chat.connection)
+      )
+
+      unique.sort((a, b) => a.timeNumber - b.timeNumber)
+      return {
+        loading: false,
+        friendsResults: unique,
+      }
     })
   },
 
@@ -174,7 +188,7 @@ const FriendStore = create<FriendState>((set) => ({
     try {
       const friends = await getAllFriendsFromDB()
       if (friends) {
-        set({ friendsResults: friends })
+        FriendStore.getState().setProcessedResults(friends)
       }
     } catch (error: unknown) {
       console.log(error)
@@ -189,10 +203,7 @@ const FriendStore = create<FriendState>((set) => ({
       })
       const data = response?.data
       if (data) {
-        // FriendStore.getState().setProcessedResults(
-        //   data.results,
-        //   data.totalUnread
-        // )
+        FriendStore.getState().setProcessedResults(data.results)
       }
     } catch (error: unknown) {
       console.log(error)

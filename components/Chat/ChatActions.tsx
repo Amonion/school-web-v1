@@ -16,22 +16,10 @@ const ChatActions = ({ e }: ChatContentProps) => {
 
   const setIsActive = (id: string) => {
     ChatStore.setState((prev) => {
-      let willBeActive = false
-      for (const group of prev.chatResults) {
-        const chat = group.chats.find((c) => c._id === id)
-        if (chat) {
-          willBeActive = !chat.isActive
-          break
-        }
-      }
-      const updatedResults = prev.chatResults.map((group) => ({
-        ...group,
-        chats: group.chats.map((chat) => ({
-          ...chat,
-          isActive: chat._id === id ? willBeActive : false,
-        })),
-      }))
-      return { chatResults: updatedResults }
+      const updatedChats = prev.chats.map((c) =>
+        c._id === id ? { ...c, isActive: true } : c
+      )
+      return { chats: updatedChats }
     })
   }
 

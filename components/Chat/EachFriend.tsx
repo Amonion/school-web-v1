@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { formatRelativeDate } from '@/lib/helpers'
 import { useRouter } from 'next/navigation'
 import { ChatStore } from '@/src/zustand/chat/Chat'
+import { useEffect, useState } from 'react'
 
 interface EachFriendProps {
   friend: Friend
@@ -18,12 +19,13 @@ export default function EachFriend({ friend }: EachFriendProps) {
   const { user } = AuthStore()
   const { friendForm } = FriendStore()
   const { getSavedChats } = ChatStore()
+  const [unread, setUnread] = useState(0)
   const router = useRouter()
   const isSender = friend.senderUsername === user?.username
 
   const selectFriend = () => {
     if (friendForm.connection !== friend.connection) {
-      ChatStore.setState({ chatContentResults: [] })
+      ChatStore.setState({ chats: [] })
       getSavedChats(friend.connection)
     }
 
@@ -38,6 +40,17 @@ export default function EachFriend({ friend }: EachFriendProps) {
       }`
     )
   }
+
+  useEffect(() => {
+    if (currentFriend.unreadMessages && user) {
+      for (let i = 0; i < currentFriend.unreadMessages.length; i++) {
+        const el = currentFriend.unreadMessages[i]
+        if (el.username === user?.username) {
+          setUnread(el.unread)
+        }
+      }
+    }
+  }, [currentFriend, user])
 
   return (
     <li
@@ -82,22 +95,22 @@ export default function EachFriend({ friend }: EachFriendProps) {
                 <i className="bi bi-check2"></i>
               ) : currentFriend.status === 'delivered' ? (
                 <i className="bi bi-check2-all"></i>
+              ) : currentFriend.status === 'read' ? (
+                <i className="bi bi-check2-all text-[var(--custom)]"></i>
               ) : (
                 <i className="bi bi-clock-history"></i>
               )}
             </div>
           )}
-          {currentFriend.totalUnread && currentFriend.totalUnread > 0 && (
+          {unread > 0 && (
             <div
               className={`${
-                currentFriend.totalUnread >= 100
+                unread >= 100
                   ? 'w-[20px] h-[20px] text-[10px]'
                   : 'w-[15px] h-[15px] text-[12px]'
               } flex items-center  text-white absolute right-0 bottom-1 z-30 justify-center rounded-full bg-[var(--custom)]`}
             >
-              {currentFriend.totalUnread >= 100
-                ? '99+'
-                : currentFriend.totalUnread}
+              {unread >= 100 ? '99+' : unread}
             </div>
           )}
           <div
