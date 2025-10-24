@@ -10,28 +10,15 @@ import {
 import { useParams, usePathname } from 'next/navigation'
 import { Smile } from 'lucide-react'
 import { GlobalWorkerOptions, getDocument } from 'pdfjs-dist'
-import { User, UserStore } from '@/src/zustand/user/User'
+import { UserStore } from '@/src/zustand/user/User'
 import { AuthStore } from '@/src/zustand/user/AuthStore'
 import { MessageStore } from '@/src/zustand/notification/Message'
-import { ChatContent, ChatStore, FileType } from '@/src/zustand/chat/Chat'
+import { ChatStore, FileType } from '@/src/zustand/chat/Chat'
 import ChatEditor from '@/components/Chat/ChatEditor'
 import FriendStore from '@/src/zustand/chat/Friend'
 import ChatBody from '@/components/Chat/ChatBody'
 import Spinner from '@/components/LoadingAnimations/Spinner'
 import useSocket from '@/src/useSocket'
-// import ChatBody from '@/components/Chat/ChatBody'
-
-type response = {
-  message: string
-  key: string
-  totalUnread: number
-  receiverId: string
-  userId: string
-  username: string
-  pending: boolean
-  chat: ChatContent
-  chats: ChatContent[]
-}
 
 const UserChat = () => {
   const chatContainerRef = useRef<HTMLDivElement | null>(null)
@@ -39,9 +26,7 @@ const UserChat = () => {
   const { updateFriendsChat, friendForm } = FriendStore()
   const socket = useSocket()
   const {
-    current,
     chats,
-    unread,
     moveUp,
     repliedChat,
     connection,
@@ -60,12 +45,10 @@ const UserChat = () => {
   const { baseURL, setMessage } = MessageStore()
   const [files, setFiles] = useState<FileType[]>([])
   // const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [isNearBottom, setIsNearBottom] = useState(false)
   const [isLoading, setLoading] = useState(false)
   const [isOptions, setOptions] = useState(false)
   const [percents, setPercents] = useState<number[]>([])
   const pathname = usePathname()
-  const pendingReadIds = useRef<Set<number>>(new Set())
 
   useEffect(() => {
     if (!moveUp) return
@@ -91,192 +74,190 @@ const UserChat = () => {
   }, [])
 
   //////////////SCROLL DOWN ON NEW CHAT WHEN CLOSE TO BOTTOM//////////////////
-  useEffect(() => {
-    const container = chatContainerRef.current
-    if (!container) return
+  // useEffect(() => {
+  //   const container = chatContainerRef.current
+  //   if (!container) return
 
-    const handleScroll = () => {
-      const distanceFromBottom =
-        container.scrollHeight - container.scrollTop - container.clientHeight
+  //   const handleScroll = () => {
+  //     const distanceFromBottom =
+  //       container.scrollHeight - container.scrollTop - container.clientHeight
 
-      setIsNearBottom(distanceFromBottom < 150)
-    }
+  //     setIsNearBottom(distanceFromBottom < 150)
+  //   }
 
-    container.addEventListener('scroll', handleScroll)
-    handleScroll()
+  //   container.addEventListener('scroll', handleScroll)
+  //   handleScroll()
 
-    return () => {
-      container.removeEventListener('scroll', handleScroll)
-    }
-  }, [])
+  //   return () => {
+  //     container.removeEventListener('scroll', handleScroll)
+  //   }
+  // }, [])
   //************SCROLL DOWN ON NEW CHAT WHEN CLOSE TO BOTTOM***************//
 
   //////////////SCROLL DOWN ON NEW CHAT//////////////////
-  useEffect(() => {
-    const container = chatContainerRef.current
-    if (!container) return
+  // useEffect(() => {
+  //   const container = chatContainerRef.current
+  //   if (!container) return
 
-    const isUserNearBottom = () => {
-      return (
-        container.scrollHeight - container.scrollTop - container.clientHeight <
-        200
-      )
-    }
+  //   const isUserNearBottom = () => {
+  //     return (
+  //       container.scrollHeight - container.scrollTop - container.clientHeight <
+  //       200
+  //     )
+  //   }
 
-    const scrollToBottom = () => {
-      container.scrollTop = container.scrollHeight
-    }
+  //   console.log('New chat detected')
 
-    const shouldScroll = isUserNearBottom()
+  //   const scrollToBottom = () => {
+  //     container.scrollTop = container.scrollHeight
+  //   }
 
-    if (shouldScroll) {
-      scrollToBottom()
-    }
+  //   const shouldScroll = isUserNearBottom()
 
-    const mediaElements = container.querySelectorAll('img, video')
-    let pending = 0
+  //   console.log('scrolling is: ', isUserNearBottom)
 
-    const handleLoad = () => {
-      pending--
-      if (pending <= 0 && shouldScroll) {
-        scrollToBottom()
-      }
-    }
+  //   if (shouldScroll) {
+  //     scrollToBottom()
+  //   }
 
-    mediaElements.forEach((el) => {
-      const media = el as HTMLImageElement | HTMLVideoElement
+  //   const mediaElements = container.querySelectorAll('img, video')
+  //   let pending = 0
 
-      if (media.tagName === 'IMG') {
-        const img = media as HTMLImageElement
-        if (!img.complete) {
-          pending++
-          img.addEventListener('load', handleLoad)
-          img.addEventListener('error', handleLoad)
-        }
-      } else if (media.tagName === 'VIDEO') {
-        const video = media as HTMLVideoElement
-        if (video.readyState < 3) {
-          pending++
-          video.addEventListener('loadeddata', handleLoad)
-          video.addEventListener('error', handleLoad)
-        }
-      }
-    })
+  //   const handleLoad = () => {
+  //     pending--
+  //     if (pending <= 0 && shouldScroll) {
+  //       scrollToBottom()
+  //     }
+  //   }
 
-    if (pending === 0 && shouldScroll) {
-      scrollToBottom()
-    }
+  //   mediaElements.forEach((el) => {
+  //     const media = el as HTMLImageElement | HTMLVideoElement
 
-    return () => {
-      mediaElements.forEach((el) => {
-        const media = el as HTMLImageElement | HTMLVideoElement
-        media.removeEventListener('load', handleLoad)
-        media.removeEventListener('error', handleLoad)
-        media.removeEventListener('loadeddata', handleLoad)
-      })
-    }
-  }, [chats.length])
+  //     if (media.tagName === 'IMG') {
+  //       const img = media as HTMLImageElement
+  //       if (!img.complete) {
+  //         pending++
+  //         img.addEventListener('load', handleLoad)
+  //         img.addEventListener('error', handleLoad)
+  //       }
+  //     } else if (media.tagName === 'VIDEO') {
+  //       const video = media as HTMLVideoElement
+  //       if (video.readyState < 3) {
+  //         pending++
+  //         video.addEventListener('loadeddata', handleLoad)
+  //         video.addEventListener('error', handleLoad)
+  //       }
+  //     }
+  //   })
+
+  //   if (pending === 0 && shouldScroll) {
+  //     scrollToBottom()
+  //   }
+
+  //   return () => {
+  //     mediaElements.forEach((el) => {
+  //       const media = el as HTMLImageElement | HTMLVideoElement
+  //       media.removeEventListener('load', handleLoad)
+  //       media.removeEventListener('error', handleLoad)
+  //       media.removeEventListener('loadeddata', handleLoad)
+  //     })
+  //   }
+  // }, [chats.length])
   //***********SCROLL DOWN ON NEW CHAT****************//
 
   //////////////ALLOW FIRST SCROLL DOWN ON CHAT LOAD//////////////////
-  useEffect(() => {
-    const container = chatContainerRef.current
-    if (!container || current !== 2) return
+  // useEffect(() => {
+  //   const container = chatContainerRef.current
+  //   if (!container) return
 
-    const mediaElements = container.querySelectorAll('img, video')
-    let pending = 0
+  //   const mediaElements = container.querySelectorAll('img, video')
+  //   let pending = 0
 
-    const scrollToBottom = () => {
-      container.scrollTop = container.scrollHeight
-    }
+  //   const scrollToBottom = () => {
+  //     container.scrollTop = container.scrollHeight
+  //   }
 
-    const handleMediaLoad = () => {
-      pending--
-      if (pending <= 0) {
-        scrollToBottom()
-      }
-    }
+  //   console.log('scrolling down: ', container.scrollHeight)
 
-    mediaElements.forEach((media) => {
-      if (media.tagName === 'IMG') {
-        const img = media as HTMLImageElement
-        if (!img.complete) {
-          pending++
-          img.addEventListener('load', handleMediaLoad)
-          img.addEventListener('error', handleMediaLoad)
-        }
-      } else if (media.tagName === 'VIDEO') {
-        const video = media as HTMLVideoElement
-        if (video.readyState < 3) {
-          pending++
-          video.addEventListener('loadeddata', handleMediaLoad)
-          video.addEventListener('error', handleMediaLoad)
-        }
-      }
-    })
+  //   const handleMediaLoad = () => {
+  //     pending--
+  //     if (pending <= 0) {
+  //       scrollToBottom()
+  //     }
+  //   }
 
-    // ✨ Key fix: small delay to wait for DOM updates
-    if (pending === 0) {
-      setTimeout(() => {
-        scrollToBottom()
-      }, 100) // 100ms is enough
-    }
+  //   mediaElements.forEach((media) => {
+  //     if (media.tagName === 'IMG') {
+  //       const img = media as HTMLImageElement
+  //       if (!img.complete) {
+  //         pending++
+  //         img.addEventListener('load', handleMediaLoad)
+  //         img.addEventListener('error', handleMediaLoad)
+  //       }
+  //     } else if (media.tagName === 'VIDEO') {
+  //       const video = media as HTMLVideoElement
+  //       if (video.readyState < 3) {
+  //         pending++
+  //         video.addEventListener('loadeddata', handleMediaLoad)
+  //         video.addEventListener('error', handleMediaLoad)
+  //       }
+  //     }
+  //   })
 
-    return () => {
-      mediaElements.forEach((media) => {
-        media.removeEventListener('load', handleMediaLoad)
-        media.removeEventListener('error', handleMediaLoad)
-        media.removeEventListener('loadeddata', handleMediaLoad)
-      })
-    }
-  }, [chats, current, pathname])
+  //   if (pending === 0) {
+  //     setTimeout(() => {
+  //       scrollToBottom()
+  //     }, 100)
+  //   }
+
+  //   return () => {
+  //     mediaElements.forEach((media) => {
+  //       media.removeEventListener('load', handleMediaLoad)
+  //       media.removeEventListener('error', handleMediaLoad)
+  //       media.removeEventListener('loadeddata', handleMediaLoad)
+  //     })
+  //   }
+  // }, [chats, current, pathname])
   //***********ALLOW FIRST SCROLL DOWN ON CHAT LOAD****************//
 
   //////////////FETCH OLDER CHATS WHEN USER SCROLL UP//////////////////
+  // useEffect(() => {
+  //   const container = chatContainerRef.current
+  //   if (!container) return
+
+  //   const handleScroll = () => {
+  //     if (container.scrollTop === 0 && user) {
+  //       handleFetchOlderChats(user)
+  //     }
+  //   }
+
+  //   container.addEventListener('scroll', handleScroll)
+
+  //   if (username && user) {
+  //     const key = setConnectionKey(String(username), String(user?.username))
+  //     setConnection(key)
+  //     getSavedChats(key)
+  //     getChats(
+  //       `/chats/?connection=${key}&page_size=10&page=1&ordering=-createdAt&deletedUsername[ne]=${user.username}&username=${user.username}`,
+  //       setMessage
+  //     )
+  //   }
+
+  //   return () => container.removeEventListener('scroll', handleScroll)
+  // }, [username, user, pathname])
+  //***********FETCH OLDER CHATS WHEN USER SCROLL UP****************//
+
   useEffect(() => {
-    const container = chatContainerRef.current
-    if (!container) return
-
-    const handleScroll = () => {
-      if (container.scrollTop === 0 && user) {
-        handleFetchOlderChats(user)
-      }
-    }
-
-    container.addEventListener('scroll', handleScroll)
-
     if (username && user) {
       const key = setConnectionKey(String(username), String(user?.username))
       setConnection(key)
       getSavedChats(key)
       getChats(
-        `/chats/?connection=${key}&page_size=10&page=1&ordering=-createdAt&deletedUsername[ne]=${user.username}&username=${user.username}`,
+        `/chats/?connection=${key}&page_size=40&page=1&ordering=-createdAt&deletedUsername[ne]=${user.username}&username=${user.username}`,
         setMessage
       )
     }
-
-    return () => container.removeEventListener('scroll', handleScroll)
   }, [username, user, pathname])
-  //***********FETCH OLDER CHATS WHEN USER SCROLL UP****************//
-
-  //////////////LISTEN TO SENT & RECEIVED CHAT//////////////////
-  useEffect(() => {
-    if (!socket) return
-
-    if (user) {
-      socket.on(`addCreatedChat${user.username}`, (data: response) => {
-        if (data.chat.receiverUsername === user.username) {
-          pendingReadIds.current.add(data.chat.timeNumber)
-        }
-      })
-    }
-
-    return () => {
-      setLoading(false)
-      socket.off(`createdChat${user?.username}`)
-    }
-  }, [user, socket])
-  //***********LISTEN TO SENT & RECEIVED CHAT****************//
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -326,38 +307,9 @@ const UserChat = () => {
     }
   }
 
-  const handleFetchOlderChats = async (user: User) => {
-    const container = chatContainerRef.current
-    if (!container) return
-
-    const prevScrollHeight = container.scrollHeight
-    const key = setConnectionKey(String(username), String(user.username))
-
-    await ChatStore.getState().addChats(
-      `/user-messages/user-chats/?connection=${key}&page_size=10&ordering=-createdAt&username=${user.username}&deletedUsername[ne]=${user.username}`,
-      setMessage
-    )
-
-    requestAnimationFrame(() => {
-      const newScrollHeight = container.scrollHeight
-      const scrollDiff = newScrollHeight - prevScrollHeight
-
-      container.scrollTop = scrollDiff
-    })
-  }
-
   const setConnectionKey = (id1: string, id2: string) => {
     const participants = [id1, id2].sort()
     return participants.join('')
-  }
-
-  const scrollDown = () => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTo({
-        top: chatContainerRef.current.scrollHeight,
-        behavior: 'smooth',
-      })
-    }
   }
 
   const removeFile = async (index: number, source: string) => {
@@ -524,31 +476,11 @@ const UserChat = () => {
 
   return (
     <>
-      <div
-        ref={chatContainerRef}
-        className="flex-1 sm:px-0 px-1 overflow-auto chat_scrollbar"
-      >
+      <div className="flex-1 sm:px-0 px-1 relative">
         <ChatBody />
       </div>
 
       <div className="w-full sticky bottom-0 left-0 flex items-end bg-[var(--primary)] py-1 px-2">
-        {!isNearBottom && unread > 0 && (
-          <div
-            onClick={scrollDown}
-            className="cursor-pointer w-[20px] h-[20px] border border-[var(--border)] text-[10px] text-white rounded-full flex items-center justify-center bg-[var(--custom)] absolute left-[10px] top-[-40px]"
-          >
-            {unread < 100 ? unread : '99+'}
-          </div>
-        )}
-
-        {!isNearBottom && (
-          <div
-            onClick={scrollDown}
-            className="cursor-pointer w-8 h-8 border border-[var(--border)] rounded-full flex items-center justify-center bg-[var(--primary)] absolute right-[10px] top-[-40px]"
-          >
-            <i className="bi bi-arrow-down"></i>
-          </div>
-        )}
         <div className="flex flex-1 relative flex-col">
           <div className="flex items-end bg-[var(--secondary)] rounded-[25px] px-2">
             <div
