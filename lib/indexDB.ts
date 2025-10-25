@@ -2,7 +2,7 @@ import { ChatContent } from '@/src/zustand/chat/Chat'
 import { openDB } from 'idb'
 
 const DB_NAME = 'chatDB'
-const DB_VERSION = 1
+const DB_VERSION = 4
 const MESSAGES_STORE = 'messages'
 const FRIENDS_STORE = 'friends'
 
