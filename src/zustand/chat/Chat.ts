@@ -256,7 +256,7 @@ export const ChatStore = create<ChatState>((set) => ({
       })
       const data = response?.data
       if (data) {
-        // ChatStore.getState().setProcessedResults(data.results)
+        ChatStore.getState().setProcessedResults(data.results)
       }
     } catch (error: unknown) {
       console.log(error)
