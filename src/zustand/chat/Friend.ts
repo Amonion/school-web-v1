@@ -126,7 +126,7 @@ const FriendStore = create<FriendState>((set) => ({
           index === self.findIndex((c) => c.connection === chat.connection)
       )
 
-      unique.sort((a, b) => a.timeNumber - b.timeNumber)
+      unique.sort((a, b) => b.timeNumber - a.timeNumber)
       return {
         loading: false,
         friendsResults: unique,
@@ -181,6 +181,8 @@ const FriendStore = create<FriendState>((set) => ({
         return { ...item }
       })
 
+      saveOrUpdateFriendInDB(data).catch(console.error)
+
       updatePendingFriendMessageStatus(
         data.connection,
         data.status,
@@ -194,7 +196,8 @@ const FriendStore = create<FriendState>((set) => ({
     try {
       const friends = await getAllFriendsFromDB()
       if (friends) {
-        FriendStore.getState().setProcessedResults(friends)
+        set({ friendsResults: friends })
+        // FriendStore.getState().setProcessedResults(friends)
       }
     } catch (error: unknown) {
       console.log(error)

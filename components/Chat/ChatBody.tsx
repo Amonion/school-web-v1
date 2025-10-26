@@ -5,7 +5,7 @@ import { ChatContent, ChatStore } from '@/src/zustand/chat/Chat'
 import EachChat from './EachChat'
 import FriendStore, { Friend } from '@/src/zustand/chat/Friend'
 import { useEffect, useRef, useState } from 'react'
-import { useParams, usePathname } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { AuthStore } from '@/src/zustand/user/AuthStore'
 import useSocket from '@/src/useSocket'
 
@@ -26,17 +26,16 @@ const ChatBody = () => {
     loading,
     unread,
     connection,
+    username,
     updatePendingChat,
     addNewChat,
   } = ChatStore()
-  const { friendForm, updatePendingFriendsChat, updateFriendsChat } =
-    FriendStore()
+  const { updatePendingFriendsChat, updateFriendsChat } = FriendStore()
   const { user } = AuthStore()
   const chatContainerRef = useRef<HTMLDivElement | null>(null)
   const pathname = usePathname()
   const [isNearBottom, setIsNearBottom] = useState(true)
   const socket = useSocket()
-  const { username } = useParams()
 
   useEffect(() => {
     const scrollToBottom = () => {
@@ -89,12 +88,16 @@ const ChatBody = () => {
     const observeScroll = () => {
       const container = chatContainerRef.current
       if (container) {
-        setIsNearBottom(container.scrollTop >= 100)
-        if (container.scrollTop === 0) {
-          console.log('Scrolled to top')
+        const distanceFromBottom =
+          container.scrollHeight - container.scrollTop - container.clientHeight
+        if (distanceFromBottom >= 200) {
+          setIsNearBottom(false)
+        } else {
+          setIsNearBottom(true)
         }
       }
     }
+
     const container = chatContainerRef.current
     if (container) {
       container.addEventListener('scroll', observeScroll)
@@ -108,14 +111,14 @@ const ChatBody = () => {
     if (!socket) return
 
     if (user) {
-      socket.on(`updateChatToRead${user.username}`, (data: response) => {
-        if (username === data.receiverUsername) {
-          for (let i = 0; i < data.chats.length; i++) {
-            const el = data.chats[i]
-            updatePendingChat(el)
-          }
-          updatePendingFriendsChat(data.friend)
+      socket.on(`updateChatToRead${connection}`, (data: response) => {
+        // if (username === data.receiverUsername) {
+        for (let i = 0; i < data.chats.length; i++) {
+          const el = data.chats[i]
+          updatePendingChat(el)
         }
+        updatePendingFriendsChat(data.friend)
+        // }
       })
     }
 
@@ -146,6 +149,7 @@ const ChatBody = () => {
       <div
         style={{
           maxHeight: `calc(100vh - 120px)`,
+          minHeight: `calc(100vh - 120px)`,
         }}
         ref={chatContainerRef}
         className="flex relative flex-1 px-1 sm:px-2 flex-col mb-auto overflow-auto chat_scrollbar"
@@ -214,7 +218,7 @@ const ChatBody = () => {
           )
         })}
 
-        {!friendForm.isFriends && chats.length > 0 && (
+        {chatUserForm && !chatUserForm.isFriends && chats.length > 0 && (
           <div className="w-full flex flex-col items-center px-[10px] mt-10">
             <div className="text-center max-w-[400px] text-lg leading-[25px]">
               <span className="text-[var(--custom)]">
@@ -237,7 +241,7 @@ const ChatBody = () => {
       {!isNearBottom && (
         <div
           onClick={scrollDown}
-          className="cursor-pointer w-8 h-8 border border-[var(--border)] rounded-full flex items-center justify-center bg-[var(--primary)] absolute right-[10px] bottom-[40px]"
+          className="cursor-pointer w-8 h-8 border border-[var(--border)] rounded-full flex items-center justify-center bg-[var(--primary)] absolute right-[20px] sm:bottom-[40px] bottom-[70px]"
         >
           <i className="bi bi-arrow-down"></i>
         </div>

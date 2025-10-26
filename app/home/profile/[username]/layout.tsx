@@ -1,7 +1,7 @@
 'use client'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
-import { useParams, usePathname } from 'next/navigation'
+import { useParams, usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { formatCount, formatDate } from '@/lib/helpers'
 import pluralize from 'pluralize'
@@ -14,6 +14,8 @@ import ProfileBottomSheet from '@/components/Home/Profile/ProfileBottomSheet'
 import UserPostStore from '@/src/zustand/post/UserPost'
 import UserMediaHolder from '@/components/Home/Media/UserMediaHolder'
 import { MessageCircle } from 'lucide-react'
+import FriendStore, { FriendEmpty } from '@/src/zustand/chat/Friend'
+import { ChatStore } from '@/src/zustand/chat/Chat'
 
 const Profile = ({ children }: { children: React.ReactNode }) => {
   const { username } = useParams()
@@ -27,6 +29,8 @@ const Profile = ({ children }: { children: React.ReactNode }) => {
   const [intro, setIntro] = useState('Write an intro about yourself...')
   const pathname = usePathname()
   const { theme } = useTheme()
+  const router = useRouter()
+  const { getSavedChats, setConnection, connection } = ChatStore()
 
   const urls = ['comments', 'exams', 'media']
 
@@ -43,6 +47,41 @@ const Profile = ({ children }: { children: React.ReactNode }) => {
       `/posts/user/?username=${username}&myId=${user?._id}&ordering=-createdAt&postType=main&page_size=${page_size}&page=${currentPage}`,
       setMessage
     )
+  }
+
+  const findFriend = FriendStore.getState().friendsResults.find(
+    (item) => item.connection === connection
+  )
+
+  const selectFriend = () => {
+    ChatStore.setState({
+      chats: [],
+      username: userForm.username,
+      chatUserForm: {
+        username: userForm.username,
+        picture: String(userForm.picture),
+        displayName: userForm.displayName,
+        _id: '',
+        isFriends: findFriend?.isFriends,
+      },
+    })
+    getSavedChats(connection)
+
+    FriendStore.setState((prev) => {
+      const friend = prev.friendsResults.find(
+        (item) => item.connection === connection
+      )
+      return {
+        friendForm: friend ? friend : { ...FriendEmpty },
+      }
+    })
+
+    router.push(`/chat`)
+  }
+
+  const setConnectionKey = (id1: string, id2: string) => {
+    const participants = [id1, id2].sort()
+    return participants.join('')
   }
 
   useEffect(() => {
@@ -77,6 +116,8 @@ const Profile = ({ children }: { children: React.ReactNode }) => {
   }, [username, pathname, user])
 
   useEffect(() => {
+    const key = setConnectionKey(String(username), String(user?.username))
+    setConnection(key)
     if (urls.every((word) => !pathname.includes(word))) {
       setTab('posts')
     }
@@ -165,12 +206,12 @@ const Profile = ({ children }: { children: React.ReactNode }) => {
               </div>
               {showFollow ? (
                 <div className="flex items-center">
-                  <Link
-                    className="mr-3 text-lg"
-                    href={`/friends/chat/${userForm.username}`}
+                  <div
+                    className="mr-3 text-lg cursor-pointer"
+                    onClick={() => selectFriend()}
                   >
                     <MessageCircle />
-                  </Link>
+                  </div>
                   <div
                     onClick={followAccount}
                     className={`${

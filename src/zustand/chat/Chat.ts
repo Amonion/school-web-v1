@@ -39,6 +39,7 @@ interface ChatState {
   unseenCheckIds: number[]
   chats: ChatContent[]
   connection: string
+  username: string
   count: number
   current: number
   favChatContentResults: ChatContent[]
@@ -117,6 +118,7 @@ export interface ChatUserForm {
   displayName: string
   picture: string
   _id: string
+  isFriends?: boolean
 }
 
 export const ChatUserFormEmpty = {
@@ -160,6 +162,7 @@ export const ChatStore = create<ChatState>((set) => ({
   unseenChatIds: [],
   chats: [],
   connection: '',
+  username: '',
   count: 0,
   current: 0,
   chatUserForm: ChatUserFormEmpty,

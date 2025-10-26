@@ -3,7 +3,7 @@ import { AuthStore } from '@/src/zustand/user/AuthStore'
 // import UsersList from '../Chat/UsersList'
 import Image from 'next/image'
 import { formatRelativeDate } from '@/lib/helpers'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { ChatStore } from '@/src/zustand/chat/Chat'
 import { useEffect, useState } from 'react'
 
@@ -18,15 +18,17 @@ export default function EachFriend({ friend }: EachFriendProps) {
   const currentFriend = friendState ?? friend
   const { user } = AuthStore()
   const { friendForm } = FriendStore()
-  const { getSavedChats } = ChatStore()
+  const { getSavedChats, connection } = ChatStore()
   const [unread, setUnread] = useState(0)
   const router = useRouter()
+  const pathname = usePathname()
   const isSender = friend.senderUsername === user?.username
 
   const selectFriend = () => {
     if (friendForm.connection !== friend.connection) {
       ChatStore.setState({
         chats: [],
+        username: isSender ? friend.receiverUsername : friend.senderUsername,
         chatUserForm: {
           username: isSender ? friend.receiverUsername : friend.senderUsername,
           picture: isSender ? friend.receiverPicture : friend.senderPicture,
@@ -34,22 +36,19 @@ export default function EachFriend({ friend }: EachFriendProps) {
             ? friend.receiverDisplayName
             : friend.senderDisplayName,
           _id: '',
+          isFriends: friend.isFriends,
         },
       })
       getSavedChats(friend.connection)
+
+      FriendStore.setState(() => ({
+        friendForm: currentFriend,
+      }))
     }
 
-    FriendStore.setState(() => ({
-      friendForm: currentFriend,
-    }))
-
-    router.push(
-      `/friends/chat/${
-        user?.username === currentFriend.receiverUsername
-          ? currentFriend.senderUsername
-          : currentFriend.receiverUsername
-      }`
-    )
+    if (pathname !== '/chat') {
+      router.push(`/chat`)
+    }
   }
 
   useEffect(() => {
@@ -65,9 +64,11 @@ export default function EachFriend({ friend }: EachFriendProps) {
 
   return (
     <li
-      onClick={selectFriend}
+      onClick={() => selectFriend()}
       className={`${
-        friendForm && currentFriend.connection === friendForm.connection
+        connection &&
+        currentFriend.connection === connection &&
+        pathname === '/chat'
           ? 'bg-[var(--primary)]'
           : ''
       } hover:bg-[var(--primary)] px-1 py-2 rounded-[10px] mb-2 flex w-full items-start cursor-pointer`}
