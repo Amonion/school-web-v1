@@ -189,17 +189,19 @@ const Chats = () => {
   }
 
   const uploadFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const filePages = await getPdfPageCount(e.target.files?.[0])
-    const duration = await getMediaDuration(e.target.files)
-    await handleFileUpload(
-      e,
-      baseURL,
-      setFiles,
-      setPercents,
-      setLoading,
-      filePages,
-      duration
-    )
+    if (connection === 'k') {
+      const filePages = await getPdfPageCount(e.target.files?.[0])
+      const duration = await getMediaDuration(e.target.files)
+      await handleFileUpload(
+        e,
+        baseURL,
+        setFiles,
+        setPercents,
+        setLoading,
+        filePages,
+        duration
+      )
+    }
   }
 
   const postMessage = () => {
