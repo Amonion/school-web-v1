@@ -149,7 +149,6 @@ const ChatBody = () => {
       <div
         style={{
           maxHeight: `calc(100vh - 120px)`,
-          minHeight: `calc(100vh - 120px)`,
         }}
         ref={chatContainerRef}
         className="flex relative flex-1 px-1 sm:px-2 flex-col mb-auto overflow-auto chat_scrollbar"
