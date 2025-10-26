@@ -1,26 +1,4 @@
 'use client'
-// Define the expected shape of the pdfjs-dist legacy module
-interface PdfJsModule {
-  GlobalWorkerOptions: {
-    workerSrc: string
-  }
-  getDocument: (src: string | URL | Uint8Array) => {
-    promise: Promise<{ numPages: number }>
-  }
-}
-
-// Cache the module (can be reused safely)
-let pdfjs: PdfJsModule | null = null
-
-export async function loadPdfJs(): Promise<PdfJsModule> {
-  if (!pdfjs) {
-    const mod = (await import('pdfjs-dist/legacy/build/pdf')) as PdfJsModule
-    mod.GlobalWorkerOptions.workerSrc =
-      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js'
-    pdfjs = mod
-  }
-  return pdfjs
-}
 
 import Image from 'next/image'
 import ChatBody from '@/components/Chat/ChatBody'
@@ -41,6 +19,7 @@ import {
   getExtension,
   handleFileUpload,
   handleRemoveFile,
+  loadPdfJs,
 } from '@/lib/helpers'
 // import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist'
 
