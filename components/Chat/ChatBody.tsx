@@ -1,18 +1,42 @@
 'use client'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ChatStore } from '@/src/zustand/chat/Chat'
+import { ChatContent, ChatStore } from '@/src/zustand/chat/Chat'
 import EachChat from './EachChat'
-import FriendStore from '@/src/zustand/chat/Friend'
+import FriendStore, { Friend } from '@/src/zustand/chat/Friend'
 import { useEffect, useRef, useState } from 'react'
-import { usePathname } from 'next/navigation'
+import { useParams, usePathname } from 'next/navigation'
+import { AuthStore } from '@/src/zustand/user/AuthStore'
+import useSocket from '@/src/useSocket'
+
+type response = {
+  friend: Friend
+  connection: string
+  ids: number[]
+  senderUsername: string
+  receiverUsername: string
+  chat: ChatContent
+  chats: ChatContent[]
+}
 
 const ChatBody = () => {
-  const { chats, chatUserForm, loading, unread } = ChatStore()
-  const { friendForm } = FriendStore()
+  const {
+    chats,
+    chatUserForm,
+    loading,
+    unread,
+    connection,
+    updatePendingChat,
+    addNewChat,
+  } = ChatStore()
+  const { friendForm, updatePendingFriendsChat, updateFriendsChat } =
+    FriendStore()
+  const { user } = AuthStore()
   const chatContainerRef = useRef<HTMLDivElement | null>(null)
   const pathname = usePathname()
-  const [isNearBottom, setIsNearBottom] = useState(false)
+  const [isNearBottom, setIsNearBottom] = useState(true)
+  const socket = useSocket()
+  const { username } = useParams()
 
   useEffect(() => {
     const scrollToBottom = () => {
@@ -22,6 +46,8 @@ const ChatBody = () => {
         setIsNearBottom(true)
       }
     }
+
+    scrollToBottom()
 
     const timer = setTimeout(() => {
       scrollToBottom()
@@ -78,6 +104,43 @@ const ChatBody = () => {
     }
   }, [])
 
+  useEffect(() => {
+    if (!socket) return
+
+    if (user) {
+      socket.on(`updateChatToRead${user.username}`, (data: response) => {
+        if (username === data.receiverUsername) {
+          for (let i = 0; i < data.chats.length; i++) {
+            const el = data.chats[i]
+            updatePendingChat(el)
+          }
+          updatePendingFriendsChat(data.friend)
+        }
+      })
+    }
+
+    return () => {
+      socket.off(`updateChatToRead${user?.username}`)
+    }
+  }, [user, socket])
+
+  useEffect(() => {
+    if (!socket) return
+
+    if (user) {
+      socket.on(`addCreatedChat${username}`, (data: response) => {
+        updateFriendsChat({ ...data.friend })
+        if (data.connection === connection) {
+          addNewChat(data.chat)
+        }
+      })
+    }
+
+    return () => {
+      socket.off(`addCreatedChat${username}`)
+    }
+  }, [user, socket, connection])
+
   return (
     <>
       <div
@@ -85,7 +148,7 @@ const ChatBody = () => {
           maxHeight: `calc(100vh - 120px)`,
         }}
         ref={chatContainerRef}
-        className="flex relative flex-1 flex-col mb-auto overflow-auto chat_scrollbar"
+        className="flex relative flex-1 px-1 sm:px-2 flex-col mb-auto overflow-auto chat_scrollbar"
       >
         {chats.length === 0 && !loading && (
           <div className="w-full flex-1 flex flex-col items-center px-[10px] mt-10">
@@ -136,7 +199,7 @@ const ChatBody = () => {
           return (
             <div key={chat.timeNumber} className={`w-full flex flex-col`}>
               {showDate && (
-                <div className="mx-auto my-3 rounded-[25px] py-1 px-3 bg-[var(--primary)]">
+                <div className="mx-auto text-[12px] sm:text-sm my-3 rounded-[25px] py-1 px-3 bg-[var(--primary)]">
                   {chat.day}
                 </div>
               )}

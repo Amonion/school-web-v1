@@ -35,6 +35,7 @@ export interface Friend {
   timeNumber: number
   isFriends: boolean
   unreadMessages?: UnreadMessage[]
+  updatedAt?: Date
   totalUnread?: number
   isOnline?: boolean
   isActive?: boolean
@@ -170,7 +171,12 @@ const FriendStore = create<FriendState>((set) => ({
     set((prev) => {
       const friends = prev.friendsResults.map((item) => {
         if (item.connection === data.connection) {
-          return { ...item, status: data.status }
+          return {
+            ...item,
+            status: data.status,
+            updatedAt: data.updatedAt,
+            unreadMessages: data.unreadMessages,
+          }
         }
         return { ...item }
       })

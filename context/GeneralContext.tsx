@@ -37,22 +37,18 @@ type response = {
   username: string
   pending: boolean
   chat: ChatContent
+  chats: ChatContent[]
 }
 
 export const GeneralProvider = ({ children }: GeneralProviderProps) => {
   const socket = useSocket()
   const { setIp, setBaseUrl, setMessage, baseURL } = MessageStore()
-  const {
-    getSavedFriends,
-    getFriends,
-    updateFriendsChat,
-    updatePendingFriendsChat,
-  } = FriendStore()
+  const { getSavedFriends, getFriends, updatePendingFriendsChat } =
+    FriendStore()
   const { user } = AuthStore()
   const { getSchoolNotifications } = SchoolStore()
   const { officeForm } = OfficeStore()
-  const { connection, updatePendingChat, addNewChat, updateChatsToRead } =
-    ChatStore()
+  const { connection, updatePendingChat } = ChatStore()
   const [chat, setChat] = useState<ChatContent | null>(null)
 
   useEffect(() => {
@@ -146,6 +142,7 @@ export const GeneralProvider = ({ children }: GeneralProviderProps) => {
     if (user) {
       socket.on(`updatePendingChat${user.username}`, (data: response) => {
         updatePendingChat(data.chat)
+        setChat(data.chat)
         updatePendingFriendsChat(data.friend)
         FriendStore.setState((prev) => {
           return {
@@ -157,46 +154,25 @@ export const GeneralProvider = ({ children }: GeneralProviderProps) => {
         })
       })
 
-      socket.on(`updateDeliveredChat${user.username}`, (data: response) => {
+      socket.on(`updateChatToDelivered${user.username}`, (data: response) => {
         updatePendingChat(data.chat)
         updatePendingFriendsChat(data.friend)
       })
 
-      socket.on(`updateChatToRead${user.username}`, (data: response) => {
-        updateChatsToRead(data.ids, data.connection)
-        updatePendingFriendsChat(data.friend)
-      })
-
       socket.on(`updateCheckedChats${user.username}`, (data: response) => {
-        updateChatsToRead(data.ids, data.connection)
-      })
-    }
-
-    return () => {
-      socket.off(`updateCheckedChats${user?.username}`)
-      socket.off(`updateChatToRead${user?.username}`)
-      socket.off(`updateDeliveredChat${user?.username}`)
-      socket.off(`updatePendingChat${connection}`)
-    }
-  }, [user, socket])
-
-  useEffect(() => {
-    if (!socket) return
-
-    if (user) {
-      socket.on(`addCreatedChat${user.username}`, (data: response) => {
-        setChat(data.chat)
-        updateFriendsChat({ ...data.friend })
-        if (data.connection === connection) {
-          addNewChat(data.chat)
+        for (let i = 0; i < data.chats.length; i++) {
+          const el = data.chats[i]
+          updatePendingChat(el)
         }
       })
     }
 
     return () => {
-      socket.off(`addCreatedChat${user?.username}`)
+      socket.off(`updateCheckedChats${user?.username}`)
+      socket.off(`updateChatToDelivered${user?.username}`)
+      socket.off(`updatePendingChat${connection}`)
     }
-  }, [user, socket, connection])
+  }, [user, socket])
 
   useEffect(() => {
     if (!socket) return

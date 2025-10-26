@@ -25,13 +25,24 @@ export default function EachFriend({ friend }: EachFriendProps) {
 
   const selectFriend = () => {
     if (friendForm.connection !== friend.connection) {
-      ChatStore.setState({ chats: [] })
+      ChatStore.setState({
+        chats: [],
+        chatUserForm: {
+          username: isSender ? friend.receiverUsername : friend.senderUsername,
+          picture: isSender ? friend.receiverPicture : friend.senderPicture,
+          displayName: isSender
+            ? friend.receiverDisplayName
+            : friend.senderDisplayName,
+          _id: '',
+        },
+      })
       getSavedChats(friend.connection)
     }
 
     FriendStore.setState(() => ({
       friendForm: currentFriend,
     }))
+
     router.push(
       `/friends/chat/${
         user?.username === currentFriend.receiverUsername
@@ -82,7 +93,7 @@ export default function EachFriend({ friend }: EachFriendProps) {
               : currentFriend.senderDisplayName}
           </div>
           <div className="text-[12px] ml-2 block">
-            {formatRelativeDate(String(currentFriend.createdAt))}
+            {formatRelativeDate(String(currentFriend.updatedAt))}
           </div>
         </div>
 

@@ -19,7 +19,6 @@ export default function ChatHead() {
   const inputRef = useRef<HTMLInputElement>(null)
   const pathname = usePathname()
   const {
-    loading,
     searchResult,
     selectedItems,
     selectedFavItems,
@@ -50,7 +49,7 @@ export default function ChatHead() {
   }, [text])
 
   useEffect(() => {
-    if (chatUserForm.username !== username) {
+    if (!chatUserForm.username) {
       getChatUser(`/users/chat/${username}`, setMessage)
     }
   }, [chatUserForm, pathname])
@@ -274,11 +273,6 @@ export default function ChatHead() {
               </div>
             )}
         </div>
-        {loading && (
-          <div className="flex absolute bottom-[-35px] left-0 w-full text-[var(--custom)] justify-center items-center ">
-            <i className="bi bi-opencollective activeLoader"></i>
-          </div>
-        )}
 
         {pathname.includes('favourites') ? (
           <>

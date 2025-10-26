@@ -212,19 +212,18 @@ const EachChat = ({ e, isFirst, isGroupEnd }: ChatContentProps) => {
           <div className="flex items-end">
             {isSender ? (
               <>
-                {e.status}
                 {formatTimeTo12Hour(e.senderTime ?? null)}
                 <div className="flex ml-3 text-[10px]">
                   {e.status === 'pending' ? (
                     <i className="bi bi-clock-history"></i>
                   ) : e.status === 'delivered' ? (
                     <i className={`bi text-[15px] bi-check2-all`}></i>
-                  ) : e.status === 'read' ? (
-                    <i
-                      className={`bi text-[15px] bi-check2-all text-[var(--custom)]`}
-                    ></i>
                   ) : (
-                    <i className="bi bi-check2 text-[15px]"></i>
+                    e.status === 'read' && (
+                      <i
+                        className={`bi text-[15px] bi-check2-all text-[var(--custom)]`}
+                      ></i>
+                    )
                   )}
                 </div>
               </>

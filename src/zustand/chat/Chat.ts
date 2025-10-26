@@ -60,7 +60,7 @@ interface ChatState {
   getSavedChats: (url: string) => Promise<void>
   getChats: (
     url: string,
-    setMessage: (message: string, isError: boolean) => void
+    setMessage?: (message: string, isError: boolean) => void
   ) => Promise<void>
   getFavChats: (
     url: string,
@@ -193,26 +193,80 @@ export const ChatStore = create<ChatState>((set) => ({
     })
   },
 
+  // setProcessedResults: (newResults) => {
+  //   set((prev) => {
+  //     // Create a map of newResults by timeNumber for quick lookup
+  //     const newResultsMap = new Map(
+  //       newResults.map((chat) => [chat.timeNumber, chat])
+  //     )
+
+  //     // Update existing chats with new status if timeNumber matches, otherwise keep or add
+  //     const combined = prev.chats.map((chat) => {
+  //       const newChat = newResultsMap.get(chat.timeNumber)
+  //       if (newChat) {
+  //         return { ...chat, status: newChat.status }
+  //       }
+  //       return chat
+  //     })
+
+  //     // Add new chats from newResults that don't exist in prev.chats
+  //     const unique = [
+  //       ...combined,
+  //       ...newResults.filter(
+  //         (chat) => !prev.chats.some((c) => c.timeNumber === chat.timeNumber)
+  //       ),
+  //     ]
+
+  //     // Sort by timeNumber
+  //     unique.sort((a, b) => a.timeNumber - b.timeNumber)
+
+  //     return {
+  //       loading: false,
+  //       chats: unique,
+  //     }
+  //   })
+  // },
+
   setProcessedResults: (newResults) => {
     set((prev) => {
-      const combined = [...prev.chats, ...newResults]
-
-      // Remove duplicates based on `timeNumber`
-      const unique = combined.filter(
-        (chat, index, self) =>
-          index === self.findIndex((c) => c.timeNumber === chat.timeNumber)
+      // Create a map of newResults by timeNumber for quick lookup
+      const newResultsMap = new Map(
+        newResults.map((chat) => [chat.timeNumber, chat])
       )
 
-      // Sort by timeNumber (optional but recommended)
-      unique.sort((a, b) => a.timeNumber - b.timeNumber)
+      // Update existing chats with new status if timeNumber matches, otherwise keep or add
+      const combined = prev.chats.map((chat) => {
+        const newChat = newResultsMap.get(chat.timeNumber)
+        if (newChat) {
+          return { ...chat, status: newChat.status }
+        }
+        return chat
+      })
 
+      // Add new chats from newResults that don't exist in prev.chats
+      const unique = [
+        ...combined,
+        ...newResults.filter(
+          (chat) => !prev.chats.some((c) => c.timeNumber === chat.timeNumber)
+        ),
+      ]
+
+      // Sort by timeNumber
+      unique.sort((a, b) => {
+        const dateA = a.createdAt
+          ? new Date(a.createdAt).getTime()
+          : a.timeNumber
+        const dateB = b.createdAt
+          ? new Date(b.createdAt).getTime()
+          : b.timeNumber
+        return dateA - dateB
+      })
       return {
         loading: false,
         chats: unique,
       }
     })
   },
-
   setProcessedFavResults: (results) => {
     set({
       loading: false,
@@ -245,15 +299,9 @@ export const ChatStore = create<ChatState>((set) => ({
     }
   },
 
-  getChats: async (
-    url: string,
-    setMessage: (message: string, isError: boolean) => void
-  ) => {
+  getChats: async (url) => {
     try {
-      const response = await apiRequest<FetchChatResponse>(url, {
-        setMessage,
-        setLoading: ChatStore.getState().setLoading,
-      })
+      const response = await apiRequest<FetchChatResponse>(url)
       const data = response?.data
       if (data) {
         ChatStore.getState().setProcessedResults(data.results)
@@ -652,6 +700,7 @@ export interface ChatContent {
   unreadCount?: number
   unreadReceiver?: number
   unreadUser?: number
+  createdAt?: Date
   senderTime?: Date
   receiverTime?: Date
   isSavedUsernames?: string[]

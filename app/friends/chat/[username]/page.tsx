@@ -268,7 +268,7 @@ const UserChat = () => {
     }, 1000)
 
     return () => clearTimeout(timer)
-  }, [unseenChatIds])
+  }, [unseenChatIds.length])
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -278,7 +278,7 @@ const UserChat = () => {
     }, 1000)
 
     return () => clearTimeout(timer)
-  }, [unseenCheckIds])
+  }, [unseenCheckIds.length])
 
   const updateChatStatus = () => {
     if (socket) {
@@ -291,6 +291,9 @@ const UserChat = () => {
       }
 
       socket.emit('message', form)
+      ChatStore.setState({
+        unseenChatIds: [],
+      })
     }
   }
 
@@ -304,6 +307,9 @@ const UserChat = () => {
       }
 
       socket.emit('message', form)
+      ChatStore.setState({
+        unseenCheckIds: [],
+      })
     }
   }
 
@@ -409,6 +415,7 @@ const UserChat = () => {
         receiverDisplayName: chatUserForm.displayName,
         senderTime: new Date().toISOString(),
         time: new Date().getTime(),
+        updatedAt: new Date(),
         timeNumber: timeNumber,
         media: files,
       }
@@ -426,6 +433,7 @@ const UserChat = () => {
         senderTime: new Date().toISOString(),
         timeNumber: timeNumber,
         createdAt: new Date(),
+        updatedAt: new Date(),
         media: files,
         isFriends: friendForm.isFriends,
         isOnline: false,
