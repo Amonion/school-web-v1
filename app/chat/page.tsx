@@ -1,4 +1,27 @@
 'use client'
+// Define the expected shape of the pdfjs-dist legacy module
+interface PdfJsModule {
+  GlobalWorkerOptions: {
+    workerSrc: string
+  }
+  getDocument: (src: string | URL | Uint8Array) => {
+    promise: Promise<{ numPages: number }>
+  }
+}
+
+// Cache the module (can be reused safely)
+let pdfjs: PdfJsModule | null = null
+
+export async function loadPdfJs(): Promise<PdfJsModule> {
+  if (!pdfjs) {
+    const mod = (await import('pdfjs-dist/legacy/build/pdf')) as PdfJsModule
+    mod.GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js'
+    pdfjs = mod
+  }
+  return pdfjs
+}
+
 import Image from 'next/image'
 import ChatBody from '@/components/Chat/ChatBody'
 import ChatEditor from '@/components/Chat/ChatEditor'
@@ -19,7 +42,7 @@ import {
   handleFileUpload,
   handleRemoveFile,
 } from '@/lib/helpers'
-import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist'
+// import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist'
 
 const Chats = () => {
   const { loading } = UserStore()
@@ -134,29 +157,36 @@ const Chats = () => {
     handleRemoveFile(index, source, baseURL, setFiles)
   }
 
+  //   const getPdfPageCount = async (file: File | undefined): Promise<number> => {
+  //     GlobalWorkerOptions.workerSrc =
+  //       'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js'
+
+  //     const fileExtension = file?.name.split('.').pop()?.toLowerCase()
+
+  //     if (fileExtension !== 'pdf') {
+  //       return 0
+  //     }
+
+  //     if (typeof window === 'undefined') throw new Error('Client-side only')
+
+  //     if (file) {
+  //       try {
+  //         const pdf = await getDocument(URL.createObjectURL(file)).promise
+  //         return pdf.numPages
+  //       } catch (error) {
+  //         console.error('Error getting PDF page count:', error)
+  //         return 0
+  //       }
+  //     } else {
+  //       return 0
+  //     }
+  //   }
+
   const getPdfPageCount = async (file: File | undefined): Promise<number> => {
-    GlobalWorkerOptions.workerSrc =
-      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js'
-
-    const fileExtension = file?.name.split('.').pop()?.toLowerCase()
-
-    if (fileExtension !== 'pdf') {
-      return 0
-    }
-
-    if (typeof window === 'undefined') throw new Error('Client-side only')
-
-    if (file) {
-      try {
-        const pdf = await getDocument(URL.createObjectURL(file)).promise
-        return pdf.numPages
-      } catch (error) {
-        console.error('Error getting PDF page count:', error)
-        return 0
-      }
-    } else {
-      return 0
-    }
+    if (!file || typeof window === 'undefined') return 0
+    const { getDocument } = await loadPdfJs()
+    const pdf = await getDocument(URL.createObjectURL(file)).promise
+    return pdf.numPages
   }
 
   const getMediaDuration = async (
