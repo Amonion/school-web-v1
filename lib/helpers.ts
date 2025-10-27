@@ -22,27 +22,28 @@ type file = {
   height: number
 }
 
-// Define the expected shape of the pdfjs-dist legacy module
-interface PdfJsModule {
-  GlobalWorkerOptions: {
-    workerSrc: string
-  }
-  getDocument: (src: string | URL | Uint8Array) => {
-    promise: Promise<{ numPages: number }>
-  }
-}
+let pdfjs: typeof import('pdfjs-dist') | null = null
 
-// Cache the module (can be reused safely)
-let pdfjs: PdfJsModule | null = null
-
-export async function loadPdfJs(): Promise<PdfJsModule> {
+export async function loadPdfJs() {
   if (!pdfjs) {
-    const mod = (await import('pdfjs-dist/legacy/build/pdf')) as PdfJsModule
-    mod.GlobalWorkerOptions.workerSrc =
-      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js'
+    const mod = await import('pdfjs-dist')
+    mod.GlobalWorkerOptions.workerSrc = '/pdfjs/pdf.worker.min.js'
     pdfjs = mod
   }
   return pdfjs
+}
+
+export async function getPdfPageCount(file: File): Promise<number> {
+  const buffer = await file.arrayBuffer()
+  const text = new TextDecoder().decode(buffer)
+
+  // Regex to find the page count from /Count entries in the PDF
+  const matches = text.match(/\/Count\s+(\d+)/g)
+  if (!matches) return 0
+
+  // Get the largest count value — usually the total pages
+  const counts = matches.map((m) => parseInt(m.replace('/Count', '').trim()))
+  return Math.max(...counts)
 }
 
 export const createUsernameSearchHandler = ({

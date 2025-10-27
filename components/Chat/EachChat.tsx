@@ -1,14 +1,9 @@
 'use client'
-import Image from 'next/image'
 import { useEffect, useRef } from 'react'
-import { useParams } from 'next/navigation'
-import { formatTimeTo12Hour, getExtension } from '@/lib/helpers'
-import AudioMessage from './Audio'
-import pluralize from 'pluralize'
-import MediaDisplay from './MediaDisplay'
+import { formatTimeTo12Hour } from '@/lib/helpers'
 import { AuthStore } from '@/src/zustand/user/AuthStore'
 import { ChatContent, ChatStore } from '@/src/zustand/chat/Chat'
-import ChatActions from './ChatActions'
+import ChatMedia from './ChatMedia'
 
 type ChatContentProps = {
   e: ChatContent
@@ -19,22 +14,12 @@ type ChatContentProps = {
 }
 
 const EachChat = ({ e, isFirst, isGroupEnd }: ChatContentProps) => {
-  const { selectChats, chats, selectedItems } = ChatStore()
+  const { selectChats, setActiveChat, chats, selectedItems } = ChatStore()
   const { user } = AuthStore()
-  const { username } = useParams()
   const optionsRef = useRef<HTMLDivElement | null>(null)
   const firstCardRef = useRef<HTMLDivElement | null>(null)
   const messageRefs = useRef<Record<string, HTMLDivElement | null>>({})
   const isSender = e.senderUsername === user?.username
-
-  const setIsActive = (id: string) => {
-    ChatStore.setState((prev) => {
-      const updatedChats = prev.chats.map((c) =>
-        c._id === id ? { ...c, isActive: true } : c
-      )
-      return { chats: updatedChats }
-    })
-  }
 
   const selectItem = (id: string) => {
     if (selectedItems.length > 0) {
@@ -145,65 +130,7 @@ const EachChat = ({ e, isFirst, isGroupEnd }: ChatContentProps) => {
                         /> */}
           </div>
         )}
-        {e.media.length > 0 && (
-          <>
-            {e.media[0].type === 'document' ? (
-              <div className="flex items-start mb-2">
-                <Image
-                  style={{ height: '40px', objectFit: 'contain' }}
-                  src={getExtension(e.media[0].source)}
-                  loading="lazy"
-                  sizes="100vw"
-                  className="w-auto h-auto object-contain mr-3"
-                  width={0}
-                  height={0}
-                  alt={`"/files/file.png"`}
-                />
-                <div className="flex-col flex flex-1 mr-2">
-                  <div className="flex items-start mb-1 justify-between">
-                    {e.media[0].name && (
-                      <div className="text-[var(--text-secondary)] mr-2 line-clamp-1 overflow-hidden text-ellipsis">
-                        {e.media[0].name}
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex mb-auto text-[12px] uppercase">
-                    {e.media[0].source
-                      .substring(e.media[0].source.lastIndexOf('.'))
-                      .slice(1)}{' '}
-                    . {(e.media[0].size / (1024 * 1024)).toFixed(2)} MB{' '}
-                    {e.media[0].pages > 0 &&
-                      `. ${e.media[0].pages} ${pluralize(
-                        'Page',
-                        e.media[0].pages
-                      )}`}
-                  </div>
-                </div>
-                <a
-                  href={e.media[0].source}
-                  download
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`${
-                    username === e.senderUsername
-                      ? 'border-white text-white'
-                      : 'border-[var(--text-primary)]'
-                  } cursor-pointer ml-auto min-w-8 w-8 h-8 border rounded-full flex items-center justify-center`}
-                >
-                  <i className="bi bi-download"></i>
-                </a>
-              </div>
-            ) : e.media[0].type === 'audio' ? (
-              <AudioMessage
-                src={e.media[0].source}
-                isSender={isSender}
-                name={e.media[0].name}
-              />
-            ) : (
-              <MediaDisplay sources={e.media} />
-            )}
-          </>
-        )}
+        <ChatMedia e={e} />
 
         <div className="mb-1">
           <div dangerouslySetInnerHTML={{ __html: e.content }}></div>
@@ -218,6 +145,8 @@ const EachChat = ({ e, isFirst, isGroupEnd }: ChatContentProps) => {
                     <i className="bi bi-clock-history"></i>
                   ) : e.status === 'delivered' ? (
                     <i className={`bi text-[15px] bi-check2-all`}></i>
+                  ) : e.status === 'sent' ? (
+                    <i className="bi bi-check2"></i>
                   ) : (
                     e.status === 'read' && (
                       <i
@@ -233,10 +162,8 @@ const EachChat = ({ e, isFirst, isGroupEnd }: ChatContentProps) => {
           </div>
 
           <div className="relative" ref={optionsRef}>
-            {e.isActive && <ChatActions e={e} />}
-
             <i
-              onClick={() => setIsActive(String(e._id))}
+              onClick={() => setActiveChat(e)}
               className="bi bi-three-dots-vertical text-sm cursor-pointer"
             ></i>
           </div>

@@ -85,6 +85,16 @@ const ChatBody = () => {
   }
 
   useEffect(() => {
+    return () => {
+      chats.forEach((msg) => {
+        msg.media?.forEach((m) => {
+          if (m.previewUrl) URL.revokeObjectURL(m.previewUrl)
+        })
+      })
+    }
+  }, [chats])
+
+  useEffect(() => {
     const observeScroll = () => {
       const container = chatContainerRef.current
       if (container) {

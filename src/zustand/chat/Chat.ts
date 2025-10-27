@@ -5,8 +5,29 @@ import { initDB, updatePendingMessageStatus } from '@/lib/indexDB'
 
 export const saveOrUpdateMessageInDB = async (message: ChatContent) => {
   const db = await initDB()
+
+  const serializedMedia = message.media
+    ? await Promise.all(
+        message.media.map(async (item) => {
+          let fileData: ArrayBuffer | null = null
+
+          // Convert File or Blob to binary data
+          if (item.file instanceof File || item.file instanceof Blob) {
+            fileData = await item.file.arrayBuffer()
+          }
+
+          return {
+            ...item,
+            fileData, // raw bytes for IndexedDB
+            previewUrl: '', // will be rebuilt later
+          }
+        })
+      )
+    : []
+
   await db.put('messages', {
     ...message,
+    media: serializedMedia,
     createdAt: new Date().toISOString(),
   })
 }
@@ -16,7 +37,42 @@ export const getMessagesByConnection = async (
 ): Promise<ChatContent[]> => {
   const db = await initDB()
   const index = db.transaction('messages').store.index('connection')
-  return index.getAll(connection)
+  const messages = await index.getAll(connection)
+
+  const restored = messages.map((msg) => {
+    if (msg.media && Array.isArray(msg.media)) {
+      msg.media = msg.media.map((item: PreviewFile) => {
+        if (item.blob) {
+          // 🧩 Create a new blob URL each time
+          const blob = new Blob([item.blob], { type: item.type })
+          const previewUrl = URL.createObjectURL(blob)
+
+          return {
+            ...item,
+            previewUrl,
+            file: blob, // in case you need to upload it later
+          }
+        }
+        return item
+      })
+    }
+    return msg
+  })
+
+  return restored
+}
+
+export interface PreviewFile {
+  file?: File | Blob
+  blob?: Blob
+  url?: string
+  previewUrl?: string
+  name: string
+  type: string
+  size: number
+  status: string
+  pages?: number
+  duration?: number
 }
 
 interface FetchChatResponse {
@@ -38,6 +94,7 @@ interface ChatState {
   unseenChatIds: number[]
   unseenCheckIds: number[]
   chats: ChatContent[]
+  activeChat: ChatContent
   connection: string
   username: string
   count: number
@@ -58,6 +115,7 @@ interface ChatState {
   successs?: string | null
   unread: number
   chatUserForm: ChatUserForm
+  setActiveChat: (chat: ChatContent) => void
   getSavedChats: (url: string) => Promise<void>
   getChats: (
     url: string,
@@ -129,38 +187,21 @@ export const ChatUserFormEmpty = {
 }
 
 export const ChatContentEmpty = {
-  _id: '',
   connection: '',
   content: '',
-  isSent: false,
-  isRead: false,
-  deletedUsername: '',
-  repliedChat: null,
-  isSavedUsernames: '',
-  isReadUsernames: '',
-  isPinned: false,
-  from: '',
   senderUsername: '',
-  senderPicture: '',
   media: [],
   day: '',
   receiverUsername: '',
-  receiverPicture: '',
   status: '',
-  unread: 0,
-  unreadCount: 0,
-  unreadReceiver: 0,
-  unreadUser: 0,
-  senderTime: new Date(),
-  createdAt: new Date(),
-  time: new Date(),
-  receiverTime: new Date(),
+  timeNumber: 0,
 }
 
 export const ChatStore = create<ChatState>((set) => ({
   unseenCheckIds: [],
   unseenChatIds: [],
   chats: [],
+  activeChat: ChatContentEmpty,
   connection: '',
   username: '',
   count: 0,
@@ -193,6 +234,12 @@ export const ChatStore = create<ChatState>((set) => ({
     set({
       loading: false,
       chats: results,
+    })
+  },
+
+  setActiveChat: (chat) => {
+    set({
+      activeChat: chat,
     })
   },
 
@@ -270,6 +317,7 @@ export const ChatStore = create<ChatState>((set) => ({
       }
     })
   },
+
   setProcessedFavResults: (results) => {
     set({
       loading: false,
@@ -307,7 +355,7 @@ export const ChatStore = create<ChatState>((set) => ({
       const response = await apiRequest<FetchChatResponse>(url)
       const data = response?.data
       if (data) {
-        ChatStore.getState().setProcessedResults(data.results)
+        // ChatStore.getState().setProcessedResults(data.results)
       }
     } catch (error: unknown) {
       console.log(error)
@@ -678,20 +726,11 @@ export const Chat = {
   chats: [],
 }
 
-export interface FileType {
-  type: string
-  source: string
-  name: string
-  size: number
-  duration: number
-  pages: number
-}
-
 export interface ChatContent {
   connection: string
   content: string
   senderUsername: string
-  media: FileType[]
+  media: PreviewFile[]
   day: string
   receiverUsername: string
   status: string
@@ -716,7 +755,7 @@ export interface ChatContent {
 export interface RepliedChatContent {
   content: string
   senderUsername: string
-  media: FileType[]
+  media: PreviewFile[]
   receiverUsername: string
   senderTime?: Date
   receiverTime?: Date

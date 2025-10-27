@@ -1,17 +1,20 @@
 'use client'
-import { useParams } from 'next/navigation'
 import { useGeneralContext } from '@/context/GeneralContext'
 import { AuthStore } from '@/src/zustand/user/AuthStore'
-import { ChatContent, ChatStore } from '@/src/zustand/chat/Chat'
+import {
+  ChatContent,
+  ChatContentEmpty,
+  ChatStore,
+} from '@/src/zustand/chat/Chat'
+import { deleteMessageFromDB } from '@/lib/indexDB'
 
 type ChatContentProps = {
   e: ChatContent
 }
 
 const ChatActions = ({ e }: ChatContentProps) => {
-  const { selectChats, connection } = ChatStore()
+  const { selectChats, setActiveChat, connection } = ChatStore()
   const { user } = AuthStore()
-  const { username } = useParams()
   const { socket } = useGeneralContext()
 
   const setIsActive = (id: string) => {
@@ -32,22 +35,29 @@ const ChatActions = ({ e }: ChatContentProps) => {
     }
   }
 
-  const deleteChat = (id: string, chatUsername: string, day: string) => {
+  const deleteChat = async () => {
+    const status = await deleteMessageFromDB(e.timeNumber)
+    if (status) {
+      ChatStore.setState((prev) => {
+        return {
+          chats: prev.chats.filter((item) => item.timeNumber !== e.timeNumber),
+        }
+      })
+    }
     if (socket && user) {
       const form = {
         to: 'deleteChat',
-        id: id,
+        id: e.timeNumber,
         connection: connection,
-        day: day,
-        isSender: user.username === chatUsername,
+        isSender: user.username === e.senderUsername,
         username: user.username,
-        receiverUsername: username,
+        receiverUsername: e.receiverUsername,
       }
 
       socket.emit('message', form)
     }
 
-    setIsActive(id)
+    setActiveChat(ChatContentEmpty)
   }
 
   const startSelectItem = (id: string) => {
@@ -57,43 +67,38 @@ const ChatActions = ({ e }: ChatContentProps) => {
 
   return (
     <div
-      className={`flex flex-col text-[16px] text-[var(--text-primary)] z-30 absolute ${
-        e.receiverUsername === user?.username ? 'left-[-80px]' : 'right-0'
-      } rounded-[5px] border border-[var(--border)] bg-[var(--primary)]`}
+      className={`flex flex-col bottom-[60px] right-1  text-[var(--text-primary)] z-30 absolute  rounded-[5px] border border-[var(--border)] bg-[var(--primary)]`}
     >
       {e.content.trim().length > 0 && (
         <div
           onClick={() => {
             const cleanedText = e.content.replace(/<[^>]*>/g, '')
             navigator.clipboard.writeText(cleanedText)
-            setIsActive(String(e._id))
+            setActiveChat(ChatContentEmpty)
           }}
           className="chat_list_item"
         >
-          <i className="bi bi-clipboard mr-2"></i>
-          Copy
+          <i className="bi bi-clipboard mr-2 text-xl"></i>
+          Copy Message
         </div>
       )}
       <div onClick={() => startSetRepliedChat(e)} className="chat_list_item">
-        <i className="bi bi-reply mr-2"></i>
-        Reply
+        <i className="bi bi-reply mr-2 text-xl"></i>
+        Reply Message
       </div>
       <div
         onClick={() => startSelectItem(String(e._id))}
         className="chat_list_item"
       >
-        <i className="bi bi-check2-square mr-2"></i>
-        Select
+        <i className="bi bi-check2-square mr-2 text-xl"></i>
+        Select Message
+      </div>
+      <div onClick={() => deleteChat()} className="chat_list_item">
+        <i className="bi bi-trash mr-2 text-xl"></i>
+        Delete Message
       </div>
       <div
-        onClick={() => deleteChat(String(e._id), e.senderUsername, e.day)}
-        className="chat_list_item"
-      >
-        <i className="bi bi-trash mr-2"></i>
-        Delete
-      </div>
-      <div
-        onClick={() => setIsActive(String(e._id))}
+        onClick={() => setActiveChat(ChatContentEmpty)}
         className="chat_list_item"
       >
         <i className="bi bi-x-circle mr-2"></i>
