@@ -6,6 +6,7 @@ import AudioMessage from './Audio'
 import pluralize from 'pluralize'
 import { AuthStore } from '@/src/zustand/user/AuthStore'
 import { ChatContent } from '@/src/zustand/chat/Chat'
+import ChatMediaDisplay from './ChatMediaDisplay'
 
 type ChatContentProps = {
   e: ChatContent
@@ -74,43 +75,7 @@ const ChatMedia = ({ e }: ChatContentProps) => {
               name={e.media[0].name}
             />
           ) : (
-            <div className="grid grid-cols-2  z-40 rounded-[10px] overflow-hidden gap-2 mb-3">
-              {e.media.map((item, index) => (
-                <div
-                  key={index}
-                  className="relative group rounded-lg overflow-hidden"
-                >
-                  {item.type.includes('image') ? (
-                    <img
-                      src={item.previewUrl}
-                      alt={item.previewUrl}
-                      className="w-full h-32 object-cover"
-                    />
-                  ) : (
-                    item.type.includes('video') && (
-                      <video
-                        src={item.previewUrl}
-                        className="w-full h-32 object-cover"
-                        muted
-                        onLoadedMetadata={(e) =>
-                          (item.duration = e.currentTarget.duration)
-                        }
-                      />
-                    )
-                  )}
-
-                  <div className="absolute top-1 left-1 bg-black/60 text-white rounded-full h-6 w-6 flex items-center justify-center text-[10px]">
-                    {item.type.includes('image') ? (
-                      <i className="bi bi-image"></i>
-                    ) : item.type.includes('video') ? (
-                      <i className="bi bi-camera-video"></i>
-                    ) : (
-                      <i className="bi bi-file-earmark"></i> // 📄 File icon
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
+            <ChatMediaDisplay e={e} />
           )}
         </>
       )}

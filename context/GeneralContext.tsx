@@ -1,7 +1,11 @@
 'use client'
 import { initializeSound } from '@/lib/sound'
 import useSocket from '@/src/useSocket'
-import { ChatContent, ChatStore } from '@/src/zustand/chat/Chat'
+import {
+  ChatContent,
+  ChatStore,
+  saveOrUpdateMessageInDB,
+} from '@/src/zustand/chat/Chat'
 import FriendStore, { Friend } from '@/src/zustand/chat/Friend'
 import { MessageStore } from '@/src/zustand/notification/Message'
 import SchoolStore from '@/src/zustand/school/School'
@@ -165,9 +169,24 @@ export const GeneralProvider = ({ children }: GeneralProviderProps) => {
           updatePendingChat(el)
         }
       })
+
+      socket.on(`updateChatWithFile${user.username}`, (data: response) => {
+        if (data.chat) {
+          console.log(data)
+          saveOrUpdateMessageInDB(data.chat)
+          ChatStore.setState((prev) => {
+            return {
+              chats: prev.chats.map((item) =>
+                item.timeNumber === data.chat.timeNumber ? data.chat : item
+              ),
+            }
+          })
+        }
+      })
     }
 
     return () => {
+      socket.off(`updateChatWithFile${user?.username}`)
       socket.off(`updateCheckedChats${user?.username}`)
       socket.off(`updateChatToDelivered${user?.username}`)
       socket.off(`updatePendingChat${connection}`)

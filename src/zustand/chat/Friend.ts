@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import _debounce from 'lodash/debounce'
 import apiRequest from '@/lib/axios'
 import { initDB, updatePendingFriendMessageStatus } from '@/lib/indexDB'
+import { PreviewFile } from './Chat'
 
 export const saveOrUpdateFriendInDB = async (friend: Friend) => {
   const db = await initDB()
@@ -30,6 +31,7 @@ export interface Friend {
   receiverPicture: string
   content: string
   status: string
+  media: PreviewFile[]
   connection: string
   createdAt: Date | null
   timeNumber: number
@@ -50,6 +52,7 @@ export const FriendEmpty = {
   receiverUsername: '',
   receiverPicture: '',
   content: '',
+  media: [],
   status: '',
   connection: '',
   createdAt: null,

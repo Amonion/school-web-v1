@@ -12,7 +12,6 @@ import { usePathname } from 'next/navigation'
 import { MessageStore } from '@/src/zustand/notification/Message'
 import { formatDateToDDMMYY, getPdfPageCount } from '@/lib/helpers'
 import ChatActions from '@/components/Chat/ChatActions'
-// import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist'
 
 const Chats = () => {
   const { updateFriendsChat, friendForm } = FriendStore()
@@ -26,6 +25,7 @@ const Chats = () => {
     unseenChatIds,
     unseenCheckIds,
     username,
+    postChat,
     getSavedChats,
     updateChatsToRead,
     getChats,
@@ -122,43 +122,6 @@ const Chats = () => {
     return participants.join('')
   }
 
-  //   const handleSelectFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  //     const selectedFiles = e.target.files
-  //     if (!selectedFiles) return
-
-  //     const filesArray = Array.from(selectedFiles)
-
-  //     const newFiles: PreviewFile[] = await Promise.all(
-  //       filesArray.map(async (file) => {
-  //         const url = URL.createObjectURL(file)
-
-  //         const type = file.type.startsWith('video')
-  //           ? 'video'
-  //           : file.type.startsWith('image')
-  //           ? 'image'
-  //           : file.type.startsWith('audio')
-  //           ? 'audio'
-  //           : 'other'
-
-  //         const name = file.name.replace(/\.[^/.]+$/, '')
-  //         const size = +(file.size / (1024 * 1024)).toFixed(2)
-  //         let pages = 0
-  //         if (file.type === 'application/pdf') {
-  //           try {
-  //             pages = await getPdfPageCount(file)
-  //           } catch (error) {
-  //             console.error('Error getting PDF pages:', error)
-  //           }
-  //         }
-  //         const status = 'pending'
-
-  //         return { file, url, name, type, status, size, pages }
-  //       })
-  //     )
-
-  //     setFiles((prev) => [...prev, ...newFiles])
-  //   }
-
   const removeFile = (index: number) => {
     setFiles((prev) => {
       const newList = [...prev]
@@ -175,12 +138,14 @@ const Chats = () => {
 
   const serializeFiles = async (files: File[]) => {
     const serialized = await Promise.all(
-      files.map(async (file) => {
+      files.map(async (file, index) => {
         const buffer = await file.arrayBuffer()
         const blob = new Blob([buffer], { type: file.type })
         const previewUrl = URL.createObjectURL(blob)
 
         return {
+          index,
+          file,
           name: file.name,
           type: file.type,
           size: file.size,
@@ -188,7 +153,7 @@ const Chats = () => {
           blob,
           previewUrl, // for local preview
           url: '', // ✅ empty now, to be filled with bucket URL later
-        }
+        } as PreviewFile
       })
     )
 
@@ -198,11 +163,13 @@ const Chats = () => {
   const handleSelectFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = e.target.files
     if (!selectedFiles) return
+
     setOptions(false)
+
     const filesArray = Array.from(selectedFiles)
 
     const newFiles: PreviewFile[] = await Promise.all(
-      filesArray.map(async (file) => {
+      filesArray.map(async (file, index) => {
         const url = URL.createObjectURL(file)
 
         const type = file.type.startsWith('video')
@@ -226,12 +193,29 @@ const Chats = () => {
           }
         }
 
-        // ✅ Fix: include previewUrl
-        return { file, url, previewUrl: url, name, type, status, size, pages }
+        return {
+          index,
+          file,
+          url,
+          previewUrl: url,
+          name,
+          type,
+          status,
+          size,
+          pages,
+        } as PreviewFile
       })
     )
 
-    setFiles((prev) => [...prev, ...newFiles])
+    // preserve existing indices, append new ones correctly
+    setFiles((prev) => {
+      const baseIndex = prev.length
+      const indexedFiles = newFiles.map((f, i) => ({
+        ...f,
+        index: baseIndex + i,
+      }))
+      return [...prev, ...indexedFiles]
+    })
   }
 
   const postMessage = async () => {
@@ -261,7 +245,9 @@ const Chats = () => {
         time: new Date().getTime(),
         updatedAt: new Date(),
         timeNumber: timeNumber,
-        media: files,
+        media: await serializeFiles(
+          files.map((f) => f.file).filter((f): f is File => f instanceof File)
+        ),
       }
 
       const friendChat = {
@@ -314,8 +300,11 @@ const Chats = () => {
 
       updateFriendsChat(friendChat)
       addNewChat(saved)
-      //   socket.emit('message', form)
-      console.log(saved)
+      if (files.length > 0) {
+        postChat('/chats', form, setMessage)
+      } else {
+        socket.emit('message', form)
+      }
       setFiles([])
       setText('')
 
@@ -339,7 +328,15 @@ const Chats = () => {
           </div>
 
           {files.length > 0 && (
-            <div className="grid grid-cols-2 absoluteCenter z-40 p-3 rounded-[10px] overflow-hidden bg-[var(--primary)] gap-2 mb-3">
+            <div
+              className={`grid ${
+                files.length === 1
+                  ? 'w-[300px]'
+                  : files.length > 1
+                  ? 'grid-cols-2'
+                  : ''
+              } absoluteCenter z-40 p-3 rounded-[10px] overflow-hidden bg-[var(--primary)] gap-2 mb-3`}
+            >
               {files.map((item, index) => (
                 <div
                   key={index}
@@ -349,13 +346,13 @@ const Chats = () => {
                     <img
                       src={item.previewUrl}
                       alt={item.url}
-                      className="w-full h-32 object-cover"
+                      className="w-full h-h-[300px] object-cover"
                     />
                   ) : (
                     item.type === 'video' && (
                       <video
                         src={item.previewUrl}
-                        className="w-full h-32 object-cover"
+                        className="w-full h-h-[300px] object-cover"
                         muted
                         onLoadedMetadata={(e) =>
                           (files[index].duration = e.currentTarget.duration)
@@ -392,7 +389,7 @@ const Chats = () => {
             <ChatBody />
           </div>
 
-          {activeChat.timeNumber && <ChatActions e={activeChat} />}
+          {activeChat.timeNumber > 0 && <ChatActions e={activeChat} />}
 
           <div className="w-full fixed sm:sticky bottom-0 left-0 flex items-end bg-[var(--primary)] py-1 px-2">
             <div className="flex flex-1 relative flex-col">

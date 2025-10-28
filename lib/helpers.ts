@@ -92,6 +92,65 @@ export async function removeFileFromS3(
   }
 }
 
+export const handlePendingFileUpload = async (
+  file: File | Blob,
+  baseURL: string,
+  onProgress?: (percent: number) => void,
+  filePages: number = 0,
+  duration: number = 0
+): Promise<{
+  type: string
+  name: string
+  duration: number
+  pages: number
+  size: number
+  source: string
+}> => {
+  try {
+    const fileName = file instanceof File ? file.name : `blob-${Date.now()}`
+    const fileSize = file.size
+    const fileType = file.type || 'application/octet-stream'
+    const type = getFileType(file as File)
+
+    // Get presigned URL from backend
+    const { data } = await axios.post(`${baseURL}s3-presigned-url`, {
+      fileName,
+      fileType,
+    })
+
+    const { uploadUrl } = data
+
+    // Upload file to S3
+    await axios.put(uploadUrl, file, {
+      headers: { 'Content-Type': fileType },
+      onUploadProgress: (progressEvent) => {
+        if (progressEvent.total && onProgress) {
+          const percent = Math.round(
+            (progressEvent.loaded / progressEvent.total) * 100
+          )
+          onProgress(percent)
+        }
+      },
+    })
+
+    const cleanUrl = uploadUrl.split('?')[0]
+
+    const uploadedFile = {
+      type,
+      name: fileName,
+      duration,
+      pages: filePages,
+      size: fileSize,
+      source: cleanUrl,
+    }
+
+    return uploadedFile
+  } catch (error) {
+    console.error('❌ Upload failed:', error)
+    throw error
+  }
+}
+
 export function capitalizeFirstLetter(str: string) {
   if (!str) return '' // handle empty string
   return str.charAt(0).toUpperCase() + str.slice(1)

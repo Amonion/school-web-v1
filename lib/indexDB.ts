@@ -125,15 +125,12 @@ export const deleteMessageFromDB = async (timeNumber: number) => {
   try {
     const db = await initDB()
 
-    // Check if the message exists
     const existing = await db.get(MESSAGES_STORE, timeNumber)
     if (!existing) {
-      console.warn(`Message with timeNumber ${timeNumber} not found.`)
       return false
     }
 
     await db.delete(MESSAGES_STORE, timeNumber)
-    console.log(`✅ Message with timeNumber ${timeNumber} deleted.`)
     return true
   } catch (error) {
     console.error('❌ Error deleting message:', error)

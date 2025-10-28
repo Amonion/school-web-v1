@@ -51,20 +51,20 @@ const EachChat = ({ e, isFirst, isGroupEnd }: ChatContentProps) => {
               })
             }
 
-            const userChat = chats.find(
-              (c) => c.timeNumber === chatId && c.status !== 'read'
-            )
-            if (userChat) {
-              ChatStore.setState((prev) => {
-                const updatedIds = new Set([
-                  ...prev.unseenCheckIds,
-                  Number(userChat.timeNumber),
-                ])
-                return {
-                  unseenCheckIds: Array.from(updatedIds),
-                }
-              })
-            }
+            // const userChat = chats.find(
+            //   (c) => c.timeNumber === chatId && c.status !== 'read'
+            // )
+            // if (userChat) {
+            //   ChatStore.setState((prev) => {
+            //     const updatedIds = new Set([
+            //       ...prev.unseenCheckIds,
+            //       Number(userChat.timeNumber),
+            //     ])
+            //     return {
+            //       unseenCheckIds: Array.from(updatedIds),
+            //     }
+            //   })
+            // }
           }
         })
       },

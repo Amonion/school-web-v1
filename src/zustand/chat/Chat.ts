@@ -63,6 +63,7 @@ export const getMessagesByConnection = async (
 }
 
 export interface PreviewFile {
+  index: number
   file?: File | Blob
   blob?: Blob
   url?: string
@@ -81,6 +82,7 @@ interface FetchChatResponse {
   message: string
   page_size: number
   results: ChatContent[]
+  chat: ChatContent
 }
 
 interface FetchUserResponse {
@@ -140,6 +142,7 @@ interface ChatState {
   addSearchedChats: (url: string, createdAt: Date) => Promise<void>
   addFavSearchedChats: (url: number, createdAt: Date) => Promise<void>
   setProcessedResults: (data: ChatContent[]) => void
+  processedAndAddResults: (data: ChatContent[]) => void
   processMoreResults: (data: ChatContent[]) => void
   setProcessedFavResults: (data: Chat[]) => void
   setLoading?: (loading: boolean) => void
@@ -149,11 +152,14 @@ interface ChatState {
     setMessage: (message: string, isError: boolean) => void
   ) => Promise<void>
   deleteItem: (data: socketResponse) => Promise<void>
-  updateItem: (
+  postChat: (
     url: string,
     updatedItem: FormData | Record<string, unknown>,
-    setMessage: (message: string, isError: boolean) => void,
-    refreshUrl?: string
+    setMessage: (message: string, isError: boolean) => void
+  ) => Promise<void>
+  updateChatWithFile: (
+    url: string,
+    updatedItem: FormData | Record<string, unknown>
   ) => Promise<void>
 
   updateChatsToRead: (ids: number[], connection: string) => void
@@ -243,40 +249,6 @@ export const ChatStore = create<ChatState>((set) => ({
     })
   },
 
-  // setProcessedResults: (newResults) => {
-  //   set((prev) => {
-  //     // Create a map of newResults by timeNumber for quick lookup
-  //     const newResultsMap = new Map(
-  //       newResults.map((chat) => [chat.timeNumber, chat])
-  //     )
-
-  //     // Update existing chats with new status if timeNumber matches, otherwise keep or add
-  //     const combined = prev.chats.map((chat) => {
-  //       const newChat = newResultsMap.get(chat.timeNumber)
-  //       if (newChat) {
-  //         return { ...chat, status: newChat.status }
-  //       }
-  //       return chat
-  //     })
-
-  //     // Add new chats from newResults that don't exist in prev.chats
-  //     const unique = [
-  //       ...combined,
-  //       ...newResults.filter(
-  //         (chat) => !prev.chats.some((c) => c.timeNumber === chat.timeNumber)
-  //       ),
-  //     ]
-
-  //     // Sort by timeNumber
-  //     unique.sort((a, b) => a.timeNumber - b.timeNumber)
-
-  //     return {
-  //       loading: false,
-  //       chats: unique,
-  //     }
-  //   })
-  // },
-
   setProcessedResults: (newResults) => {
     set((prev) => {
       // Create a map of newResults by timeNumber for quick lookup
@@ -302,6 +274,83 @@ export const ChatStore = create<ChatState>((set) => ({
       ]
 
       // Sort by timeNumber
+      unique.sort((a, b) => a.timeNumber - b.timeNumber)
+
+      return {
+        loading: false,
+        chats: unique,
+      }
+    })
+  },
+
+  // setProcessedResults: (newResults) => {
+  //   set((prev) => {
+  //     const newResultsMap = new Map(
+  //       newResults.map((chat) => [chat.timeNumber, chat])
+  //     )
+
+  //     // Update existing chats if they appear in newResults
+  //     const updatedChats = prev.chats.map((chat) => {
+  //       const newChat = newResultsMap.get(chat.timeNumber)
+  //       if (newChat) {
+  //         return { ...chat, ...newChat } // merge all updates
+  //       }
+  //       return chat
+  //     })
+
+  //     // Add new chats that don’t already exist
+  //     const merged = [
+  //       ...updatedChats,
+  //       ...newResults.filter(
+  //         (chat) => !prev.chats.some((c) => c.timeNumber === chat.timeNumber)
+  //       ),
+  //     ]
+
+  //     // ✅ Sort oldest → newest
+  //     merged.sort((a, b) => {
+  //       const dateA = a.createdAt
+  //         ? new Date(a.createdAt).getTime()
+  //         : Number(a.timeNumber)
+  //       const dateB = b.createdAt
+  //         ? new Date(b.createdAt).getTime()
+  //         : Number(b.timeNumber)
+  //       return dateA - dateB // ascending → oldest first
+  //     })
+
+  //     return {
+  //       loading: false,
+  //       chats: merged,
+  //     }
+  //   })
+  // },
+
+  processedAndAddResults: (newResults) => {
+    set((prev) => {
+      const newResultsMap = new Map(
+        newResults.map((chat) => [chat.timeNumber, chat])
+      )
+
+      const combined = prev.chats.map((chat) => {
+        const newChat = newResultsMap.get(chat.timeNumber)
+        if (newChat) {
+          return { ...chat, status: newChat.status }
+        }
+        return chat
+      })
+
+      const newChatsOnly = newResults.filter(
+        (chat) => !prev.chats.some((c) => c.timeNumber === chat.timeNumber)
+      )
+
+      if (newChatsOnly.length > 0) {
+        for (let i = 0; i < newChatsOnly.length; i++) {
+          const el = newChatsOnly[i]
+          saveOrUpdateMessageInDB(el)
+        }
+      }
+
+      const unique = [...combined, ...newChatsOnly]
+
       unique.sort((a, b) => {
         const dateA = a.createdAt
           ? new Date(a.createdAt).getTime()
@@ -311,6 +360,7 @@ export const ChatStore = create<ChatState>((set) => ({
           : b.timeNumber
         return dateA - dateB
       })
+
       return {
         loading: false,
         chats: unique,
@@ -355,7 +405,7 @@ export const ChatStore = create<ChatState>((set) => ({
       const response = await apiRequest<FetchChatResponse>(url)
       const data = response?.data
       if (data) {
-        // ChatStore.getState().setProcessedResults(data.results)
+        // ChatStore.getState().processedAndAddResults(data.results)
       }
     } catch (error: unknown) {
       console.log(error)
@@ -600,38 +650,41 @@ export const ChatStore = create<ChatState>((set) => ({
     }
   },
 
-  updateItem: async (
-    url: string,
-    updatedItem: FormData | Record<string, unknown>,
-    setMessage: (message: string, isError: boolean) => void
-  ) => {
-    set({ loading: true })
-    const response = await apiRequest<FetchChatResponse>(url, {
-      method: 'PATCH',
-      body: updatedItem,
-      setMessage,
-      setLoading: ChatStore.getState().setLoading,
-    })
-    const data = response?.data
-    if (data) {
-      const chats = data.results
-      if (url.includes('unsave')) {
-        set((state) => {
-          const updatedChatResults = state.favChatResults.map((group) => ({
-            ...group,
-            chats: group.chats.filter(
-              (chat) => !chats.some((c) => c._id === chat._id)
-            ),
-          }))
+  postChat: async (url, updatedItem, setMessage) => {
+    try {
+      const response = await apiRequest<FetchChatResponse>(url, {
+        method: 'POST',
+        body: updatedItem,
+        setMessage,
+      })
+      const data = response?.data
+      if (data) {
+        console.log(data)
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  },
 
+  updateChatWithFile: async (url, updatedItem) => {
+    try {
+      const response = await apiRequest<FetchChatResponse>(url, {
+        method: 'PATCH',
+        body: updatedItem,
+      })
+      const data = response?.data
+      if (data) {
+        set((prev) => {
           return {
-            favChatResults: updatedChatResults,
-            loading: false,
-            selectedFavItems: [],
+            chats: prev.chats.map((item) =>
+              item.timeNumber === data.chat.timeNumber ? data.chat : item
+            ),
           }
         })
-      } else {
+        saveOrUpdateMessageInDB(data.chat)
       }
+    } catch (error) {
+      console.log(error)
     }
   },
 

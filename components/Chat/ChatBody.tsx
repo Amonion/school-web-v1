@@ -36,6 +36,7 @@ const ChatBody = () => {
   const pathname = usePathname()
   const [isNearBottom, setIsNearBottom] = useState(true)
   const socket = useSocket()
+  const [isFriends, setIsFriends] = useState(true)
 
   useEffect(() => {
     const scrollToBottom = () => {
@@ -53,7 +54,7 @@ const ChatBody = () => {
     }, 100)
 
     return () => clearTimeout(timer)
-  }, [chats, pathname])
+  }, [chats.length, pathname])
 
   //  const handleFetchOlderChats = async (user: User) => {
   //     const container = chatContainerRef.current
@@ -83,6 +84,20 @@ const ChatBody = () => {
       })
     }
   }
+
+  useEffect(() => {
+    if (chats.length > 0 && user) {
+      const isUsersFriends = ChatStore.getState().chats.some(
+        (item) =>
+          (item.senderUsername === user.username ||
+            item.receiverUsername === user.username) &&
+          (item.senderUsername === username ||
+            item.receiverUsername === username)
+      )
+
+      setIsFriends(isUsersFriends)
+    }
+  }, [chats.length, user])
 
   useEffect(() => {
     return () => {
@@ -227,7 +242,7 @@ const ChatBody = () => {
           )
         })}
 
-        {chatUserForm && !chatUserForm.isFriends && chats.length > 0 && (
+        {!isFriends && chats.length > 0 && (
           <div className="w-full flex flex-col items-center px-[10px] mt-10">
             <div className="text-center max-w-[400px] text-lg leading-[25px]">
               <span className="text-[var(--custom)]">

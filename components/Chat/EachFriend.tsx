@@ -98,7 +98,7 @@ export default function EachFriend({ friend }: EachFriendProps) {
           </div>
         </div>
 
-        <div className="flex relative items-end w-full">
+        <div className="flex relative items-center w-full">
           {isSender && (
             <div className="mr-1 text-[12px]">
               {currentFriend.status === 'pending' ? (
@@ -125,8 +125,19 @@ export default function EachFriend({ friend }: EachFriendProps) {
               {unread >= 100 ? '99+' : unread}
             </div>
           )}
+          {currentFriend.media && currentFriend.media.length > 0 && (
+            <div className="mr-1">
+              {currentFriend.media[0].type.includes('image') ? (
+                <i className="bi bi-image"></i>
+              ) : (
+                currentFriend.media[0].type.includes('video') && (
+                  <i className="bi bi-camera-video"></i>
+                )
+              )}
+            </div>
+          )}
           <div
-            className="text-sm mr-auto line-clamp-1"
+            className="text-sm flex-1 line-clamp-1 overflow-ellipsis"
             dangerouslySetInnerHTML={{ __html: currentFriend.content }}
           />
         </div>
