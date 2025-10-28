@@ -70,8 +70,12 @@ const ChatMediaDisplay = ({ e }: ChatContentProps) => {
   return (
     <>
       <div
-        className={`grid ${
-          e.media.length < 2 ? 'grid-cols-1' : 'grid-cols-2'
+        className={`grid items-start ${
+          e.media.length === 1
+            ? 'grid-cols-1'
+            : e.media.length === 2
+            ? 'grid-cols-2'
+            : 'grid-cols-2 sm:h-[300px] h-[200px]'
         } z-40 rounded-[10px] overflow-hidden gap-2 mb-3`}
       >
         {e.media.map((item, index) => (
@@ -137,6 +141,10 @@ const ChatMediaDisplay = ({ e }: ChatContentProps) => {
                     ? 'h-auto object-contain'
                     : e.media.length === 2
                     ? 'h-[200px] object-cover'
+                    : e.media.length === 3 && index !== 1
+                    ? 'sm:h-[150px] h-[100px] object-cover'
+                    : e.media.length === 3 && index == 1
+                    ? 'sm:h-[300px] h-[200px] object-cover'
                     : ''
                 } `}
               />
@@ -144,13 +152,17 @@ const ChatMediaDisplay = ({ e }: ChatContentProps) => {
               item.type.includes('video') && (
                 <video
                   src={item.previewUrl || item.url}
-                  className={`w-full h-auto ${
+                  className={`w-full ${
                     e.media.length === 1
                       ? 'h-auto object-contain'
                       : e.media.length === 2
                       ? 'h-[200px] object-cover'
+                      : e.media.length === 3 && index !== 1
+                      ? 'sm:h-[150px] h-[100px] object-cover'
+                      : e.media.length === 3 && index == 1
+                      ? 'sm:h-[300px] h-[200px] object-cover'
                       : ''
-                  }`}
+                  } `}
                   muted
                   controls
                   onLoadedMetadata={(e) =>

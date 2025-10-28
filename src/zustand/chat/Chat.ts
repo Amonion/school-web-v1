@@ -405,7 +405,7 @@ export const ChatStore = create<ChatState>((set) => ({
       const response = await apiRequest<FetchChatResponse>(url)
       const data = response?.data
       if (data) {
-        // ChatStore.getState().processedAndAddResults(data.results)
+        ChatStore.getState().processedAndAddResults(data.results)
       }
     } catch (error: unknown) {
       console.log(error)
