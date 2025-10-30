@@ -1,5 +1,68 @@
 import { create } from 'zustand'
 import apiRequest from '@/lib/axios'
+import { initDB } from '@/lib/indexDB'
+const MOMENTS_STORE = 'moments'
+
+export const getMomentsFromDB = async (page = 1, limit = 20) => {
+  const db = await initDB()
+  const tx = db.transaction(MOMENTS_STORE, 'readonly')
+  const store = tx.objectStore(MOMENTS_STORE)
+  const index = store.index('createdAt')
+
+  const allMoments = await index.getAll()
+
+  const sorted = allMoments.sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  )
+
+  const start = (page - 1) * limit
+  const end = start + limit
+  const paginated = sorted.slice(start, end)
+
+  await tx.done
+  return paginated
+}
+
+export const saveMomentsToDB = async (moments: Moment[]): Promise<boolean> => {
+  if (!moments || !Array.isArray(moments) || moments.length === 0) return false
+
+  try {
+    const db = await initDB()
+    const tx = db.transaction(MOMENTS_STORE, 'readwrite')
+    const store = tx.objectStore(MOMENTS_STORE)
+
+    for (const moment of moments) {
+      await store.put({
+        ...moment,
+        _id: moment._id,
+        createdAt: moment.createdAt || new Date().toISOString(),
+      })
+    }
+
+    await tx.done
+    console.log(`✅ ${moments.length} moments saved/updated in local DB.`)
+    return true
+  } catch (err) {
+    console.error('❌ Error saving moments to DB:', err)
+    return false
+  }
+}
+
+export const deleteAllMomentsFromDB = async (): Promise<boolean> => {
+  try {
+    const db = await initDB()
+    const tx = db.transaction(MOMENTS_STORE, 'readwrite')
+    const store = tx.objectStore(MOMENTS_STORE)
+
+    await store.clear()
+    await tx.done
+
+    return true
+  } catch (error) {
+    console.error('❌ Failed to delete all moments:', error)
+    return false
+  }
+}
 
 interface FetchMomentResponse {
   count: number
@@ -21,6 +84,7 @@ export interface MomentMedia {
   duration: number
   isViewed: boolean
 }
+
 export const MomentMediaEmpty = {
   type: '',
   backgroundColor: '#da3986',
@@ -78,6 +142,7 @@ interface MomentState {
   setIsEditing: (state: boolean, id: string, index: number) => void
   setForm: (key: keyof Moment, value: Moment[keyof Moment]) => void
   resetForm: () => void
+  getSavedMoments: () => void
   getMoments: (
     url: string,
     setMessage: (message: string, isError: boolean) => void
@@ -138,6 +203,7 @@ export const MomentStore = create<MomentState>((set) => ({
       isPlaying: state,
     })
   },
+
   setIsEditing: (state, id, index) => {
     set({
       isEditing: state,
@@ -159,6 +225,20 @@ export const MomentStore = create<MomentState>((set) => ({
         activeMomentMedia: prev.moments[int].media[index],
       }
     })
+  },
+
+  getSavedMoments: async () => {
+    try {
+      set({ loading: true })
+      const moments = await getMomentsFromDB()
+      if (moments) {
+        set({ moments: moments })
+      }
+    } catch (error: unknown) {
+      console.log(error)
+    } finally {
+      set({ loading: false })
+    }
   },
 
   openMomentModal: (index) => {
@@ -196,7 +276,25 @@ export const MomentStore = create<MomentState>((set) => ({
       })
       const data = response?.data
       if (data) {
-        MomentStore.getState().setProcessedResults(data)
+        const moments = MomentStore.getState().moments
+        if (data.results.length > 0) {
+          const newMoments = data.results.filter(
+            (item) => !moments.some((m) => m._id === item._id)
+          )
+          if (newMoments.length > 0) {
+            set((prev) => {
+              return {
+                moments: [...prev.moments, ...newMoments],
+              }
+            })
+            console.log(newMoments)
+            await saveMomentsToDB(newMoments)
+          } else {
+            console.log('No new moments to add.')
+          }
+        } else {
+          deleteAllMomentsFromDB()
+        }
       }
     } catch (error: unknown) {
       console.log(error)

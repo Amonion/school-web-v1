@@ -2,9 +2,12 @@ import { ChatContent } from '@/src/zustand/chat/Chat'
 import { openDB } from 'idb'
 
 const DB_NAME = 'chatDB'
-const DB_VERSION = 4
+const DB_VERSION = 6
 const MESSAGES_STORE = 'messages'
 const FRIENDS_STORE = 'friends'
+const MOMENTS_STORE = 'moments'
+const POSTS_STORE = 'posts'
+const NEWS_STORE = 'news'
 
 export const initDB = async () => {
   return openDB(DB_NAME, DB_VERSION, {
@@ -26,6 +29,33 @@ export const initDB = async () => {
 
       if (!db.objectStoreNames.contains(FRIENDS_STORE)) {
         db.createObjectStore(FRIENDS_STORE, { keyPath: 'connection' })
+      }
+
+      if (!db.objectStoreNames.contains(MOMENTS_STORE)) {
+        const store = db.createObjectStore(MOMENTS_STORE, {
+          keyPath: '_id',
+        })
+        store.createIndex('username', 'username')
+        store.createIndex('createdAt', 'createdAt')
+      }
+
+      if (!db.objectStoreNames.contains(POSTS_STORE)) {
+        const store = db.createObjectStore(POSTS_STORE, {
+          keyPath: 'id',
+          autoIncrement: true,
+        })
+        store.createIndex('author', 'author')
+        store.createIndex('createdAt', 'createdAt')
+        store.createIndex('category', 'category')
+      }
+
+      if (!db.objectStoreNames.contains(NEWS_STORE)) {
+        const store = db.createObjectStore(NEWS_STORE, {
+          keyPath: 'id',
+          autoIncrement: true,
+        })
+        store.createIndex('title', 'title')
+        store.createIndex('createdAt', 'createdAt')
       }
     },
   })

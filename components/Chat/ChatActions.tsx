@@ -67,7 +67,7 @@ const ChatActions = ({ e }: ChatContentProps) => {
 
   return (
     <div
-      className={`flex flex-col bottom-[60px] right-1  text-[var(--text-primary)] z-30 absolute  rounded-[5px] border border-[var(--border)] bg-[var(--primary)]`}
+      className={`flex flex-col bottom-[60px] right-1  text-[var(--text-primary)] z-50 absolute  rounded-[5px] border border-[var(--border)] bg-[var(--primary)]`}
     >
       {e.content.trim().length > 0 && (
         <div
