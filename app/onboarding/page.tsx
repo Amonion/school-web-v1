@@ -57,7 +57,7 @@ const OnboardingCarousel = () => {
           </SwiperSlide>
         </Swiper>
 
-        <div className="flex min-h-[100px] z-10 px-2 absolute bottom-0 w-full left-0 justify-between items-center">
+        <div className="flex min-h-[100px] z-10 px-2 absolute bottom-[100px] w-full left-0 justify-between items-center">
           {currentIndex > 0 && (
             <button
               className="custom_btn"

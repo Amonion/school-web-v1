@@ -21,7 +21,7 @@ const Final = () => {
   const { countries, getCountries } = CountryStore()
   const { states, getStates } = StateStore()
   const { user } = AuthStore()
-  const [country, setCountry] = useState('')
+  const [country, setCountry] = useState('Select Country')
   const [state, setState] = useState('')
   const [status, setStatus] = useState('Creating your account')
   const [isCountryList, setCountryList] = useState(false)
