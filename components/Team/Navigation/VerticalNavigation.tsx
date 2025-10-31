@@ -9,6 +9,7 @@ import { AuthStore } from '@/src/zustand/user/AuthStore'
 
 export default function VerticalNavigation() {
   const router = useRouter()
+  const [isUsers, setUsers] = useState(false)
   const [isSchool, setSchool] = useState(false)
   const [isPlace, togglePlace] = useState(false)
   const [isMsgActive, toggleMessages] = useState(false)
@@ -24,6 +25,7 @@ export default function VerticalNavigation() {
     toggleCompetition(false)
     toggleSettings(false)
     togglePlace(false)
+    setUsers(false)
     clearNav()
   }
 
@@ -77,12 +79,38 @@ export default function VerticalNavigation() {
             Dashboard
           </Link>
 
-          {(user?.staffPositions.includes('users') ||
+          {/* {(user?.staffPositions.includes('users') ||
             user?.staffPositions.includes('General')) && (
             <Link className="v_nav_items py-2 block" href="/team/users">
               <i className="bi bi-people mr-3"></i>
               Users
             </Link>
+          )} */}
+
+          {(user?.staffPositions.includes('users') ||
+            user?.staffPositions.includes('General')) && (
+            <div className={`v_nav_items ${isUsers ? 'active two' : ''}`}>
+              <div
+                className="flex cursor-pointer items-center py-2"
+                onClick={() => setUsers((e) => !e)}
+              >
+                <i className="bi bi-people mr-3"></i>
+                Users
+                <i
+                  className={`bi bi-caret-down-fill ml-auto ${
+                    isUsers ? 'active' : ''
+                  }`}
+                ></i>
+              </div>
+              <div className="nav_dropdown">
+                <Link className="inner_nav_items" href="/team/users/accounts">
+                  Accounts
+                </Link>
+                <Link className="inner_nav_items" href="/team/users">
+                  Persons
+                </Link>
+              </div>
+            </div>
           )}
 
           {(user?.staffPositions.includes('schools') ||

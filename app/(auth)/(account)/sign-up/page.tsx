@@ -21,7 +21,7 @@ const SignIn: React.FC = () => {
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(
     null
   )
-  const [locating, setLocating] = useState(false)
+  // const [locating, setLocating] = useState(false)
   const [isChecked, setIsChecked] = useState(false)
   const [sFormData, setFormData] = useState({
     email: '',
@@ -43,11 +43,11 @@ const SignIn: React.FC = () => {
       return
     }
 
-    if (!locating) {
-      setGeneralError('Please enable location to continue with signup.')
-      setLoading(false)
-      return
-    }
+    // if (!locating) {
+    //   setGeneralError('Please enable location to continue with signup.')
+    //   setLoading(false)
+    //   return
+    // }
 
     if (!isChecked) {
       setGeneralError('Please accept the terms and conditions to continue.')
@@ -86,11 +86,11 @@ const SignIn: React.FC = () => {
   }
 
   const getUserLocation = () => {
-    setLocating(true)
+    // setLocating(true)
 
     if (!navigator.geolocation) {
       setGeneralError('Geolocation is not supported by your browser.')
-      setLocating(false)
+      // setLocating(false)
       return
     }
 
@@ -98,7 +98,7 @@ const SignIn: React.FC = () => {
       (position) => {
         const { latitude, longitude } = position.coords
         setLocation({ lat: latitude, lng: longitude })
-        setLocating(true)
+        // setLocating(true)
       },
       (error) => {
         console.error('Geolocation error:', error)
@@ -107,7 +107,7 @@ const SignIn: React.FC = () => {
         } else {
           setGeneralError('Failed to get location. Please try again.')
         }
-        setLocating(false)
+        // setLocating(false)
       },
       {
         enableHighAccuracy: true,
