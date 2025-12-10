@@ -17,10 +17,10 @@ export default function VNavHeader() {
   return (
     <>
       <div className="flex items-start pt-2">
-        {user && user.picture && (
+        {user && (
           <Image
             className="object-cover rounded-full mr-2"
-            src={String(user.picture)}
+            src={user.picture ? String(user.picture) : '/images/avatar.jpg'}
             loading="lazy"
             alt="username"
             sizes="100vw"

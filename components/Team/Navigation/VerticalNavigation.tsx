@@ -6,12 +6,14 @@ import { useSwipeable } from 'react-swipeable'
 import ThemeToggle from '@/components/Home/Navigation/ThemeToggle'
 import { NavStore } from '@/src/zustand/notification/Navigation'
 import { AuthStore } from '@/src/zustand/user/AuthStore'
+import { BioUserStateStore } from '@/src/zustand/user/BioUserState'
 
 export default function VerticalNavigation() {
   const router = useRouter()
   const pathname = usePathname()
   const { toggleVNav, vNav, clearNav } = NavStore()
   const { user } = AuthStore()
+  const { verifyingUsers } = BioUserStateStore()
 
   const offStates = () => {
     clearNav()
@@ -38,7 +40,7 @@ export default function VerticalNavigation() {
           e.stopPropagation()
         }}
         {...handlers}
-        className="v_nav_card nav"
+        className="v_nav_card nav pb-4"
       >
         <div className="flex items-start pt-2">
           {user && user.picture && (
@@ -91,7 +93,16 @@ export default function VerticalNavigation() {
                   className="inner_nav_items"
                   href="/team/users/onverification"
                 >
-                  Verifying
+                  <div className="flex">
+                    <div className="relative">
+                      {verifyingUsers > 0 && (
+                        <span className="dot_notification -right-2 -top-1">
+                          {verifyingUsers > 9 ? `9+` : verifyingUsers}
+                        </span>
+                      )}
+                      Verifying
+                    </div>
+                  </div>
                 </Link>
               </div>
             </div>

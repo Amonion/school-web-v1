@@ -11,6 +11,7 @@ import PictureDisplay from '@/components/Home/Media/PictureDisplay'
 import { useRouter } from 'next/navigation'
 import InputMask from 'react-input-mask'
 import { isValid, parse } from 'date-fns'
+import CustomBtn from '@/components/CustomBtn'
 
 // import NotificationStore from "@/src/zustand/users/Notification";
 
@@ -21,7 +22,7 @@ export default function UserBio() {
   const { setMessage } = MessageStore()
   const { setAlert } = AlartStore()
   const [isBioEdit, setIsBioEdit] = useState(false)
-  const url = '/users/bio-user/'
+  const url = '/biousers/'
   const router = useRouter()
   const [dob, setDob] = useState('')
 
@@ -79,7 +80,7 @@ export default function UserBio() {
     )
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async () => {
     if (user && user.isVerified) {
       setMessage('To update these information, please contact support', false)
       return
@@ -164,7 +165,6 @@ export default function UserBio() {
       setMessage(firstNonEmptyMessage, false)
       return
     }
-    e.preventDefault()
     const data = appendForm(inputsToValidate)
     setAlert(
       'Warning',
@@ -320,16 +320,11 @@ export default function UserBio() {
             </div>
           </div>
           <Capture />
-          {loading ? (
-            <div className="btn">
-              <i className="bi bi-opencollective loading  text-md"></i>
-              <div>Processing...</div>
-            </div>
-          ) : (
-            <div onClick={handleSubmit} className="btn">
-              Submit Form
-            </div>
-          )}
+          <CustomBtn
+            label="Submit Form"
+            loading={loading}
+            onClick={handleSubmit}
+          />
         </div>
       ) : (
         <div className="round_box mb-5">
@@ -395,9 +390,11 @@ export default function UserBio() {
             )}
           </div>
 
-          <div onClick={() => setIsBioEdit(true)} className="btn">
-            Edit this Information
-          </div>
+          <CustomBtn
+            label="Edit this Information"
+            loading={false}
+            onClick={() => setIsBioEdit(true)}
+          />
         </div>
       )}
     </>

@@ -41,7 +41,7 @@ export default function RootLayout({
   }, [bioUserState])
   return (
     <>
-      <div className="body-card pb-[55px] h-full sm:pb-0 w-full max-w-[600px] mx-auto">
+      <div className="body-card pb-[55px] h-full sm:pb-0 w-full">
         <div className="post_card h-full">
           <div className="text-[var(--text-secondary)] pb-1 uppercase mb-4 border-b border-[var(--border)]">
             Verification

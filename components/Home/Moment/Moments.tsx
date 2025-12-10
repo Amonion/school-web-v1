@@ -69,7 +69,11 @@ export default function Moments() {
               <div className="absolute z-0 w-full h-2/3 top-0 left-0">
                 {user && (
                   <Image
-                    src={String(user?.picture)}
+                    src={
+                      user.picture
+                        ? String(user?.picture)
+                        : '/images/avatar.jpg'
+                    }
                     alt={user?.username}
                     fill
                     className="object-cover"

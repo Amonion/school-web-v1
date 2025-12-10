@@ -101,6 +101,7 @@ interface BioUserStatesState {
   bioUsersState: BioUserState[]
   searchedBioUsersState: BioUserState[]
   count: number
+  verifyingUsers: number
   page_size: number
   loading: boolean
   isAllChecked: boolean
@@ -131,6 +132,7 @@ export const BioUserStateStore = create<BioUserStatesState>((set) => ({
   bioUsersState: [],
   searchedBioUsersState: [],
   count: 0,
+  verifyingUsers: 0,
   page_size: 20,
   loading: false,
   isAllChecked: false,

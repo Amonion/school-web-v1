@@ -3,6 +3,7 @@ import localFont from 'next/font/local'
 import './globals.css'
 import '/public/styles/editor.css'
 import '../styles/style.css'
+import '../styles/users/main.css'
 import '../styles/users/nav.css'
 import 'swiper/css'
 import 'swiper/css/effect-fade'
@@ -20,6 +21,8 @@ import CompanyStore from '@/src/zustand/app/Company'
 import { getPendingMessages } from '@/lib/indexDB'
 import useSocket from '@/src/useSocket'
 import { SocialNotificationProvider } from '@/context/SocialNotificationContext'
+import { UserProvider } from '@/context/HomeContext/UserContext'
+import { UsersProvider } from '@/context/TeamContext/UsersContext'
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -168,9 +171,13 @@ export default function RootLayout({
       >
         <GeneralProvider>
           <PersonalNotificationProvider>
-            <SocialNotificationProvider>
-              <ThemeProvider>{isMounted && children}</ThemeProvider>
-            </SocialNotificationProvider>
+            <UserProvider>
+              <UsersProvider>
+                <SocialNotificationProvider>
+                  <ThemeProvider>{isMounted && children}</ThemeProvider>
+                </SocialNotificationProvider>
+              </UsersProvider>
+            </UserProvider>
           </PersonalNotificationProvider>
         </GeneralProvider>
       </body>

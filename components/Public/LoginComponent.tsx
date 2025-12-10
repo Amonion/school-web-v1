@@ -9,7 +9,7 @@ import DownloadApp from './DownloadApp'
 import { getDeviceInfo } from '@/lib/helpers'
 import { validateSignUp, ValidationResult } from '@/lib/validateInputs'
 import { PostStore } from '@/src/zustand/post/Post'
-import Spinner from '../LoadingAnimations/Spinner'
+import CustomBtn from '../CustomBtn'
 const LoginComponent: React.FC = () => {
   const router = useRouter()
   const [route, setRoute] = useState<string>('')
@@ -36,8 +36,7 @@ const LoginComponent: React.FC = () => {
     }
   }, [route])
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+  const handleSubmit = async () => {
     setError(null)
 
     const { password, email } = formData
@@ -106,7 +105,7 @@ const LoginComponent: React.FC = () => {
       ) : (
         <div className="title-sm">Sign in to your Account</div>
       )}
-      <form onSubmit={handleSubmit} className="w-full">
+      <form className="w-full">
         <div className="w-full mb-3">
           <div className="mb-1">Email</div>
           <div className="form-input">
@@ -170,25 +169,7 @@ const LoginComponent: React.FC = () => {
 
         {generalError && <div className="sm-response">{generalError}</div>}
 
-        {loading ? (
-          <button
-            type="button"
-            className="custom-btn "
-            style={{ width: '100%' }}
-          >
-            <Spinner size={30} />
-
-            <div>Processing...</div>
-          </button>
-        ) : (
-          <button
-            type="submit"
-            className="custom-btn"
-            style={{ width: '100%' }}
-          >
-            Submit
-          </button>
-        )}
+        <CustomBtn label="Submit" loading={loading} onClick={handleSubmit} />
 
         <div className="mt-3 text-center">
           Don&apos;t have an account?

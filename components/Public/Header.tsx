@@ -13,7 +13,7 @@ const Header: React.FC = () => {
     getApp(`/company/`, setMessage)
   }, [])
   return (
-    <div className="flex w-full bg-[var(--primary)] justify-center py-1 mb-5">
+    <div className="sm:flex hidden w-full bg-[var(--primary)] justify-center py-1 mb-5">
       <div className="w-full max-w-[1000px] px-3">
         <div className="flex">
           <Link href="/home" className="w-32 max-w-40">

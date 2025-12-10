@@ -9,7 +9,7 @@ import { getDeviceInfo } from '@/lib/helpers'
 import DownloadApp from '@/components/Public/DownloadApp'
 import { validateInputs, ValidationResult } from '@/lib/validateInputs'
 import CompanyStore from '@/src/zustand/app/Company'
-import Spinner from '@/components/LoadingAnimations/Spinner'
+import CustomBtn from '@/components/CustomBtn'
 
 const SignIn: React.FC = () => {
   const router = useRouter()
@@ -32,8 +32,7 @@ const SignIn: React.FC = () => {
     setShowPassword(!showPassword)
   }
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+  const handleSubmit = async () => {
     setError(null)
 
     const { password, email, confirmPassword } = sFormData
@@ -127,7 +126,7 @@ const SignIn: React.FC = () => {
       ) : (
         <div className="title-sm">Create an Account</div>
       )}
-      <form onSubmit={handleSubmit} className="w-full">
+      <form className="w-full">
         <div className="w-full mb-3">
           <div className="mb-1">Email</div>
           <div className="form-input">
@@ -229,37 +228,23 @@ const SignIn: React.FC = () => {
 
         {generalError && <div className="sm-response">{generalError}</div>}
 
-        {loading ? (
-          <button
-            type="button"
-            className=" custom-btn"
-            style={{ width: '100%' }}
-          >
-            <Spinner size={30} />
-
-            <div>Processing...</div>
-          </button>
-        ) : (
-          <>
-            {companyForm.allowSignUp ? (
-              <button
-                type="submit"
-                className="custom-btn "
-                style={{ width: '100%' }}
-              >
-                Submit
-              </button>
-            ) : (
-              <button
-                type="submit"
-                className="text-center rounded-[5px] py-[7px] px-4 flex justify-center text-white bg-slate-500 cursor-not-allowed"
-                style={{ width: '100%' }}
-              >
-                {`Account cannot be created now`}
-              </button>
-            )}
-          </>
-        )}
+        <>
+          {companyForm.allowSignUp ? (
+            <CustomBtn
+              label="Create Account"
+              loading={loading}
+              onClick={handleSubmit}
+            />
+          ) : (
+            <button
+              type="submit"
+              className="text-center rounded-[5px] py-[7px] px-4 flex justify-center text-white bg-slate-500 cursor-not-allowed"
+              style={{ width: '100%' }}
+            >
+              {`Account cannot be created now`}
+            </button>
+          )}
+        </>
 
         <div className="mt-3 text-center">
           Already have an account?

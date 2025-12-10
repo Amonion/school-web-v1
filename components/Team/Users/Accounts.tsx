@@ -265,11 +265,11 @@ const Accounts: React.FC = () => {
             )}
             <i
               onClick={suspendUsers}
-              className="bi bi-person-check text-xl cursor-pointer text-[var(--custom)]"
+              className="bi bi-person-dash text-xl cursor-pointer text-[var(--custom)]"
             ></i>
             <i
               onClick={unSuspendUsers}
-              className="bi bi-person-dash text-xl cursor-pointer text-[var(--custom)]"
+              className="bi bi-person-check text-xl cursor-pointer text-[var(--custom)]"
             ></i>
             <i
               onClick={() => setShowEmailForm(true)}

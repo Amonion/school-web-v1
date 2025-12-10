@@ -8,7 +8,7 @@ const Footer: React.FC = () => {
   const pathName = usePathname()
 
   return (
-    <div className="flex mt-auto w-full bg-[var(--primary)] justify-center py-3">
+    <div className="sm:flex hidden mt-auto w-full bg-[var(--primary)] justify-center py-3">
       <div className="w-full max-w-[1000px] px-2">
         <div className="flex flex-col sm:flex-row">
           {companyForm && (

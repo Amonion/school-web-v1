@@ -32,6 +32,7 @@ interface AuthState {
     bioUserSettings?: BioUserSettings
   ) => void
   setBioUserState: (bioUserState: BioUserState) => void
+  setBioUser: (bioUserState: BioUser) => void
   setBioUserSchoolInfo: (user: BioUserSchoolInfo) => void
   setOfficeState: (office?: Office, userOffices?: Office[]) => void
   logout: () => void
@@ -71,6 +72,9 @@ export const AuthStore = create<AuthState>()(
 
       setBioUserState: (bioUserState) => {
         set({ bioUserState: bioUserState })
+      },
+      setBioUser: (bioUserState) => {
+        set({ bioUser: bioUserState })
       },
 
       setBioUserSchoolInfo: (user) => {

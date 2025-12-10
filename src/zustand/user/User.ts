@@ -41,6 +41,10 @@ interface UserState {
     url: string,
     setMessage: (message: string, isError: boolean) => void
   ) => Promise<void>
+  getMyUser: (
+    url: string,
+    setMessage: (message: string, isError: boolean) => void
+  ) => Promise<void>
   getUsers: (
     url: string,
     setMessage: (message: string, isError: boolean) => void
@@ -155,6 +159,22 @@ export const UserStore = create<UserState>((set) => ({
           userForm: data.data,
           loading: false,
         })
+      }
+    } catch (error: unknown) {
+      if (error) return
+    }
+  },
+  getMyUser: async (
+    url: string,
+    setMessage: (message: string, isError: boolean) => void
+  ) => {
+    try {
+      const response = await apiRequest<FetchUserResponse>(url, {
+        setMessage,
+      })
+      const data = response?.data
+      if (data) {
+        AuthStore.getState().setUser(data.data)
       }
     } catch (error: unknown) {
       if (error) return

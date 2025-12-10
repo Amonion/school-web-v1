@@ -48,12 +48,15 @@ interface BioUsersState {
   page_size: number
   selectedBioUsers: BioUser[]
   searchedBioUsers: BioUser[]
-
   deleteBioUser: (
     url: string,
     setMessage: (message: string, isError: boolean) => void
   ) => Promise<void>
   getBioUser: (
+    url: string,
+    setMessage: (message: string, isError: boolean) => void
+  ) => Promise<void>
+  getMyBioUser: (
     url: string,
     setMessage: (message: string, isError: boolean) => void
   ) => Promise<void>
@@ -220,10 +223,28 @@ export const BioUserStore = create<BioUsersState>((set) => ({
       })
       const data = response?.data
       if (data) {
+        AuthStore.getInitialState().setBioUser(data.data)
         set({
           bioUserForm: data.data,
           loading: false,
         })
+      }
+    } catch (error: unknown) {
+      if (error) return
+    }
+  },
+
+  getMyBioUser: async (
+    url: string,
+    setMessage: (message: string, isError: boolean) => void
+  ) => {
+    try {
+      const response = await apiRequest<FetchUserResponse>(url, {
+        setMessage,
+      })
+      const data = response?.data
+      if (data) {
+        AuthStore.getInitialState().setBioUser(data.data)
       }
     } catch (error: unknown) {
       if (error) return

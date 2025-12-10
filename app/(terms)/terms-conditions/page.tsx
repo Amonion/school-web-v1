@@ -1,7 +1,7 @@
 'use client'
 import Image from 'next/image'
 import { useEffect } from 'react'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { PolicyStore } from '@/src/zustand/app/Policy'
 import CompanyStore from '@/src/zustand/app/Company'
 
@@ -9,6 +9,7 @@ const Terms: React.FC = () => {
   const { selectedTerms, terms, selectTerm } = PolicyStore()
   const pathName = usePathname()
   const { companyForm } = CompanyStore()
+  const router = useRouter()
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -33,7 +34,13 @@ const Terms: React.FC = () => {
     <>
       {selectedTerms ? (
         <div className="flex-col items-start">
-          <div className="text-[24px] text-[var(--text-secondary)] mb-2">
+          <span
+            onClick={() => router.back()}
+            className="bg-[var(--secondary)] sm:hidden w-10 h-10 rounded-full cursor-pointer flex justify-center items-center"
+          >
+            <i className="bi bi-arrow-left text-lg text-[var(--text-primary)]"></i>
+          </span>
+          <div className="sm:text-[24px] font-bold text-lg text-[var(--text-secondary)] mb-2">
             {companyForm.name}: Terms & Conditions
           </div>
           <div className="text-lg text-[var(--text-secondary)] mb-7">

@@ -90,7 +90,7 @@ html, body {
 }
 
 .form-input {
-  @apply w-full text-[var(--text-primary)] flex items-center outline-none border-none mb-1 py-2 px-3 rounded-[5px] bg-[var(--secondary)] overflow-hidden;
+  @apply w-full text-[var(--text-primary)] flex items-center outline-none border-none mb-1 py-2 px-3 rounded-full sm:rounded-[5px] bg-[var(--secondary)] overflow-hidden;
 }
 
 .nav-btn {

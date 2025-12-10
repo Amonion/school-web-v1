@@ -11,13 +11,14 @@ import StateStore, { State } from '@/src/zustand/place/StateOrigin'
 import AreaStore from '@/src/zustand/place/AreaOrigin'
 import { Area } from '@/src/zustand/place/Area'
 import { useRouter } from 'next/navigation'
+import CustomBtn from '@/components/CustomBtn'
 
 export default function Origin() {
   const { bioUserForm, setForm, loading, updateMyBioUser } = BioUserStore()
   const { user, bioUser, bioUserState } = AuthStore()
   const { setMessage } = MessageStore()
   const { setAlert } = AlartStore()
-  const url = '/users/bio-user/'
+  const url = '/biousers/'
   const [isCountryList, setCountryList] = useState(false)
   const [isStateList, setStateList] = useState(false)
   const [isAreaList, setIsAreaList] = useState(false)
@@ -104,7 +105,7 @@ export default function Origin() {
     )
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async () => {
     if (user && user.isVerified) {
       setMessage('To update these information, please contact support', false)
       return
@@ -195,7 +196,6 @@ export default function Origin() {
       setMessage(firstNonEmptyMessage, false)
       return
     }
-    e.preventDefault()
     const data = appendForm(inputsToValidate)
     setAlert(
       'Warning',
@@ -338,17 +338,11 @@ export default function Origin() {
               />
             </div>
           </div>
-
-          {loading ? (
-            <div className="btn">
-              <i className="bi bi-opencollective loading  text-md"></i>
-              <div>Processing...</div>
-            </div>
-          ) : (
-            <div onClick={handleSubmit} className="btn">
-              Submit Form
-            </div>
-          )}
+          <CustomBtn
+            label="Submit Form"
+            onClick={handleSubmit}
+            loading={loading}
+          />
         </div>
       ) : (
         <div className="round_box mb-5">
@@ -389,9 +383,11 @@ export default function Origin() {
             </div>
           </div>
 
-          <div onClick={() => setOEdit(true)} className="btn">
-            Edit this Information
-          </div>
+          <CustomBtn
+            label="            Edit this Information"
+            onClick={() => setOEdit(true)}
+            loading={false}
+          />
         </div>
       )}
     </>

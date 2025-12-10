@@ -6,6 +6,7 @@ import apiRequest, { ApiResponseInterface } from '@/lib/axios'
 import { getDeviceInfo } from '@/lib/helpers'
 import DownloadApp from '@/components/Public/DownloadApp'
 import { ValidationResult } from '@/lib/validateInputs'
+import CustomBtn from '@/components/CustomBtn'
 const ForgottenPassword: React.FC = () => {
   const router = useRouter()
   const [loading, setLoading] = useState<boolean>(false)
@@ -77,26 +78,7 @@ const ForgottenPassword: React.FC = () => {
         </div>
 
         {generalError && <div className="sm-response">{generalError}</div>}
-
-        {loading ? (
-          <button
-            type="button"
-            className=" custom-btn"
-            style={{ width: '100%' }}
-          >
-            <i className="bi bi-opencollective spin text-lg mr-3 animate-spin"></i>
-
-            <div>Processing...</div>
-          </button>
-        ) : (
-          <button
-            type="submit"
-            className="custom-btn "
-            style={{ width: '100%' }}
-          >
-            Submit
-          </button>
-        )}
+        <CustomBtn label="Submit" loading={loading} />
 
         <div className="mt-3">
           Already have an account?
