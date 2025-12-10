@@ -17,7 +17,7 @@ const CreateEmail: React.FC = () => {
   const [name, setName] = useState('')
   const { setMessage } = MessageStore()
   const {
-    formData,
+    emailForm,
     setForm,
     getItems,
     results,
@@ -77,11 +77,11 @@ const CreateEmail: React.FC = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target
-    setForm(name as keyof typeof formData, value)
+    setForm(name as keyof typeof emailForm, value)
   }
 
   const handleFileChange =
-    (key: keyof typeof formData) =>
+    (key: keyof typeof emailForm) =>
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files ? e.target.files[0] : null
       setForm(key, file)
@@ -91,7 +91,7 @@ const CreateEmail: React.FC = () => {
     const inputsToValidate = [
       {
         name: 'greetings',
-        value: formData.greetings,
+        value: emailForm.greetings,
         rules: { blank: false },
         field: 'Greetings field',
       },
@@ -103,25 +103,25 @@ const CreateEmail: React.FC = () => {
       },
       {
         name: 'picture',
-        value: formData.picture,
+        value: emailForm.picture,
         rules: { blank: false, maxSize: 3 },
         field: 'Email banner',
       },
       {
         name: 'title',
-        value: formData.title,
+        value: emailForm.title,
         rules: { blank: false, minLength: 3 },
         field: 'Email title field',
       },
       {
         name: 'note',
-        value: formData.note,
+        value: emailForm.note,
         rules: { blank: false },
         field: 'Email note field',
       },
       {
         name: 'name',
-        value: formData.name,
+        value: emailForm.name,
         rules: { blank: true, minLength: 3, maxLength: 1000 },
         field: 'Email name field',
       },
@@ -167,7 +167,7 @@ const CreateEmail: React.FC = () => {
               <input
                 className="form-input"
                 name="name"
-                value={formData.name}
+                value={emailForm.name}
                 onChange={handleInputChange}
                 type="text"
                 placeholder="Enter email name"
@@ -181,7 +181,7 @@ const CreateEmail: React.FC = () => {
               <input
                 className="form-input"
                 name="name"
-                value={formData.name}
+                value={emailForm.name}
                 onChange={handleInputChange}
                 type="text"
                 placeholder="Enter email name"
@@ -196,7 +196,7 @@ const CreateEmail: React.FC = () => {
               className="form-input"
               type="text"
               name="title"
-              value={formData.title}
+              value={emailForm.title}
               onChange={handleInputChange}
               placeholder="Enter email title"
             />
@@ -209,7 +209,7 @@ const CreateEmail: React.FC = () => {
               className="form-input"
               type="text"
               name="greetings"
-              value={formData.greetings}
+              value={emailForm.greetings}
               onChange={handleInputChange}
               placeholder="Enter email greeting"
             />
@@ -221,7 +221,7 @@ const CreateEmail: React.FC = () => {
             <input
               className="form-input"
               name="note"
-              value={formData.note}
+              value={emailForm.note}
               onChange={handleInputChange}
               type="text"
               placeholder="Enter email note"
