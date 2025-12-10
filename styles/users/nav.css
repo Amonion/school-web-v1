@@ -82,6 +82,7 @@
   @apply py-2 block border-b border-b-[var(--border-color)] last:border-none text-[15px];
 }
 
+
 .input_wrap {
   @apply py-1 h-10 px-3 w-10 rounded-3xl text-[var(--text-main-color)] flex items-center bg-[var(--border-background)] overflow-hidden;
 }

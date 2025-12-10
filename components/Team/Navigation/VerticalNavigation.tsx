@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter, usePathname } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { useSwipeable } from 'react-swipeable'
 import ThemeToggle from '@/components/Home/Navigation/ThemeToggle'
 import { NavStore } from '@/src/zustand/notification/Navigation'
@@ -9,17 +9,11 @@ import { AuthStore } from '@/src/zustand/user/AuthStore'
 
 export default function VerticalNavigation() {
   const router = useRouter()
-  const [isMsgActive, toggleMessages] = useState(false)
-  const [isCompetition, toggleCompetition] = useState(false)
-  const [isSettingsActive, toggleSettings] = useState(false)
   const pathname = usePathname()
   const { toggleVNav, vNav, clearNav } = NavStore()
   const { user } = AuthStore()
 
   const offStates = () => {
-    toggleMessages(false)
-    toggleCompetition(false)
-    toggleSettings(false)
     clearNav()
   }
 
@@ -148,18 +142,10 @@ export default function VerticalNavigation() {
             News
           </Link>
 
-          <div className={`v_nav_items ${isCompetition ? 'active trip' : ''}`}>
-            <div
-              className="flex cursor-pointer items-center py-2"
-              onClick={() => toggleCompetition((e) => !e)}
-            >
+          <div className={`v_nav_items`}>
+            <div className="flex cursor-pointer items-center py-2">
               <i className="bi bi-trophy mr-3"></i>
               Competitions
-              <i
-                className={`bi bi-caret-down-fill ml-auto ${
-                  isCompetition ? 'active' : ''
-                }`}
-              ></i>
             </div>
             <div className="nav_dropdown">
               <Link
@@ -180,18 +166,10 @@ export default function VerticalNavigation() {
             </div>
           </div>
 
-          <div className={`v_nav_items ${isMsgActive ? 'active trip' : ''}`}>
-            <div
-              className="flex cursor-pointer items-center py-2"
-              onClick={() => toggleMessages((e) => !e)}
-            >
+          <div className={`v_nav_items`}>
+            <div className="flex cursor-pointer items-center py-2">
               <i className="bi bi-envelope mr-3"></i>
               Messages
-              <i
-                className={`bi bi-caret-down-fill ml-auto ${
-                  isMsgActive ? 'active' : ''
-                }`}
-              ></i>
             </div>
             <div className="nav_dropdown">
               <Link className="inner_nav_items" href="/team/messages/emails">
@@ -209,18 +187,10 @@ export default function VerticalNavigation() {
             </div>
           </div>
 
-          <div className={`v_nav_items ${isSettingsActive ? 'active' : ''}`}>
-            <div
-              onClick={() => toggleSettings((e) => !e)}
-              className="flex cursor-pointer items-center py-2"
-            >
+          <div className={`v_nav_items`}>
+            <div className="flex cursor-pointer items-center py-2">
               <i className="bi bi-diagram-3 mr-3"></i>
               Company
-              <i
-                className={`bi bi-caret-down-fill ml-auto ${
-                  isSettingsActive ? 'active' : ''
-                }`}
-              ></i>
             </div>
             <div className="nav_dropdown">
               <Link className="inner_nav_items" href="/team/company/staffs">

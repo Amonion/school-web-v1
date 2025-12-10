@@ -1,39 +1,42 @@
 'use client'
 import Link from 'next/link'
 import Image from 'next/image'
+import _debounce from 'lodash/debounce'
 import { useState, useEffect, useRef } from 'react'
 import { useParams, usePathname } from 'next/navigation'
 import { MessageStore } from '@/src/zustand/notification/Message'
-import EmailStore, { Email } from '@/src/zustand/notification/Email'
+import NotificationStore, {
+  NotificationTemplate,
+} from '@/src/zustand/notification/NotificationTemplate'
 import LinkedPagination from '../LinkedPagination'
-import CreateEmailForm from './CreateEmail'
+import CreateNotificationTemplate from './CreateNotification'
+import NotificationTemplateStore from '@/src/zustand/notification/NotificationTemplate'
 
-const Emails: React.FC = () => {
-  const url = '/emails/'
+const NotificationsTable: React.FC = () => {
+  const url = '/notifications/templates/'
+  const {
+    notificationTemplates,
+    selectedItems,
+    loading,
+    searchedNotificationTemplates,
+    isAllChecked,
+    showForm,
+    count,
+    setShowForm,
+    resetForm,
+    toggleAllSelected,
+    getItems,
+    searchNotifications,
+    massDelete,
+    toggleChecked,
+    reshuffleResults,
+  } = NotificationStore()
   const [page_size] = useState(20)
   const [sort] = useState('-createdAt')
   const { setMessage } = MessageStore()
   const pathname = usePathname()
-  const { page } = useParams()
   const inputRef = useRef<HTMLInputElement>(null)
-
-  const {
-    emails,
-    selectedItems,
-    loading,
-    searchedEmails,
-    isAllChecked,
-    count,
-    showEmailForm,
-    resetForm,
-    toggleAllSelected,
-    toggleChecked,
-    getEmails,
-    searchEmail,
-    setShowEmailForm,
-    massDelete,
-    reshuffleResults,
-  } = EmailStore()
+  const { page } = useParams()
 
   useEffect(() => {
     reshuffleResults()
@@ -41,23 +44,13 @@ const Emails: React.FC = () => {
 
   useEffect(() => {
     reshuffleResults()
-    if (emails.length === 0) {
+    if (notificationTemplates.length === 0) {
       const params = `?page_size=${page_size}&page=${
         page ? page : 1
-      }&ordering=${sort}`
-      getEmails(`${url}${params}`, setMessage)
+      }&ordering=${sort}&officeUsername=Schooling`
+      getItems(`${url}${params}`, setMessage)
     }
-  }, [emails.length, page])
-
-  const getItem = async (email: Email) => {
-    setShowEmailForm(true)
-    EmailStore.setState({ emailForm: email })
-  }
-
-  const showForm = async () => {
-    resetForm()
-    setShowEmailForm(true)
-  }
+  }, [page])
 
   const DeleteItems = async () => {
     if (selectedItems.length === 0) {
@@ -67,25 +60,35 @@ const Emails: React.FC = () => {
     await massDelete(`${url}mass-delete/`, selectedItems, setMessage)
   }
 
-  const handleSearchNotifications = async (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const value = e.target.value
-    if (value.trim().length > 0) {
-      searchEmail(
-        `${url}search?name=${value}&title=${value}&page_size=${page_size}`
-      )
-    } else {
-      EmailStore.setState({ searchedEmails: [] })
-    }
+  const getItem = async (email: NotificationTemplate) => {
+    setShowForm(true)
+    NotificationTemplateStore.setState({ notificationTemplateForm: email })
   }
 
+  const toggleForm = async () => {
+    resetForm()
+    setShowForm(true)
+  }
+
+  const handleSearchNotifications = _debounce(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value
+      if (value.trim().length > 0) {
+        searchNotifications(
+          `${url}search?name=${value}&title=${value}&page_size=${page_size}`
+        )
+      } else {
+        NotificationStore.setState({ searchedNotificationTemplates: [] })
+      }
+    },
+    1000
+  )
   return (
     <>
       <div className="overflow-auto mb-5">
         <div className="card_body sharp mb-5">
           <div className="text-lg text-[var(--text-secondary)]">
-            Table of Emails
+            Table of Notifications
           </div>
           <div className="relative mb-2">
             <div className={`input_wrap ml-auto active `}>
@@ -94,7 +97,7 @@ const Emails: React.FC = () => {
                 type="search"
                 onChange={handleSearchNotifications}
                 className={`transparent-input flex-1 `}
-                placeholder="Search emails"
+                placeholder="Search notifications"
               />
               {loading ? (
                 <i className="bi bi-opencollective common-icon loading"></i>
@@ -103,15 +106,15 @@ const Emails: React.FC = () => {
               )}
             </div>
 
-            {searchedEmails.length > 0 && (
+            {searchedNotificationTemplates.length > 0 && (
               <div
                 className={`dropdownList ${
-                  searchedEmails.length > 0
+                  searchedNotificationTemplates.length > 0
                     ? 'overflow-auto'
                     : 'overflow-hidden h-0'
                 }`}
               >
-                {searchedEmails.map((item, index) => (
+                {searchedNotificationTemplates.map((item, index) => (
                   <div key={index} className="input_drop_list">
                     <Link
                       href={`/school/students/student/${item._id}`}
@@ -126,7 +129,7 @@ const Emails: React.FC = () => {
           </div>
         </div>
 
-        {emails.length > 0 ? (
+        {notificationTemplates.length > 0 ? (
           <table>
             <thead className="bg-[var(--primary)]">
               <tr>
@@ -149,7 +152,7 @@ const Emails: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {emails.map((item, index) => (
+              {notificationTemplates.map((item, index) => (
                 <tr
                   key={index}
                   className={`${index % 2 === 1 ? 'bg-[var(--primary)]' : ''} `}
@@ -211,8 +214,8 @@ const Emails: React.FC = () => {
               onClick={DeleteItems}
               className="bi bi-trash text-lg cursor-pointer text-[var(--custom)]"
             ></i>
-            <div onClick={showForm} className="custom_btn ml-auto">
-              Create Email
+            <div onClick={toggleForm} className="custom_btn ml-auto">
+              Create Notification
             </div>
 
             {/* <i
@@ -231,9 +234,9 @@ const Emails: React.FC = () => {
         />
       </div>
 
-      {showEmailForm && <CreateEmailForm />}
+      {showForm && <CreateNotificationTemplate />}
     </>
   )
 }
 
-export default Emails
+export default NotificationsTable

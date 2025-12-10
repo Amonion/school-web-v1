@@ -29,12 +29,13 @@ interface FetchEmailResponse {
   count: number
   page_size: number
   results: Email[]
+  data: Email
 }
 
 interface EmailsState {
   count: number
   page_size: number
-  results: Email[]
+  emails: Email[]
   loading: boolean
   selectedItems: Email[]
   searchedEmails: Email[]
@@ -44,7 +45,11 @@ interface EmailsState {
   setForm: (key: keyof Email, value: Email[keyof Email]) => void
   resetForm: () => void
   setShowEmailForm: (state: boolean) => void
-  getItems: (
+  getEmails: (
+    url: string,
+    setMessage: (message: string, isError: boolean) => void
+  ) => Promise<void>
+  getEmail: (
     url: string,
     setMessage: (message: string, isError: boolean) => void
   ) => Promise<void>
@@ -63,12 +68,14 @@ interface EmailsState {
   updateItem: (
     url: string,
     updatedItem: FormData,
-    setMessage: (message: string, isError: boolean) => void
+    setMessage: (message: string, isError: boolean) => void,
+    redirect?: () => void
   ) => Promise<void>
   postItem: (
     url: string,
     updatedItem: FormData,
-    setMessage: (message: string, isError: boolean) => void
+    setMessage: (message: string, isError: boolean) => void,
+    redirect?: () => void
   ) => Promise<void>
   toggleChecked: (index: number) => void
   toggleActive: (index: number) => void
@@ -80,7 +87,7 @@ interface EmailsState {
 const EmailStore = create<EmailsState>((set) => ({
   count: 0,
   page_size: 0,
-  results: [],
+  emails: [],
   loading: false,
   showEmailForm: false,
   selectedItems: [],
@@ -94,6 +101,7 @@ const EmailStore = create<EmailsState>((set) => ({
         [key]: value,
       },
     })),
+
   resetForm: () =>
     set({
       emailForm: EmailEmpty,
@@ -102,6 +110,7 @@ const EmailStore = create<EmailsState>((set) => ({
   setLoading: (loadState: boolean) => {
     set({ loading: loadState })
   },
+
   setShowEmailForm: (loadState: boolean) => {
     set({ showEmailForm: loadState })
   },
@@ -118,12 +127,25 @@ const EmailStore = create<EmailsState>((set) => ({
         loading: false,
         count,
         page_size,
-        results: updatedResults,
+        emails: updatedResults,
       })
     }
   },
 
-  getItems: async (url: string) => {
+  getEmail: async (url: string) => {
+    try {
+      const response = await apiRequest<FetchEmailResponse>(url, {
+        setLoading: EmailStore.getState().setLoading,
+      })
+      const data = response?.data
+      if (data) {
+        set({ emailForm: data.data })
+      }
+    } catch (error: unknown) {
+      console.error('Failed to fetch staff:', error)
+    }
+  },
+  getEmails: async (url: string) => {
     try {
       const response = await apiRequest<FetchEmailResponse>(url, {
         setLoading: EmailStore.getState().setLoading,
@@ -139,7 +161,7 @@ const EmailStore = create<EmailsState>((set) => ({
 
   reshuffleResults: async () => {
     set((state) => ({
-      results: state.results.map((item: Email) => ({
+      emails: state.emails.map((item: Email) => ({
         ...item,
         isChecked: false,
         isActive: false,
@@ -201,11 +223,7 @@ const EmailStore = create<EmailsState>((set) => ({
     })
   },
 
-  updateItem: async (
-    url: string,
-    updatedItem: FormData | Record<string, unknown>,
-    setMessage: (message: string, isError: boolean) => void
-  ) => {
+  updateItem: async (url, updatedItem, setMessage, redirect) => {
     set({ loading: true })
     const response = await apiRequest<FetchEmailResponse>(url, {
       method: 'PATCH',
@@ -213,19 +231,16 @@ const EmailStore = create<EmailsState>((set) => ({
       setMessage,
       setLoading: EmailStore.getState().setLoading,
     })
-    if (response?.status !== 404 && response?.data) {
+    if (response?.data) {
       set({ loading: false })
       EmailStore.getState().setProcessedResults(response.data)
+      if (redirect) redirect()
     } else {
       set({ loading: false })
     }
   },
 
-  postItem: async (
-    url: string,
-    updatedItem: FormData | Record<string, unknown>,
-    setMessage: (message: string, isError: boolean) => void
-  ) => {
+  postItem: async (url, updatedItem, setMessage, redirect) => {
     set({ loading: true })
     const response = await apiRequest<FetchEmailResponse>(url, {
       method: 'POST',
@@ -233,9 +248,10 @@ const EmailStore = create<EmailsState>((set) => ({
       setMessage,
       setLoading: EmailStore.getState().setLoading,
     })
-    if (response?.status !== 404 && response?.data) {
+    if (response?.data) {
       set({ loading: false })
       EmailStore.getState().setProcessedResults(response.data)
+      if (redirect) redirect()
     } else {
       set({ loading: false })
     }
@@ -243,20 +259,20 @@ const EmailStore = create<EmailsState>((set) => ({
 
   toggleActive: (index: number) => {
     set((state) => {
-      const isCurrentlyActive = state.results[index]?.isActive
-      const updatedResults = state.results.map((tertiary, idx) => ({
+      const isCurrentlyActive = state.emails[index]?.isActive
+      const updatedResults = state.emails.map((tertiary, idx) => ({
         ...tertiary,
         isActive: idx === index ? !isCurrentlyActive : false,
       }))
       return {
-        results: updatedResults,
+        emails: updatedResults,
       }
     })
   },
 
   toggleChecked: (index: number) => {
     set((state) => {
-      const updatedResults = state.results.map((tertiary, idx) =>
+      const updatedResults = state.emails.map((tertiary, idx) =>
         idx === index
           ? { ...tertiary, isChecked: !tertiary.isChecked }
           : tertiary
@@ -270,7 +286,7 @@ const EmailStore = create<EmailsState>((set) => ({
       )
 
       return {
-        results: updatedResults,
+        emails: updatedResults,
         selectedItems: updatedSelectedItems,
         isAllChecked,
       }
@@ -280,8 +296,8 @@ const EmailStore = create<EmailsState>((set) => ({
   toggleAllSelected: () => {
     set((state) => {
       const isAllChecked =
-        state.results.length === 0 ? false : !state.isAllChecked
-      const updatedResults = state.results.map((place) => ({
+        state.emails.length === 0 ? false : !state.isAllChecked
+      const updatedResults = state.emails.map((place) => ({
         ...place,
         isChecked: isAllChecked,
       }))
@@ -289,7 +305,7 @@ const EmailStore = create<EmailsState>((set) => ({
       const updatedSelectedItems = isAllChecked ? updatedResults : []
 
       return {
-        results: updatedResults,
+        emails: updatedResults,
         selectedItems: updatedSelectedItems,
         isAllChecked,
       }

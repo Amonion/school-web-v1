@@ -31,24 +31,22 @@ export const NotificationTemplateEmpty = {
 }
 
 interface NotificationTemplateState {
-  links: { next: string | null; previous: string | null } | null
   count: number
   currentPage: number
   page_size: number
-  results: NotificationTemplate[]
+  notificationTemplates: NotificationTemplate[]
   loading: boolean
-  error: string | null
-  successs?: string | null
+  showForm: boolean
   selectedItems: NotificationTemplate[]
-  searchResult: NotificationTemplate[]
-  searchedResults: NotificationTemplate[]
+  searchedNotificationTemplates: NotificationTemplate[]
   isAllChecked: boolean
-  formData: NotificationTemplate
+  notificationTemplateForm: NotificationTemplate
   setForm: (
     key: keyof NotificationTemplate,
     value: NotificationTemplate[keyof NotificationTemplate]
   ) => void
   resetForm: () => void
+  setShowForm: (state: boolean) => void
   getItems: (
     url: string,
     setMessage: (message: string, isError: boolean) => void
@@ -85,37 +83,39 @@ interface NotificationTemplateState {
   toggleActive: (index: number) => void
   toggleAllSelected: () => void
   reshuffleResults: () => void
-  searchItem: (url: string) => void
+  searchNotifications: (url: string) => void
 }
 
 const NotificationTemplateStore = create<NotificationTemplateState>((set) => ({
-  links: null,
   count: 0,
   currentPage: 1,
   page_size: 20,
-  results: [],
+  notificationTemplates: [],
   loading: false,
-  error: null,
+  showForm: false,
   selectedItems: [],
-  searchResult: [],
-  searchedResults: [],
+  searchedNotificationTemplates: [],
   isAllChecked: false,
-  formData: NotificationTemplateEmpty,
+  notificationTemplateForm: NotificationTemplateEmpty,
   setForm: (key, value) =>
     set((state) => ({
-      formData: {
-        ...state.formData,
+      notificationTemplateForm: {
+        ...state.notificationTemplateForm,
         [key]: value,
       },
     })),
 
   resetForm: () =>
     set({
-      formData: NotificationTemplateEmpty,
+      notificationTemplateForm: NotificationTemplateEmpty,
     }),
 
   setLoading: (loadState: boolean) => {
     set({ loading: loadState })
+  },
+
+  setShowForm: (loadState: boolean) => {
+    set({ showForm: loadState })
   },
 
   setProcessedResults: ({ count, page_size, results }: FetchResponse) => {
@@ -130,7 +130,7 @@ const NotificationTemplateStore = create<NotificationTemplateState>((set) => ({
         loading: false,
         count,
         page_size,
-        results: updatedResults,
+        notificationTemplates: updatedResults,
       })
     }
   },
@@ -162,7 +162,7 @@ const NotificationTemplateStore = create<NotificationTemplateState>((set) => ({
       const data = response?.data
       if (data) {
         set({
-          formData: data.data,
+          notificationTemplateForm: data.data,
           loading: false,
         })
       }
@@ -174,15 +174,17 @@ const NotificationTemplateStore = create<NotificationTemplateState>((set) => ({
 
   reshuffleResults: async () => {
     set((state) => ({
-      results: state.results.map((item: NotificationTemplate) => ({
-        ...item,
-        isChecked: false,
-        isActive: false,
-      })),
+      notificationTemplates: state.notificationTemplates.map(
+        (item: NotificationTemplate) => ({
+          ...item,
+          isChecked: false,
+          isActive: false,
+        })
+      ),
     }))
   },
 
-  searchItem: _debounce(async (url: string) => {
+  searchNotifications: _debounce(async (url: string) => {
     try {
       const response = await apiRequest<FetchResponse>(url)
       if (response) {
@@ -192,17 +194,15 @@ const NotificationTemplateStore = create<NotificationTemplateState>((set) => ({
           isChecked: false,
           isActive: false,
         }))
-        set({ searchedResults: updatedResults })
+        set({ searchedNotificationTemplates: updatedResults })
       }
     } catch (error: unknown) {
       if (error instanceof AxiosError && error.response?.data?.message) {
         set({
-          error: error.message || 'Failed to search items',
           loading: false,
         })
       } else {
         set({
-          error: 'Failed to search items',
           loading: false,
         })
       }
@@ -276,7 +276,7 @@ const NotificationTemplateStore = create<NotificationTemplateState>((set) => ({
 
   postItem: async (url, updatedItem, setMessage, redirect) => {
     try {
-      set({ loading: true, error: null })
+      set({ loading: true })
       const response = await apiRequest<FetchResponse>(url, {
         method: 'POST',
         body: updatedItem,
@@ -291,26 +291,28 @@ const NotificationTemplateStore = create<NotificationTemplateState>((set) => ({
     } catch (error) {
       console.log(error)
     } finally {
-      set({ loading: false, error: null })
+      set({ loading: false })
     }
   },
 
   toggleActive: (index: number) => {
     set((state) => {
-      const isCurrentlyActive = state.results[index]?.isActive
-      const updatedResults = state.results.map((tertiary, idx) => ({
-        ...tertiary,
-        isActive: idx === index ? !isCurrentlyActive : false,
-      }))
+      const isCurrentlyActive = state.notificationTemplates[index]?.isActive
+      const updatedResults = state.notificationTemplates.map(
+        (tertiary, idx) => ({
+          ...tertiary,
+          isActive: idx === index ? !isCurrentlyActive : false,
+        })
+      )
       return {
-        results: updatedResults,
+        notificationTemplates: updatedResults,
       }
     })
   },
 
   toggleChecked: (index: number) => {
     set((state) => {
-      const updatedResults = state.results.map((tertiary, idx) =>
+      const updatedResults = state.notificationTemplates.map((tertiary, idx) =>
         idx === index
           ? { ...tertiary, isChecked: !tertiary.isChecked }
           : tertiary
@@ -334,8 +336,8 @@ const NotificationTemplateStore = create<NotificationTemplateState>((set) => ({
   toggleAllSelected: () => {
     set((state) => {
       const isAllChecked =
-        state.results.length === 0 ? false : !state.isAllChecked
-      const updatedResults = state.results.map((place) => ({
+        state.notificationTemplates.length === 0 ? false : !state.isAllChecked
+      const updatedResults = state.notificationTemplates.map((place) => ({
         ...place,
         isChecked: isAllChecked,
       }))
@@ -343,7 +345,7 @@ const NotificationTemplateStore = create<NotificationTemplateState>((set) => ({
       const updatedSelectedItems = isAllChecked ? updatedResults : []
 
       return {
-        results: updatedResults,
+        notificationTemplates: updatedResults,
         selectedItems: updatedSelectedItems,
         isAllChecked,
       }
