@@ -112,6 +112,12 @@ const News: React.FC = () => {
     }
     updateNews(`${url}/${id}${params}`, form, setMessage)
   }
+  const updateItem = async (form: Record<string, unknown>, id: string) => {
+    const params = `?page_size=${page_size}&page=${
+      page ? page : 1
+    }&ordering=${sort}`
+    updateNews(`${url}/${id}${params}`, form, setMessage)
+  }
 
   return (
     <>
@@ -198,13 +204,35 @@ const News: React.FC = () => {
                   {item.subtitle}
                 </div>
               </div>
-              <div className="absolute top-[-10px] right-0 flex items-center">
+              <div className="absolute gap-2 top-[-10px] right-0 flex items-center">
+                <div
+                  onClick={() =>
+                    updateItem({ isFeatured: !item.isFeatured }, item._id)
+                  }
+                  className={`${
+                    item.isFeatured
+                      ? 'border-[var(--custom)] text-white bg-[var(--custom)]'
+                      : 'border-[var(--border)]'
+                  } cursor-pointer text-[12px] border px-3 py-1 rounded-full`}
+                >
+                  featured
+                </div>
+                <div
+                  onClick={() => updateItem({ isMain: !item.isMain }, item._id)}
+                  className={`${
+                    item.isMain
+                      ? 'border-[var(--custom)] text-white bg-[var(--custom)]'
+                      : 'border-[var(--border)]'
+                  } cursor-pointer text-[12px] border px-3 py-1 rounded-full`}
+                >
+                  main
+                </div>
                 <Link href={`/team/news/edit-news/${item._id}`}>
                   <Edit className="cursor-pointer" size={18} />
                 </Link>
 
                 <Trash
-                  className="ml-2 cursor-pointer"
+                  className="cursor-pointer"
                   onClick={() => startDelete(item._id, index)}
                   size={18}
                 />

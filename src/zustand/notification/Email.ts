@@ -1,7 +1,6 @@
 import { create } from 'zustand'
 import apiRequest from '@/lib/axios'
 import _debounce from 'lodash/debounce'
-import axios, { AxiosError } from 'axios'
 
 export interface Email {
   _id: string
@@ -15,7 +14,7 @@ export interface Email {
   isActive?: boolean
 }
 
-export const Email = {
+export const EmailEmpty = {
   _id: '',
   picture: '',
   title: '',
@@ -33,20 +32,18 @@ interface FetchEmailResponse {
 }
 
 interface EmailsState {
-  links: { next: string | null; previous: string | null } | null
   count: number
   page_size: number
   results: Email[]
   loading: boolean
-  error: string | null
-  successs?: string | null
   selectedItems: Email[]
-  searchResult: Email[]
-  searchedResults: Email[]
+  searchedEmails: Email[]
   isAllChecked: boolean
-  formData: Email
+  showEmailForm: boolean
+  emailForm: Email
   setForm: (key: keyof Email, value: Email[keyof Email]) => void
   resetForm: () => void
+  setShowEmailForm: (state: boolean) => void
   getItems: (
     url: string,
     setMessage: (message: string, isError: boolean) => void
@@ -77,51 +74,36 @@ interface EmailsState {
   toggleActive: (index: number) => void
   toggleAllSelected: () => void
   reshuffleResults: () => void
-  searchItem: (url: string) => void
+  searchEmail: (url: string) => void
 }
 
 const EmailStore = create<EmailsState>((set) => ({
-  links: null,
   count: 0,
   page_size: 0,
   results: [],
   loading: false,
-  error: null,
+  showEmailForm: false,
   selectedItems: [],
-  searchResult: [],
-  searchedResults: [],
+  searchedEmails: [],
   isAllChecked: false,
-  formData: {
-    _id: '',
-    content: '',
-    greetings: '',
-    note: '',
-    title: '',
-    name: '',
-    picture: null,
-  },
+  emailForm: EmailEmpty,
   setForm: (key, value) =>
     set((state) => ({
-      formData: {
-        ...state.formData,
+      emailForm: {
+        ...state.emailForm,
         [key]: value,
       },
     })),
   resetForm: () =>
     set({
-      formData: {
-        _id: '',
-        content: '',
-        greetings: '',
-        note: '',
-        title: '',
-        name: '',
-        picture: null,
-      },
+      emailForm: EmailEmpty,
     }),
 
   setLoading: (loadState: boolean) => {
     set({ loading: loadState })
+  },
+  setShowEmailForm: (loadState: boolean) => {
+    set({ showEmailForm: loadState })
   },
 
   setProcessedResults: ({ count, page_size, results }: FetchEmailResponse) => {
@@ -141,10 +123,7 @@ const EmailStore = create<EmailsState>((set) => ({
     }
   },
 
-  getItems: async (
-    url: string,
-    setMessage: (message: string, isError: boolean) => void
-  ) => {
+  getItems: async (url: string) => {
     try {
       const response = await apiRequest<FetchEmailResponse>(url, {
         setLoading: EmailStore.getState().setLoading,
@@ -154,12 +133,7 @@ const EmailStore = create<EmailsState>((set) => ({
         EmailStore.getState().setProcessedResults(data)
       }
     } catch (error: unknown) {
-      if (axios.isAxiosError(error) && error.response?.data?.message) {
-        setMessage(error.response.data.message, false)
-      } else {
-        console.error('Failed to fetch staff:', error)
-        setMessage('An unexpected error occurred.', false)
-      }
+      console.error('Failed to fetch staff:', error)
     }
   },
 
@@ -173,8 +147,11 @@ const EmailStore = create<EmailsState>((set) => ({
     }))
   },
 
-  searchItem: _debounce(async (url: string) => {
+  searchEmail: _debounce(async (url: string) => {
     try {
+      set({
+        loading: true,
+      })
       const response = await apiRequest<FetchEmailResponse>(url)
       if (response) {
         const { results } = response?.data
@@ -183,20 +160,14 @@ const EmailStore = create<EmailsState>((set) => ({
           isChecked: false,
           isActive: false,
         }))
-        set({ searchedResults: updatedResults })
+        set({ searchedEmails: updatedResults })
       }
     } catch (error: unknown) {
-      if (error instanceof AxiosError && error.response?.data?.message) {
-        set({
-          error: error.message || 'Failed to search items',
-          loading: false,
-        })
-      } else {
-        set({
-          error: 'Failed to search items',
-          loading: false,
-        })
-      }
+      console.log(error)
+    } finally {
+      set({
+        loading: false,
+      })
     }
   }, 1000),
 
@@ -235,7 +206,7 @@ const EmailStore = create<EmailsState>((set) => ({
     updatedItem: FormData | Record<string, unknown>,
     setMessage: (message: string, isError: boolean) => void
   ) => {
-    set({ loading: true, error: null })
+    set({ loading: true })
     const response = await apiRequest<FetchEmailResponse>(url, {
       method: 'PATCH',
       body: updatedItem,
@@ -243,10 +214,10 @@ const EmailStore = create<EmailsState>((set) => ({
       setLoading: EmailStore.getState().setLoading,
     })
     if (response?.status !== 404 && response?.data) {
-      set({ loading: false, error: null })
+      set({ loading: false })
       EmailStore.getState().setProcessedResults(response.data)
     } else {
-      set({ loading: false, error: null })
+      set({ loading: false })
     }
   },
 
@@ -255,7 +226,7 @@ const EmailStore = create<EmailsState>((set) => ({
     updatedItem: FormData | Record<string, unknown>,
     setMessage: (message: string, isError: boolean) => void
   ) => {
-    set({ loading: true, error: null })
+    set({ loading: true })
     const response = await apiRequest<FetchEmailResponse>(url, {
       method: 'POST',
       body: updatedItem,
@@ -263,10 +234,10 @@ const EmailStore = create<EmailsState>((set) => ({
       setLoading: EmailStore.getState().setLoading,
     })
     if (response?.status !== 404 && response?.data) {
-      set({ loading: false, error: null })
+      set({ loading: false })
       EmailStore.getState().setProcessedResults(response.data)
     } else {
-      set({ loading: false, error: null })
+      set({ loading: false })
     }
   },
 

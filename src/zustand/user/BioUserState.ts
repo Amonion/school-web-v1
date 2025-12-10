@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import apiRequest from '@/lib/axios'
 import { AuthStore } from './AuthStore'
 import { User } from './User'
+import _debounce from 'lodash/debounce'
 
 interface FetchResponse {
   count: number
@@ -98,6 +99,7 @@ export const BioUserStateEmpty = {
 interface BioUserStatesState {
   bioUserStateForm: BioUserState
   bioUsersState: BioUserState[]
+  searchedBioUsersState: BioUserState[]
   count: number
   page_size: number
   loading: boolean
@@ -112,9 +114,11 @@ interface BioUserStatesState {
   ) => Promise<void>
   reshuffleResults: () => void
   resetForm: () => void
+
   setProcessedResults: (data: FetchResponse) => void
   toggleChecked: (index: number) => void
   toggleActive: (index: number) => void
+  searchBioUserState: (url: string) => void
   updateBioUserState: (
     url: string,
     updatedItem: FormData | Record<string, unknown>,
@@ -125,6 +129,7 @@ interface BioUserStatesState {
 export const BioUserStateStore = create<BioUserStatesState>((set) => ({
   bioUserStateForm: BioUserStateEmpty,
   bioUsersState: [],
+  searchedBioUsersState: [],
   count: 0,
   page_size: 20,
   loading: false,
@@ -194,6 +199,23 @@ export const BioUserStateStore = create<BioUserStatesState>((set) => ({
       bioUsersState: updatedResults,
     })
   },
+
+  searchBioUserState: _debounce(async (url: string) => {
+    try {
+      const response = await apiRequest<FetchResponse>(url)
+      if (response) {
+        const { results } = response?.data
+        const updatedResults = results.map((item: BioUserState) => ({
+          ...item,
+          isChecked: false,
+          isActive: false,
+        }))
+        set({ searchedBioUsersState: updatedResults })
+      }
+    } catch (error: unknown) {
+      console.log(error)
+    }
+  }, 1000),
 
   toggleActive: (index: number) => {
     set((state) => {

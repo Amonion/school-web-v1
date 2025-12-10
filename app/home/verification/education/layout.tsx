@@ -1,7 +1,10 @@
 'use client'
+import { MessageStore } from '@/src/zustand/notification/Message'
 import { AuthStore } from '@/src/zustand/user/AuthStore'
+import { BioUserSchoolInfoStore } from '@/src/zustand/user/BioUserSchoolInfo'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useEffect } from 'react'
 // import { useRouter } from "next/navigation";
 export default function SettingsLayout({
   children,
@@ -10,7 +13,17 @@ export default function SettingsLayout({
 }>) {
   // const router = useRouter();
   const pathname = usePathname()
-  const { bioUserState } = AuthStore()
+  const { bioUserSchoolInfo, bioUserState } = AuthStore()
+  const { setMessage } = MessageStore()
+  const { getPastSchools } = BioUserSchoolInfoStore()
+  useEffect(() => {
+    if (!bioUserSchoolInfo) return
+    BioUserSchoolInfoStore.setState({ bioUserSchoolForm: bioUserSchoolInfo })
+    getPastSchools(
+      `/biousers-school/${bioUserSchoolInfo.bioUserId}`,
+      setMessage
+    )
+  }, [bioUserSchoolInfo])
 
   return (
     <>

@@ -7,17 +7,23 @@ import { BioUserStore } from '@/src/zustand/user/BioUser'
 import { MessageStore } from '@/src/zustand/notification/Message'
 import PictureDisplay from '@/components/Home/Media/PictureDisplay'
 import { BioUserSchoolInfoStore } from '@/src/zustand/user/BioUserSchoolInfo'
+import { useParams } from 'next/navigation'
 
 const VerificationDetails: React.FC = () => {
   const url = '/users'
-  let username: string | null = null
   const { bioUserForm, setForm, getBioUser, loading } = BioUserStore()
-  const { bioUserSchoolForm, getBioUserSchoolInfo, updateBioUserSchoolInfo } =
-    BioUserSchoolInfoStore()
+  const {
+    bioUserSchoolForm,
+    pastSchools,
+    getPastSchools,
+    getBioUserSchoolInfo,
+    updateBioUserSchoolInfo,
+  } = BioUserSchoolInfoStore()
   const [displayBox, setDisplayBox] = useState(false)
   const [isAuthority, setIsAuthority] = useState(false)
   const [content, setContent] = useState('')
   const [action, setAction] = useState('')
+  const { username } = useParams()
 
   const { setMessage } = MessageStore()
 
@@ -36,12 +42,10 @@ const VerificationDetails: React.FC = () => {
   ]
 
   useEffect(() => {
-    const query = window.location.search
-    username = new URLSearchParams(query).get('username')
-
     if (username !== null) {
-      getBioUser(`${url}/bio-user/username/${username}`, setMessage)
-      getBioUserSchoolInfo(`${url}/biouser-school/${username}`, setMessage)
+      getBioUser(`biousers/username/${username}`, setMessage)
+      getBioUserSchoolInfo(`biousers-school/${username}`, setMessage)
+      getPastSchools(`biousers-school/schools/${username}`, setMessage)
     }
   }, [username])
 
@@ -174,7 +178,7 @@ const VerificationDetails: React.FC = () => {
                 </div>
               </div>
             </div>
-            <div className="flex flex-col items-center justify-center">
+            {/* <div className="flex flex-col items-center justify-center">
               <div
                 style={{
                   borderRadius: '5px',
@@ -187,7 +191,7 @@ const VerificationDetails: React.FC = () => {
               >
                 <PictureDisplay source={String(bioUserForm.passport)} />
               </div>
-            </div>
+            </div> */}
           </div>
 
           <div className="card_body sharp mb-2">
@@ -318,7 +322,7 @@ const VerificationDetails: React.FC = () => {
             </div>
           </div>
 
-          <div className="card_body sharp flex flex-col items-center mb-2">
+          {/* <div className="card_body sharp flex flex-col items-center mb-2">
             <div className="text-lg mb-2 text-[var(--text-secondary)]">
               {bioUserForm.bioUserUsername} Media Information
             </div>
@@ -345,9 +349,9 @@ const VerificationDetails: React.FC = () => {
                 className="form-input"
               ></div>
             </div>
-          </div>
+          </div> */}
 
-          <div className="card_body sharp mb-2">
+          {/* <div className="card_body sharp mb-2">
             <div className="text-lg mb-2 text-[var(--text-secondary)]">
               {bioUserForm.bioUserUsername} Identification Document
             </div>
@@ -364,7 +368,7 @@ const VerificationDetails: React.FC = () => {
                 </div>
               ))}
             </div>
-          </div>
+          </div> */}
 
           <div className="card_body sharp mb-2">
             <div className="text-lg mb-2 text-[var(--text-secondary)]">
@@ -472,9 +476,9 @@ const VerificationDetails: React.FC = () => {
             <div className="text-lg mb-2 text-[var(--text-secondary)]">
               {bioUserForm.bioUserUsername} Education History
             </div>
-            {bioUserSchoolForm.hasPastSchool ? (
+            {pastSchools.length > 0 ? (
               <>
-                {bioUserSchoolForm.pastSchools.map((item, index) => (
+                {pastSchools.map((item, index) => (
                   <div key={index}>
                     <div className="grid-3 grid-lay ">
                       <div className="flex flex-col">

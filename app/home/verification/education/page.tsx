@@ -494,12 +494,6 @@ export default function Current() {
         rules: { blank: true },
         field: 'ID ',
       },
-      {
-        name: 'inSchool',
-        value: bioUserSchoolForm.inSchool,
-        rules: { blank: false },
-        field: 'In School',
-      },
     ]
 
     const array2 = [

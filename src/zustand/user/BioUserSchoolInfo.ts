@@ -15,7 +15,7 @@ export const BioUserSchoolInfoEmpty = {
   bioUserMedia: '',
   bioUserPicture: '',
   bioUserUsername: '',
-  bioUserUserId: '',
+  bioUserId: '',
   createdAt: new Date(),
   graduatedAt: null,
   hasPastSchool: null,
@@ -59,7 +59,7 @@ export interface BioUserSchoolInfo {
   bioUserMedia: string
   bioUserPicture: string
   bioUserUsername: string
-  bioUserUserId: string
+  bioUserId: string
   createdAt: Date
   graduatedAt: Date | null
   hasPastSchool: boolean | null
@@ -97,6 +97,41 @@ export interface BioUserSchoolInfo {
   isChecked?: boolean
 }
 
+export interface PastSchool {
+  admittedAt: Date | null
+  bioUserId: string
+  bioUserPassport: string
+  bioUserUsername: string
+  bioUserDisplayName: string
+  graduatedAt: Date | null
+  isAdvanced: boolean
+  isNew: boolean
+  isSchoolVerified: boolean
+  schoolArea: string
+  schoolArm: string
+  schoolLevel: number
+  schoolLevelName: string
+  schoolContinent: string
+  schoolCountry: string
+  schoolCountryFlag: string
+  schoolCountrySymbol: string
+  schoolDepartment: string
+  schoolDepartmentId: string
+  schoolDepartmentUsername: string
+  schoolFaculty: string
+  schoolFacultyId: string
+  schoolFacultyUsername: string
+  schoolId: string
+  schoolLogo: string
+  schoolName: string
+  schoolPicture: string
+  schoolPlaceId: string
+  schoolState: string
+  schoolCertificate: string | File
+  schoolTempCertificate: string
+  schoolUsername: string
+}
+
 interface FetchResponse {
   count: number
   message: string
@@ -106,6 +141,7 @@ interface FetchResponse {
   bioUser: BioUser
   bioUserState: BioUserState
   bioUserSchoolInfo: BioUserSchoolInfo
+  pastSchools: PastSchool[]
   user: User
 }
 
@@ -115,7 +151,7 @@ interface UsersState {
   searchPageSize: number
   searchCurrentPage: number
   results: BioUserSchoolInfo[]
-  pastSchools: BioUserSchoolInfo[]
+  pastSchools: PastSchool[]
   loading: boolean
   hasMoreSearch: boolean
   selectedBioUsers: BioUserSchoolInfo[]
@@ -139,8 +175,11 @@ interface UsersState {
     url: string,
     setMessage: (message: string, isError: boolean) => void
   ) => Promise<void>
-
   getBioUserSchoolInfo: (
+    url: string,
+    setMessage: (message: string, isError: boolean) => void
+  ) => Promise<void>
+  getPastSchools: (
     url: string,
     setMessage: (message: string, isError: boolean) => void
   ) => Promise<void>
@@ -247,6 +286,23 @@ export const BioUserSchoolInfoStore = create<UsersState>((set) => ({
       const data = response?.data
       if (data) {
         BioUserSchoolInfoStore.getState().setProcessedResults(data)
+      }
+    } catch (error: unknown) {
+      console.log(error)
+    }
+  },
+
+  getPastSchools: async (
+    url: string,
+    setMessage: (message: string, isError: boolean) => void
+  ) => {
+    try {
+      const response = await apiRequest<FetchResponse>(url, {
+        setMessage,
+      })
+      const data = response?.data
+      if (data) {
+        set({ pastSchools: data.pastSchools })
       }
     } catch (error: unknown) {
       console.log(error)

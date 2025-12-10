@@ -39,6 +39,7 @@ export interface News {
   bookmarked: boolean
   liked: boolean
   isFeatured: boolean
+  isMain: boolean
   seoTitle: string
   seoDescription: string
   isChecked?: boolean
@@ -74,6 +75,7 @@ export const NewsEmpty = {
   bookmarked: false,
   liked: false,
   isFeatured: false,
+  isMain: false,
   seoTitle: '',
   seoDescription: '',
 }

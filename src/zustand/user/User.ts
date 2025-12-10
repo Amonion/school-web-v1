@@ -65,6 +65,11 @@ interface UserState {
     updatedItem: FormData | Record<string, unknown>,
     setMessage: (message: string, isError: boolean) => void
   ) => Promise<void>
+  updateUsers: (
+    url: string,
+    updatedItem: FormData | Record<string, unknown>,
+    setMessage: (message: string, isError: boolean) => void
+  ) => Promise<void>
   sendUsersEmail: (
     url: string,
     updatedItem: FormData | Record<string, unknown>,
@@ -339,6 +344,23 @@ export const UserStore = create<UserState>((set) => ({
     const data = response?.data
     if (data) {
       AuthStore.getState().setUser(data.data)
+    }
+  },
+
+  updateUsers: async (
+    url: string,
+    updatedItem: FormData | Record<string, unknown>,
+    setMessage: (message: string, isError: boolean) => void
+  ) => {
+    set({ loading: true })
+    const response = await apiRequest<FetchUserResponse>(url, {
+      method: 'PATCH',
+      body: updatedItem,
+      setMessage,
+    })
+    const data = response?.data
+    if (data) {
+      UserStore.getState().setProcessedResults(data)
     }
   },
 

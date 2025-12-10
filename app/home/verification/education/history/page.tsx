@@ -39,7 +39,7 @@ export default function History() {
   } = AcademicStore()
   const { bioUser, bioUserSchoolInfo, bioUserState } = AuthStore()
   const { setMessage } = MessageStore()
-  const url = '/users/bio-user/school/'
+  const url = '/biousers-school/'
   const [isHistoryEdit, setHistoryEdit] = useState(true)
   const [isEditingSchool, setEditingSchool] = useState(false)
   // const [isAdvanced, setIsAdvanced] = useState(false)
@@ -81,14 +81,6 @@ export default function History() {
       setMessage
     )
   }, [pathname])
-
-  useEffect(() => {
-    if (bioUserSchoolInfo) {
-      BioUserSchoolInfoStore.setState({
-        bioUserSchoolForm: bioUserSchoolInfo,
-      })
-    }
-  }, [bioUserSchoolInfo])
 
   useEffect(() => {
     if (bioUserState?.isEducationHistory) {

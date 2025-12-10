@@ -150,7 +150,7 @@
 }
 
 .v_nav_items {
-  @apply text-lg border-b border-b-[var(--border-color)] overflow-hidden h-[45px]  transition-[height] duration-300;
+  @apply text-lg border-b border-b-[var(--border-color)]  transition-[height] duration-300;
 }
 
 

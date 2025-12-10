@@ -35,8 +35,6 @@ export default function Capture() {
   }, [])
 
   const initCamera = async () => {
-    // if (os !== "browser") return;
-
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: true,

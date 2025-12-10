@@ -9,9 +9,6 @@ import { AuthStore } from '@/src/zustand/user/AuthStore'
 
 export default function VerticalNavigation() {
   const router = useRouter()
-  const [isUsers, setUsers] = useState(false)
-  const [isSchool, setSchool] = useState(false)
-  const [isPlace, togglePlace] = useState(false)
   const [isMsgActive, toggleMessages] = useState(false)
   const [isCompetition, toggleCompetition] = useState(false)
   const [isSettingsActive, toggleSettings] = useState(false)
@@ -20,12 +17,9 @@ export default function VerticalNavigation() {
   const { user } = AuthStore()
 
   const offStates = () => {
-    setSchool(false)
     toggleMessages(false)
     toggleCompetition(false)
     toggleSettings(false)
-    togglePlace(false)
-    setUsers(false)
     clearNav()
   }
 
@@ -71,8 +65,6 @@ export default function VerticalNavigation() {
           </div>
         </div>
 
-        <div className="flex py-1">{user?.staffPositions}</div>
-
         <div className="mt-4">
           <Link className="v_nav_items block" href="/team">
             <i className="bi bi-speedometer2 mr-3"></i>
@@ -89,25 +81,23 @@ export default function VerticalNavigation() {
 
           {(user?.staffPositions.includes('users') ||
             user?.staffPositions.includes('General')) && (
-            <div className={`v_nav_items ${isUsers ? 'active two' : ''}`}>
-              <div
-                className="flex cursor-pointer items-center py-2"
-                onClick={() => setUsers((e) => !e)}
-              >
+            <div className={`v_nav_items`}>
+              <div className="flex cursor-pointer items-center py-2">
                 <i className="bi bi-people mr-3"></i>
                 Users
-                <i
-                  className={`bi bi-caret-down-fill ml-auto ${
-                    isUsers ? 'active' : ''
-                  }`}
-                ></i>
               </div>
               <div className="nav_dropdown">
                 <Link className="inner_nav_items" href="/team/users/accounts">
                   Accounts
                 </Link>
-                <Link className="inner_nav_items" href="/team/users">
+                <Link className="inner_nav_items" href="/team/users/verified">
                   Persons
+                </Link>
+                <Link
+                  className="inner_nav_items"
+                  href="/team/users/onverification"
+                >
+                  Verifying
                 </Link>
               </div>
             </div>
@@ -115,18 +105,10 @@ export default function VerticalNavigation() {
 
           {(user?.staffPositions.includes('schools') ||
             user?.staffPositions.includes('General')) && (
-            <div className={`v_nav_items ${isSchool ? 'active two' : ''}`}>
-              <div
-                className="flex cursor-pointer items-center py-2"
-                onClick={() => setSchool((e) => !e)}
-              >
+            <div className={`v_nav_items`}>
+              <div className="flex cursor-pointer items-center py-2">
                 <i className="bi bi-bank mr-3"></i>
                 Schools
-                <i
-                  className={`bi bi-caret-down-fill ml-auto ${
-                    isSchool ? 'active' : ''
-                  }`}
-                ></i>
               </div>
               <div className="nav_dropdown">
                 <Link className="inner_nav_items" href="/team/schools/">
@@ -139,20 +121,12 @@ export default function VerticalNavigation() {
             </div>
           )}
 
-          <div className={`v_nav_items ${isPlace ? 'active two' : ''}`}>
-            <div
-              className="flex cursor-pointer items-center py-2"
-              onClick={() => togglePlace((e) => !e)}
-            >
+          <div className={`v_nav_items`}>
+            <div className="flex cursor-pointer items-center py-2">
               <Link className="block" href="/team/places/1">
                 <i className="bi bi-globe-americas mr-3"></i>
                 Places
               </Link>
-              <i
-                className={`bi bi-caret-down-fill ml-auto ${
-                  isPlace ? 'active' : ''
-                }`}
-              ></i>
             </div>
             <div className="nav_dropdown">
               <Link className="inner_nav_items" href="/team/places/ads">
