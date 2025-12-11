@@ -1,7 +1,11 @@
 import { create } from 'zustand'
 import _debounce from 'lodash/debounce'
 import apiRequest from '@/lib/axios'
-import { initDB, updatePendingFriendMessageStatus } from '@/lib/indexDB'
+import {
+  clearTable,
+  initDB,
+  updatePendingFriendMessageStatus,
+} from '@/lib/indexDB'
 import { PreviewFile } from './Chat'
 
 export const saveOrUpdateFriendInDB = async (friend: Friend) => {
@@ -123,6 +127,8 @@ const FriendStore = create<FriendState>((set) => ({
 
   setProcessedResults: (results) => {
     set((prev) => {
+      if (results.length) {
+      }
       const combined = [...results, ...prev.friendsResults]
       const unique = combined.filter(
         (chat, index, self) =>
@@ -216,6 +222,26 @@ const FriendStore = create<FriendState>((set) => ({
       const data = response?.data
       if (data) {
         FriendStore.getState().setProcessedResults(data.results)
+        const results = data.results
+        set((prev) => {
+          if (results.length === 0) {
+            clearTable('friends')
+            return {
+              friendsResults: [],
+            }
+          } else {
+            const combined = [...results, ...prev.friendsResults]
+            const unique = combined.filter(
+              (chat, index, self) =>
+                index ===
+                self.findIndex((c) => c.connection === chat.connection)
+            )
+            unique.sort((a, b) => b.timeNumber - a.timeNumber)
+            return {
+              friendsResults: unique,
+            }
+          }
+        })
       }
     } catch (error: unknown) {
       console.log(error)

@@ -16,6 +16,7 @@ import { UserStore } from '@/src/zustand/user/User'
 import Welcome from '@/components/Home/Onboarding/Welcome'
 import Username from '@/components/Home/Onboarding/Username'
 import Final from '@/components/Home/Onboarding/Final'
+import { clearTable } from '@/lib/indexDB'
 // import Accounts from "@/components/Users/Onboarding/Accounts";
 const OnboardingCarousel = () => {
   const swiperRef = useRef<SwiperType | null>(null)
@@ -25,6 +26,9 @@ const OnboardingCarousel = () => {
 
   useEffect(() => {
     return () => {
+      clearTable('friends')
+      clearTable('chats')
+      clearTable('moments')
       resetForm()
     }
   }, [])

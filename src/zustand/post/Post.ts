@@ -480,6 +480,8 @@ export const PostStore = create<PostState>((set, get) => ({
       }
     } catch (error: unknown) {
       console.log(error)
+    } finally {
+      set({ loading: false })
     }
   },
 
@@ -499,6 +501,8 @@ export const PostStore = create<PostState>((set, get) => ({
       }
     } catch (error: unknown) {
       console.log(error)
+    } finally {
+      set({ loading: false })
     }
   },
 
@@ -517,6 +521,8 @@ export const PostStore = create<PostState>((set, get) => ({
       }
     } catch (error: unknown) {
       console.log(error)
+    } finally {
+      set({ loading: false })
     }
   },
 
@@ -536,6 +542,8 @@ export const PostStore = create<PostState>((set, get) => ({
       }
     } catch (error: unknown) {
       console.log(error)
+    } finally {
+      set({ loading: false })
     }
   },
 
@@ -554,6 +562,8 @@ export const PostStore = create<PostState>((set, get) => ({
       }
     } catch (error: unknown) {
       console.log(error)
+    } finally {
+      set({ loading: false })
     }
   },
 
@@ -572,6 +582,8 @@ export const PostStore = create<PostState>((set, get) => ({
       }
     } catch (error: unknown) {
       console.log(error)
+    } finally {
+      set({ loading: false })
     }
   },
 
@@ -681,6 +693,7 @@ export const PostStore = create<PostState>((set, get) => ({
       set({ loading: false, error: null })
     }
   },
+
   updatePinPost: async (
     url: string,
     updatedItem: FormData | Record<string, unknown>

@@ -167,3 +167,8 @@ export const deleteMessageFromDB = async (timeNumber: number) => {
     return false
   }
 }
+
+export const clearTable = async (tableName: string): Promise<void> => {
+  const db = await initDB()
+  await db.clear(tableName)
+}

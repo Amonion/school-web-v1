@@ -292,9 +292,7 @@ export const BioUserStore = create<BioUsersState>((set) => ({
 
   massUpdateBioUsers: async (url, selectedUsers, setMessage) => {
     try {
-      set({
-        loading: true,
-      })
+      set({ loading: true })
       await apiRequest<FetchUserResponse>(url, {
         method: 'POST',
         body: selectedUsers,
@@ -302,6 +300,8 @@ export const BioUserStore = create<BioUsersState>((set) => ({
       })
     } catch (error) {
       console.log(error)
+    } finally {
+      set({ loading: false })
     }
   },
 
@@ -309,6 +309,7 @@ export const BioUserStore = create<BioUsersState>((set) => ({
     set({
       bioUserForm: BioUserEmpty,
     }),
+
   reshuffleResults: async () => {
     set((state) => ({
       bioUsers: state.bioUsers.map((item: BioUser) => ({
@@ -318,6 +319,7 @@ export const BioUserStore = create<BioUsersState>((set) => ({
       })),
     }))
   },
+
   setForm: (key, value) =>
     set((state) => ({
       bioUserForm: {
@@ -361,6 +363,7 @@ export const BioUserStore = create<BioUsersState>((set) => ({
       bioUsers: updatedResults,
     })
   },
+
   toggleActive: (index: number) => {
     set((state) => {
       const isCurrentlyActive = state.bioUsers[index]?.isActive
@@ -373,6 +376,7 @@ export const BioUserStore = create<BioUsersState>((set) => ({
       }
     })
   },
+
   toggleAllSelected: () => {
     set((state) => {
       const isAllChecked =
@@ -391,6 +395,7 @@ export const BioUserStore = create<BioUsersState>((set) => ({
       }
     })
   },
+
   toggleChecked: (index: number) => {
     set((state) => {
       const updatedResults = state.bioUsers.map((tertiary, idx) =>
@@ -413,6 +418,7 @@ export const BioUserStore = create<BioUsersState>((set) => ({
       }
     })
   },
+
   updateBioUser: async (
     url: string,
     updatedItem: FormData | Record<string, unknown>,
