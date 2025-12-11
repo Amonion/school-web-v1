@@ -84,6 +84,7 @@ export const PersonalNotificationProvider = ({
   useEffect(() => {
     if (!bioUser || !socket) return
     //////////////PERSONAL NOTIFICATION//////////////
+
     socket.on(
       `personal_notification_${bioUser._id}`,
       (data: NotificationData) => {

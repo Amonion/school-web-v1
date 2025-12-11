@@ -39,7 +39,7 @@ export default function Current() {
   const { departments, getDepartments } = DepartmentStore()
   const { bioUser, bioUserSchoolInfo, bioUserState, user } = AuthStore()
   const { setMessage } = MessageStore()
-  const url = '/users/bio-user/school/'
+  const url = '/biousers-school/'
   const [inSchool, setInSchool] = useState('')
   // const [showInSchool, setShowInSchool] = useState(false)
   const [isDepartmentList, setDepartmentList] = useState(false)

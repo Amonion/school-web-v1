@@ -11,8 +11,7 @@ export default function Document() {
   const { updateBioUserSchoolInfo, loading } = BioUserSchoolInfoStore()
   const { bioUser, bioUserSchoolInfo } = AuthStore()
   const { setMessage } = MessageStore()
-  const url = '/users/bio-user/school/'
-
+  const url = '/biousers-school/'
   const uploadCert = (
     e: React.ChangeEvent<HTMLInputElement>,
     index: number

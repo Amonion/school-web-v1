@@ -7,10 +7,10 @@ import { BioUserStore } from '@/src/zustand/user/BioUser'
 import { MessageStore } from '@/src/zustand/notification/Message'
 import PictureDisplay from '@/components/Home/Media/PictureDisplay'
 import { BioUserSchoolInfoStore } from '@/src/zustand/user/BioUserSchoolInfo'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 
 const VerificationDetails: React.FC = () => {
-  const url = '/users'
+  const url = '/biousers'
   const { bioUserForm, setForm, getBioUser, loading } = BioUserStore()
   const {
     bioUserSchoolForm,
@@ -24,6 +24,7 @@ const VerificationDetails: React.FC = () => {
   const [content, setContent] = useState('')
   const [action, setAction] = useState('')
   const { username } = useParams()
+  const router = useRouter()
 
   const { setMessage } = MessageStore()
 
@@ -84,7 +85,8 @@ const VerificationDetails: React.FC = () => {
     updateBioUserSchoolInfo(
       `${url}/approve-user/${bioUserForm.bioUserUsername}`,
       data,
-      setMessage
+      setMessage,
+      () => router.back()
     )
   }
 
@@ -178,7 +180,7 @@ const VerificationDetails: React.FC = () => {
                 </div>
               </div>
             </div>
-            {/* <div className="flex flex-col items-center justify-center">
+            <div className="flex flex-col items-center justify-center">
               <div
                 style={{
                   borderRadius: '5px',
@@ -191,7 +193,7 @@ const VerificationDetails: React.FC = () => {
               >
                 <PictureDisplay source={String(bioUserForm.passport)} />
               </div>
-            </div> */}
+            </div>
           </div>
 
           <div className="card_body sharp mb-2">
@@ -322,18 +324,22 @@ const VerificationDetails: React.FC = () => {
             </div>
           </div>
 
-          {/* <div className="card_body sharp flex flex-col items-center mb-2">
+          <div className="card_body sharp flex flex-col items-center mb-2">
             <div className="text-lg mb-2 text-[var(--text-secondary)]">
               {bioUserForm.bioUserUsername} Media Information
             </div>
-            <div className="relative w-full max-w-[600px] sm:h-64 h-[170px] xs:h-[200px] rounded-xl bg-[var(--secondary)] overflow-hidden mb-3">
-              <PictureDisplay source={String(bioUserForm.bioUserMedia)} />
-            </div>
+            {bioUserForm.bioUserMedia && (
+              <div className="relative w-full max-w-[600px] sm:h-64 h-[170px] xs:h-[200px] rounded-xl bg-[var(--secondary)] overflow-hidden mb-3">
+                <PictureDisplay source={String(bioUserForm.bioUserMedia)} />
+              </div>
+            )}
 
             <div className="w-full relative mb-3 flex items-center justify-center flex-col">
-              <div className="mx-auto  w-24 h-24 overflow-hidden bg-[var(--primary)] rounded-full border border-[var(--border)]">
-                <PictureDisplay source={String(bioUserForm.bioUserPicture)} />
-              </div>
+              {bioUserForm.bioUserPicture && (
+                <div className="mx-auto  w-24 h-24 overflow-hidden bg-[var(--primary)] rounded-full border border-[var(--border)]">
+                  <PictureDisplay source={String(bioUserForm.bioUserPicture)} />
+                </div>
+              )}
             </div>
             <div className="mx-auto w-full max-w-[600px]">
               <div className="grid mb-3 grid-cols-2 gap-4">
@@ -342,14 +348,8 @@ const VerificationDetails: React.FC = () => {
                   {bioUserForm.bioUserDisplayName}
                 </div>
               </div>
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: bioUserForm.bioUserIntro,
-                }}
-                className="form-input"
-              ></div>
             </div>
-          </div> */}
+          </div>
 
           {/* <div className="card_body sharp mb-2">
             <div className="text-lg mb-2 text-[var(--text-secondary)]">

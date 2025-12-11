@@ -14,13 +14,14 @@ import PictureDisplay from '@/components/Home/Media/PictureDisplay'
 import BioEditor from '@/components/Home/BioEditor'
 import apiRequest from '@/lib/axios'
 import { useRouter } from 'next/navigation'
+import CustomBtn from '@/components/CustomBtn'
 
 export default function SetSocial() {
   const [media, setMedia] = useState<File | string | null>(null)
   const [picture, setPicture] = useState<File | string | null>(null)
   const { bioUser } = AuthStore()
   const { setMessage } = MessageStore()
-  const url = '/users/bio-user/'
+  const url = '/biousers/'
   const { theme } = useTheme()
   const [text, setText] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -84,7 +85,7 @@ export default function SetSocial() {
     }
   }, [bioUser])
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async () => {
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords
@@ -188,7 +189,6 @@ export default function SetSocial() {
       setMessage(firstNonEmptyMessage, false)
       return
     }
-    e.preventDefault()
     const data = appendForm(inputsToValidate)
 
     setAlert(
@@ -378,20 +378,11 @@ export default function SetSocial() {
 
       <BioEditor value={text} onChange={(content) => setIntro(content)} />
 
-      {loading ? (
-        <div className="btn">
-          <i className="bi bi-opencollective loading  text-md"></i>
-          <div>Processing...</div>
-        </div>
-      ) : (
-        <>
-          {!isLoading && (
-            <div onClick={handleSubmit} className="btn">
-              Save Changes
-            </div>
-          )}
-        </>
-      )}
+      <CustomBtn
+        label="Save Changes"
+        loading={loading}
+        onClick={handleSubmit}
+      />
     </>
   )
 }

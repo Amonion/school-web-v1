@@ -5,7 +5,7 @@ import { AcademicLevel, AcademicLevelEmpty } from '../school/Academic'
 import { AuthStore } from '../user/AuthStore'
 import { User } from '../user/User'
 import { BioUser } from './BioUser'
-import { BioUserState } from './BioUserState'
+import { BioUserState, BioUserStateStore } from './BioUserState'
 
 export const BioUserSchoolInfoEmpty = {
   _id: '',
@@ -143,6 +143,7 @@ interface FetchResponse {
   bioUserSchoolInfo: BioUserSchoolInfo
   pastSchools: PastSchool[]
   user: User
+  verifyingUsers: number
 }
 
 interface UsersState {
@@ -403,6 +404,9 @@ export const BioUserSchoolInfoStore = create<UsersState>((set) => ({
       })
       const data = response?.data
       if (data) {
+        if (data.verifyingUsers) {
+          BioUserStateStore.setState({ verifyingUsers: data.verifyingUsers })
+        }
         if (data.bioUserSchoolInfo) {
           AuthStore.getState().setBioUserSchoolInfo(data.bioUserSchoolInfo)
         }

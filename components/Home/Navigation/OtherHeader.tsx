@@ -44,6 +44,7 @@ export default function OtherHeader() {
           )}
           <i className={`bi bi-bell font-bold text-2xl`}></i>
         </Link>
+
         <i
           onClick={toggleAsideVNav}
           className="bi bi-people text-2xl ml-4 hidden sm:block md:hidden font-bold"
