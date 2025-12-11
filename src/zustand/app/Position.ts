@@ -21,23 +21,31 @@ export interface Position {
   isChecked?: boolean
   isActive?: boolean
 }
+export const PositionEmpty = {
+  _id: '',
+  level: 0,
+  position: '',
+  duties: '',
+  region: '',
+  salary: 0,
+  role: '',
+}
 
 interface PositionsState {
-  links: { next: string | null; previous: string | null } | null
   count: number
   page_size: number
   positionResults: Position[]
   loading: boolean
-  error: string | null
-  successs?: string | null
   selectedItems: Position[]
   searchedPositions: Position[]
   isAllChecked: boolean
+  isPositionForm: boolean
   positionFormData: Position
   setPositionForm: (
     key: keyof Position,
     value: Position[keyof Position]
   ) => void
+  showPositionForm: (state: boolean) => void
   resetForm: () => void
   getPositions: (
     url: string,
@@ -47,7 +55,7 @@ interface PositionsState {
   setLoading?: (loading: boolean) => void
   massDelete: (
     url: string,
-    selectedItems: Position[],
+    selectedItems: Record<string, unknown>,
     setMessage: (message: string, isError: boolean) => void
   ) => Promise<void>
   deleteItem: (
@@ -73,7 +81,6 @@ interface PositionsState {
 }
 
 const PositionStore = create<PositionsState>((set) => ({
-  links: null,
   count: 0,
   page_size: 0,
   positionResults: [],
@@ -81,16 +88,9 @@ const PositionStore = create<PositionsState>((set) => ({
   error: null,
   selectedItems: [],
   searchedPositions: [],
+  isPositionForm: false,
   isAllChecked: false,
-  positionFormData: {
-    _id: '',
-    level: 0,
-    salary: 0,
-    position: '',
-    duties: '',
-    region: '',
-    role: '',
-  },
+  positionFormData: PositionEmpty,
   setPositionForm: (key, value) =>
     set((state) => ({
       positionFormData: {
@@ -100,17 +100,12 @@ const PositionStore = create<PositionsState>((set) => ({
     })),
   resetForm: () =>
     set({
-      positionFormData: {
-        _id: '',
-        level: 0,
-        salary: 0,
-        position: '',
-        duties: '',
-        region: '',
-        role: '',
-      },
+      positionFormData: PositionEmpty,
     }),
 
+  showPositionForm: (loadState: boolean) => {
+    set({ isPositionForm: loadState })
+  },
   setLoading: (loadState: boolean) => {
     set({ loading: loadState })
   },
@@ -179,12 +174,10 @@ const PositionStore = create<PositionsState>((set) => ({
     } catch (error: unknown) {
       if (error instanceof AxiosError && error.response?.data?.message) {
         set({
-          error: error.message || 'Failed to search items',
           loading: false,
         })
       } else {
         set({
-          error: 'Failed to search items',
           loading: false,
         })
       }
@@ -192,8 +185,8 @@ const PositionStore = create<PositionsState>((set) => ({
   }, 1000),
 
   massDelete: async (
-    url: string,
-    selectedItems: Position[],
+    url,
+    selectedItems,
     setMessage: (message: string, isError: boolean) => void
   ) => {
     const response = await apiRequest<FetchPositionResponse>(url, {
@@ -202,7 +195,9 @@ const PositionStore = create<PositionsState>((set) => ({
       setMessage,
       setLoading: PositionStore.getState().setLoading,
     })
-    if (response) {
+    const data = response.data
+    if (data) {
+      PositionStore.getState().setProcessedResults(data)
     }
   },
 
@@ -224,7 +219,7 @@ const PositionStore = create<PositionsState>((set) => ({
     updatedItem: FormData | Record<string, unknown>,
     setMessage: (message: string, isError: boolean) => void
   ) => {
-    set({ loading: true, error: null })
+    set({ loading: true })
     const response = await apiRequest<FetchPositionResponse>(url, {
       method: 'PATCH',
       body: updatedItem,
@@ -232,10 +227,10 @@ const PositionStore = create<PositionsState>((set) => ({
       setLoading: PositionStore.getState().setLoading,
     })
     if (response?.status !== 404 && response?.data) {
-      set({ loading: false, error: null })
+      set({ loading: false })
       PositionStore.getState().setProcessedResults(response.data)
     } else {
-      set({ loading: false, error: null })
+      set({ loading: false })
     }
   },
 
@@ -244,7 +239,7 @@ const PositionStore = create<PositionsState>((set) => ({
     updatedItem: FormData | Record<string, unknown>,
     setMessage: (message: string, isError: boolean) => void
   ) => {
-    set({ loading: true, error: null })
+    set({ loading: true })
     const response = await apiRequest<FetchPositionResponse>(url, {
       method: 'POST',
       body: updatedItem,
@@ -252,10 +247,10 @@ const PositionStore = create<PositionsState>((set) => ({
       setLoading: PositionStore.getState().setLoading,
     })
     if (response?.status !== 404 && response?.data) {
-      set({ loading: false, error: null })
+      set({ loading: false })
       PositionStore.getState().setProcessedResults(response.data)
     } else {
-      set({ loading: false, error: null })
+      set({ loading: false })
     }
   },
 

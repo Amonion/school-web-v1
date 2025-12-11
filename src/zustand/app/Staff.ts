@@ -12,12 +12,12 @@ interface FetchStaffsResponse {
 
 export interface Staff {
   _id: string
-  userId: string
+  bioUserId: string
   level: number
   email: string
   picture: string
   phone: string
-  username: string
+  bioUserUsername: string
   firstName: string
   middleName: string
   lastName: string
@@ -35,18 +35,38 @@ export interface Staff {
   isActive?: boolean
 }
 
+export const StaffEmpty = {
+  _id: '',
+  bioUserId: '',
+  level: 0,
+  email: '',
+  picture: '',
+  phone: '',
+  bioUserUsername: '',
+  firstName: '',
+  middleName: '',
+  lastName: '',
+  duties: '',
+  country: '',
+  countryFlag: '',
+  continent: '',
+  state: '',
+  area: '',
+  stateId: 0,
+  salary: 0,
+  position: '',
+  role: '',
+}
+
 interface StaffsState {
-  links: { next: string | null; previous: string | null } | null
   count: number
   page_size: number
   results: Staff[]
   loading: boolean
-  error: string | null
-  successs?: string | null
   selectedItems: Staff[]
-  searchResult: Staff[]
+  searchedStaffs: Staff[]
   isAllChecked: boolean
-  formData: Staff
+  staffForm: Staff
   setForm: (key: keyof Staff, value: Staff[keyof Staff]) => void
   resetForm: () => void
   getItems: (
@@ -57,7 +77,7 @@ interface StaffsState {
   setLoading?: (loading: boolean) => void
   massDelete: (
     url: string,
-    selectedItems: Staff[],
+    selectedItems: Record<string, unknown>,
     setMessage: (message: string, isError: boolean) => void
   ) => Promise<void>
   deleteItem: (
@@ -79,72 +99,28 @@ interface StaffsState {
   toggleActive: (index: number) => void
   toggleAllSelected: () => void
   reshuffleResults: () => void
-  searchItem: (url: string) => void
+  searchStaff: (url: string) => void
 }
 
 const StaffStore = create<StaffsState>((set) => ({
-  links: null,
   count: 0,
   page_size: 0,
   results: [],
   loading: false,
-  error: null,
   selectedItems: [],
-  searchResult: [],
+  searchedStaffs: [],
   isAllChecked: false,
-  formData: {
-    _id: '',
-    userId: '',
-    level: 0,
-    picture: '',
-    email: '',
-    phone: '',
-    username: '',
-    firstName: '',
-    middleName: '',
-    lastName: '',
-    duties: '',
-    country: '',
-    countryFlag: '',
-    continent: '',
-    state: '',
-    area: '',
-    stateId: 0,
-    salary: 0,
-    position: '',
-    role: '',
-  },
+  staffForm: StaffEmpty,
   setForm: (key, value) =>
     set((state) => ({
-      formData: {
-        ...state.formData,
+      staffForm: {
+        ...state.staffForm,
         [key]: value,
       },
     })),
   resetForm: () =>
     set({
-      formData: {
-        _id: '',
-        level: 0,
-        picture: '',
-        userId: '',
-        email: '',
-        phone: '',
-        username: '',
-        firstName: '',
-        middleName: '',
-        lastName: '',
-        duties: '',
-        country: '',
-        countryFlag: '',
-        continent: '',
-        state: '',
-        area: '',
-        stateId: 0,
-        salary: 0,
-        position: '',
-        role: '',
-      },
+      staffForm: StaffEmpty,
     }),
 
   setProcessedResults: ({ count, page_size, results }: FetchStaffsResponse) => {
@@ -196,7 +172,7 @@ const StaffStore = create<StaffsState>((set) => ({
     }))
   },
 
-  searchItem: _debounce(async (url: string) => {
+  searchStaff: _debounce(async (url: string) => {
     try {
       const response = await apiRequest<FetchStaffsResponse>(url)
       if (response) {
@@ -206,28 +182,22 @@ const StaffStore = create<StaffsState>((set) => ({
           isChecked: false,
           isActive: false,
         }))
-        set({ searchResult: updatedResults })
+        set({ searchedStaffs: updatedResults })
       }
     } catch (error: unknown) {
       if (error instanceof AxiosError && error.response?.data?.message) {
         set({
-          error: error.message || 'Failed to search items',
           loading: false,
         })
       } else {
         set({
-          error: 'Failed to search items',
           loading: false,
         })
       }
     }
   }, 1000),
 
-  massDelete: async (
-    url: string,
-    selectedItems: Staff[],
-    setMessage: (message: string, isError: boolean) => void
-  ) => {
+  massDelete: async (url, selectedItems, setMessage) => {
     set({
       loading: true,
     })
@@ -237,7 +207,9 @@ const StaffStore = create<StaffsState>((set) => ({
       setMessage,
       setLoading: StaffStore.getState().setLoading,
     })
-    if (response) {
+    const data = response.data
+    if (data) {
+      StaffStore.getState().setProcessedResults(data)
     }
   },
 

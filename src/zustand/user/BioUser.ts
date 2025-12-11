@@ -69,6 +69,11 @@ interface BioUsersState {
     selectedUsers: BioUser[],
     setMessage: (message: string, isError: boolean) => void
   ) => Promise<void>
+  massUpdateBioUsers: (
+    url: string,
+    selectedUsers: Record<string, unknown>,
+    setMessage: (message: string, isError: boolean) => void
+  ) => Promise<void>
   resetForm: () => void
   reshuffleResults: () => void
   setForm: (key: keyof BioUser, value: BioUser[keyof BioUser]) => void
@@ -284,6 +289,22 @@ export const BioUserStore = create<BioUsersState>((set) => ({
       console.log(error)
     }
   },
+
+  massUpdateBioUsers: async (url, selectedUsers, setMessage) => {
+    try {
+      set({
+        loading: true,
+      })
+      await apiRequest<FetchUserResponse>(url, {
+        method: 'POST',
+        body: selectedUsers,
+        setMessage,
+      })
+    } catch (error) {
+      console.log(error)
+    }
+  },
+
   resetForm: () =>
     set({
       bioUserForm: BioUserEmpty,

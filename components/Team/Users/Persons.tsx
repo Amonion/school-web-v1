@@ -6,11 +6,11 @@ import { useParams, usePathname } from 'next/navigation'
 import { formatDateToDDMMYY, formatTimeTo12Hour } from '@/lib/helpers'
 import EmailStore from '@/src/zustand/notification/Email'
 import { MessageStore } from '@/src/zustand/notification/Message'
-import { AuthStore } from '@/src/zustand/user/AuthStore'
 import LinkedPagination from '@/components/Team/LinkedPagination'
 import _debounce from 'lodash/debounce'
 import EmailForm from '@/components/Team/Email/EmailForm'
-import { BioUser, BioUserStore } from '@/src/zustand/user/BioUser'
+import { BioUserStore } from '@/src/zustand/user/BioUser'
+import CustomBtn from '@/components/CustomBtn'
 const Persons: React.FC = () => {
   const url = 'biousers/'
   const {
@@ -20,13 +20,12 @@ const Persons: React.FC = () => {
     searchedBioUsers,
     count,
     bioUsers,
-    updateBioUser,
+    massUpdateBioUsers,
     getBioUsers,
     massDeleteBioUsers,
     toggleAllSelected,
     toggleChecked,
     searchBioUser,
-    toggleActive,
     reshuffleResults,
   } = BioUserStore()
   const { setShowEmailForm, showEmailForm } = EmailStore()
@@ -35,7 +34,6 @@ const Persons: React.FC = () => {
   const { page } = useParams()
   const { setMessage } = MessageStore()
   const pathname = usePathname()
-  const { user } = AuthStore()
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -49,20 +47,6 @@ const Persons: React.FC = () => {
     }&ordering=${sort}&status=User&isVerified=true`
     getBioUsers(`${url}${params}`, setMessage)
   }, [page])
-
-  const makeStaff = async (user: BioUser) => {
-    const data = {
-      userId: user._id,
-      userStatus: 'Staff',
-      isStaff: true,
-      email: user.email,
-      phone: user.phone,
-    }
-    const params = `?page_size=${page_size}&page=${
-      page ? page : 1
-    }&ordering=${sort}&userStatus=User`
-    await updateBioUser(`${url}${user._id}${params}`, data, setMessage)
-  }
 
   const handleSearchUsers = _debounce(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -78,23 +62,22 @@ const Persons: React.FC = () => {
     1000
   )
 
-  const suspendUser = async (user: BioUser) => {
-    const data = {
-      userId: user._id,
-      isSuspended: !user.isSuspended,
-    }
-    const params = `?page_size=${page_size}&page=${
-      page ? page : 1
-    }&ordering=${sort}`
-    await updateBioUser(`${url}${user._id}${params}`, data, setMessage)
-  }
-
   const DeleteItems = async () => {
     if (selectedBioUsers.length === 0) {
       setMessage('Please select at least one user to delete', false)
       return
     }
     await massDeleteBioUsers(`${url}mass-delete/`, selectedBioUsers, setMessage)
+  }
+
+  const makeUsersStaffs = async () => {
+    if (selectedBioUsers.length === 0) {
+      setMessage('Please select at least one user to make staff', false)
+      return
+    }
+    const usersIds = selectedBioUsers.map((user) => user._id)
+
+    await massUpdateBioUsers(`/staffs`, { usersIds }, setMessage)
   }
 
   return (
@@ -189,41 +172,7 @@ const Persons: React.FC = () => {
                         )}
                       </div>
                       {(page ? Number(page) - 1 : 0) * page_size + index + 1}
-                      <i
-                        onClick={() => toggleActive(index)}
-                        className="bi bi-three-dots-vertical text-lg cursor-pointer"
-                      ></i>
                     </div>
-                    {item.isActive && user && user?.staffRanking > -1 && (
-                      <div className="card_list">
-                        <span
-                          onClick={() => toggleActive(index)}
-                          className="more_close "
-                        >
-                          X
-                        </span>
-                        <Link
-                          className="card_list_item"
-                          href={`/team/messages/emails/create-email?id=${item._id}&name=${item.bioUserUsername}`}
-                        >
-                          View Profile
-                        </Link>
-                        <div
-                          onClick={() => makeStaff(item)}
-                          className="card_list_item"
-                        >
-                          Make Staff
-                        </div>
-                        <div
-                          onClick={() => suspendUser(item)}
-                          className="card_list_item"
-                        >
-                          {`${
-                            item.isSuspended ? 'Permit User' : 'Suspend User'
-                          }`}
-                        </div>
-                      </div>
-                    )}
                   </td>
                   <td>
                     {item.bioUserPicture ? (
@@ -279,24 +228,22 @@ const Persons: React.FC = () => {
 
       <div className=" card_body sharp my-5">
         {loading ? (
-          <button className="custom_btn ">
-            <i className="bi bi-opencollective loading"></i>
-
-            <div>Processing...</div>
+          <button className="flex">
+            <CustomBtn label="" loading={loading} />
           </button>
         ) : (
-          <div className="flex items-center w-full">
+          <div className="flex gap-5 items-center w-full">
             <i
               onClick={DeleteItems}
-              className="bi bi-trash text-lg cursor-pointer mr-3 text-[var(--custom)]"
+              className="bi bi-trash text-lg cursor-pointer text-[var(--custom)]"
             ></i>
             <i
-              onClick={DeleteItems}
-              className="bi bi-ban text-lg cursor-pointer mr-3 text-[var(--custom)]"
+              onClick={makeUsersStaffs}
+              className="bi bi-person-vcard text-lg cursor-pointer text-[var(--custom)]"
             ></i>
             <i
               onClick={() => setShowEmailForm(true)}
-              className="bi bi-envelope text-lg cursor-pointer mr-3 text-[var(--custom)]"
+              className="bi bi-envelope text-lg cursor-pointer text-[var(--custom)]"
             ></i>
 
             {/* <i

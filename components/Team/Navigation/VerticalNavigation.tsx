@@ -77,7 +77,7 @@ export default function VerticalNavigation() {
 
           {(user?.staffPositions.includes('users') ||
             user?.staffPositions.includes('General')) && (
-            <div className={`v_nav_items`}>
+            <div className={`v_nav_items line`}>
               <div className="flex cursor-pointer items-center py-2">
                 <i className="bi bi-people mr-3"></i>
                 Users
@@ -110,7 +110,7 @@ export default function VerticalNavigation() {
 
           {(user?.staffPositions.includes('schools') ||
             user?.staffPositions.includes('General')) && (
-            <div className={`v_nav_items`}>
+            <div className={`v_nav_items line`}>
               <div className="flex cursor-pointer items-center py-2">
                 <i className="bi bi-bank mr-3"></i>
                 Schools
@@ -126,7 +126,7 @@ export default function VerticalNavigation() {
             </div>
           )}
 
-          <div className={`v_nav_items`}>
+          <div className={`v_nav_items line`}>
             <div className="flex cursor-pointer items-center py-2">
               <Link className="block" href="/team/places/1">
                 <i className="bi bi-globe-americas mr-3"></i>

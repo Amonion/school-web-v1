@@ -151,7 +151,10 @@
 }
 
 .v_nav_items {
-  @apply text-lg border-b border-b-[var(--border-color)]  transition-[height] duration-300;
+  @apply mb-3 text-lg border-b border-b-[var(--border-color)]  transition-[height] duration-300;
+}
+.v_nav_items.line {
+  @apply border-b-0;
 }
 
 
