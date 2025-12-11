@@ -1,5 +1,5 @@
 'use client'
-import ComponentStaffs from '@/components/Team/Staffs'
+import ComponentStaffs from '@/components/Team/Company/Staffs'
 
 const Staff: React.FC = () => {
   return (

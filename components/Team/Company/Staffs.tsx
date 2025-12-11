@@ -5,8 +5,8 @@ import { useState, useEffect, useRef } from 'react'
 import { useParams } from 'next/navigation'
 import StaffStore from '@/src/zustand/app/Staff'
 import { MessageStore } from '@/src/zustand/notification/Message'
-import LinkedPagination from './LinkedPagination'
-import CustomBtn from '../CustomBtn'
+import LinkedPagination from '../LinkedPagination'
+import CustomBtn from '../../CustomBtn'
 
 const ComponentStaffs: React.FC = () => {
   const url = '/staffs/'
