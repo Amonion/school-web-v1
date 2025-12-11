@@ -7,6 +7,7 @@ import {
   updatePendingFriendMessageStatus,
 } from '@/lib/indexDB'
 import { PreviewFile } from './Chat'
+import { User } from '../user/User'
 
 export const saveOrUpdateFriendInDB = async (friend: Friend) => {
   const db = await initDB()
@@ -85,11 +86,8 @@ interface FriendState {
   selectedItems: Friend[]
   searchResult: Friend[]
   isAllChecked: boolean
-  getFriends: (
-    url: string,
-    setMessage: (message: string, isError: boolean) => void
-  ) => Promise<void>
-  getSavedFriends: () => Promise<void>
+  getFriends: (url: string) => Promise<void>
+  getSavedFriends: (user: User) => Promise<void>
   setProcessedResults: (data: Friend[]) => void
   setLoading?: (loading: boolean) => void
   massDelete: (
@@ -201,22 +199,23 @@ const FriendStore = create<FriendState>((set) => ({
     })
   },
 
-  getSavedFriends: async () => {
+  getSavedFriends: async (user) => {
     try {
       const friends = await getAllFriendsFromDB()
       if (friends) {
         set({ friendsResults: friends })
-        // FriendStore.getState().setProcessedResults(friends)
       }
+      FriendStore.getState().getFriends(
+        `/chats/friends?username=${user.username}&page=1&page_size=40`
+      )
     } catch (error: unknown) {
       console.log(error)
     }
   },
 
-  getFriends: async (url, setMessage) => {
+  getFriends: async (url) => {
     try {
       const response = await apiRequest<FetchChatResponse>(url, {
-        setMessage,
         setLoading: FriendStore.getState().setLoading,
       })
       const data = response?.data

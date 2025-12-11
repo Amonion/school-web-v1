@@ -23,6 +23,8 @@ import useSocket from '@/src/useSocket'
 import { SocialNotificationProvider } from '@/context/SocialNotificationContext'
 import { UserProvider } from '@/context/HomeContext/UserContext'
 import { UsersProvider } from '@/context/TeamContext/UsersContext'
+import { ChatProvider } from '@/context/HomeContext/ChatContext'
+import { TraceProvider } from '@/context/HomeContext/TraceContext'
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -170,15 +172,19 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-[100vh] bg-[var(--white-gray)] text-[var(--text-main-color)]`}
       >
         <GeneralProvider>
-          <PersonalNotificationProvider>
-            <UserProvider>
-              <UsersProvider>
-                <SocialNotificationProvider>
-                  <ThemeProvider>{isMounted && children}</ThemeProvider>
-                </SocialNotificationProvider>
-              </UsersProvider>
-            </UserProvider>
-          </PersonalNotificationProvider>
+          <ChatProvider>
+            <TraceProvider>
+              <PersonalNotificationProvider>
+                <UserProvider>
+                  <UsersProvider>
+                    <SocialNotificationProvider>
+                      <ThemeProvider>{isMounted && children}</ThemeProvider>
+                    </SocialNotificationProvider>
+                  </UsersProvider>
+                </UserProvider>
+              </PersonalNotificationProvider>
+            </TraceProvider>
+          </ChatProvider>
         </GeneralProvider>
       </body>
     </html>

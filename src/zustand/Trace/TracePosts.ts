@@ -2,18 +2,8 @@ import { create } from 'zustand'
 import _debounce from 'lodash/debounce'
 import apiRequest from '@/lib/axios'
 import { User } from '../user/User'
-import { initDB } from '@/lib/indexDB'
-
-export const getPostsFromDB = async (
-  limit: number,
-  page: number
-): Promise<Post[]> => {
-  const db = await initDB()
-  const allPosts = await db.getAll('posts')
-  const start = (page - 1) * limit
-  const end = start + limit
-  return allPosts.slice(start, end)
-}
+import { getRecordsFromDB } from '@/lib/indexDB'
+import { IMedia, Post, PostEmpty } from '../post/Post'
 
 interface FetchPostResponse {
   count: number
@@ -27,102 +17,7 @@ interface PostResponse {
   data: Post
 }
 
-export interface Media {
-  source: string
-  type: string
-  preview: string
-}
-
-export interface Poll {
-  picture: string
-  text: string
-  userId: string
-  index: number
-  percent: number
-}
-
-export interface IMedia {
-  type: string
-  src: string
-  postId: string
-  replies: number
-  preview: string
-  content: string
-  backgroundColor: string
-}
-
-export interface Post {
-  _id: string
-  username: string
-  userId: string
-  postId: string
-  backgroundColor: string
-  displayName: string
-  content: string
-  media: Media[]
-  polls: Poll[]
-  users: string[]
-  picture: string
-  country: string
-  isSelected: boolean
-  isVerified: boolean
-  hated: boolean
-  totalVotes: number
-  hates: number
-  shares: number
-  bookmarks: number
-  replies: number
-  views: number
-  likes: number
-  reposts: number
-  createdAt: Date | null | string
-  message: string
-  followed: boolean
-  muted: boolean
-  liked: boolean
-  bookmarked: boolean
-  shared: boolean
-  viewed: boolean
-  isChecked?: boolean
-  isActive?: boolean
-}
-
-export const PostEmpty = {
-  _id: '',
-  username: '',
-  userId: '',
-  postId: '',
-  backgroundColor: '',
-  displayName: '',
-  content: '',
-  media: [],
-  polls: [],
-  users: [],
-  picture: '',
-  country: '',
-  isSelected: false,
-  isVerified: false,
-  hated: false,
-  totalVotes: 0,
-  hates: 0,
-  shares: 0,
-  bookmarks: 0,
-  replies: 0,
-  views: 0,
-  likes: 0,
-  reposts: 0,
-  createdAt: '',
-  message: '',
-  followed: false,
-  muted: false,
-  liked: false,
-  bookmarked: false,
-  shared: false,
-  viewed: false,
-}
-
 interface PostState {
-  links: { next: string | null; previous: string | null } | null
   count: number
   page_size: number
   currentPage: number
@@ -130,14 +25,9 @@ interface PostState {
   postResults: Post[]
   mediaResults: IMedia[]
   selectedMedia: IMedia | null
-  followingPostResults: Post[]
-  bookmarkedPostResults: Post[]
   loading: boolean
-  error: string | null
-  successs?: string | null
-  selectedPosts: Post[]
-  searchedPostResult: Post[]
   searchedPosts: Post[]
+  text: string
   hasMore: boolean
   isPlaying: boolean
   isMobile: boolean
@@ -147,19 +37,12 @@ interface PostState {
   hasMoreFollowing: boolean
   postForm: Post
   setForm: (key: keyof Post, value: Post[keyof Post]) => void
+  setText: (text: string) => void
   resetForm: () => void
   clearSearchedPosts: () => void
   getPosts: (url: string) => Promise<void>
   getSavedPosts: (user: User) => Promise<void>
   addMorePosts: (
-    url: string,
-    setMessage: (message: string, isError: boolean) => void
-  ) => Promise<void>
-  getFollowingPosts: (
-    url: string,
-    setMessage: (message: string, isError: boolean) => void
-  ) => Promise<void>
-  getBookmarkedPosts: (
     url: string,
     setMessage: (message: string, isError: boolean) => void
   ) => Promise<void>
@@ -170,8 +53,6 @@ interface PostState {
   ) => Promise<void>
   setProcessedResults: (data: FetchPostResponse) => void
   processMoreResults: (data: FetchPostResponse) => void
-  setFollowingResults: (data: FetchPostResponse) => void
-  setBookmarkedResults: (data: FetchPostResponse) => void
   removePosts: (id: string) => void
   setCurrentPage: (page: number) => void
   setLoading?: (loading: boolean) => void
@@ -223,21 +104,16 @@ interface PostState {
   setCurrentIndex: (index: number) => void
 }
 
-export const PostStore = create<PostState>((set, get) => ({
-  links: null,
+export const PostStore = create<PostState>((set) => ({
   count: 0,
   page_size: 20,
   currentPage: 1,
   currentIndex: 0,
   postResults: [],
   mediaResults: [],
-  followingPostResults: [],
-  bookmarkedPostResults: [],
   selectedMedia: null,
+  text: '',
   loading: false,
-  error: null,
-  selectedPosts: [],
-  searchedPostResult: [],
   searchedPosts: [],
   hasMore: false,
   hasMoreSearch: true,
@@ -254,26 +130,12 @@ export const PostStore = create<PostState>((set, get) => ({
         [key]: value,
       },
     })),
-  resetForm: () =>
-    set({
-      postForm: PostEmpty,
-    }),
-  setIsMobile: (mobile: boolean) =>
-    set({
-      isMobile: mobile,
-    }),
-  setSelectedMedia: (media) =>
-    set({
-      selectedMedia: media,
-    }),
-  setFitMode: (mode: boolean) =>
-    set({
-      fitMode: mode,
-    }),
-  setCurrentIndex: (index: number) =>
-    set({
-      currentIndex: index,
-    }),
+  resetForm: () => set({ postForm: PostEmpty }),
+  setIsMobile: (mobile: boolean) => set({ isMobile: mobile }),
+  setText: (text) => set({ text: text }),
+  setSelectedMedia: (media) => set({ selectedMedia: media }),
+  setFitMode: (mode: boolean) => set({ fitMode: mode }),
+  setCurrentIndex: (index: number) => set({ currentIndex: index }),
 
   processMoreResults: ({ count, results }: FetchPostResponse) => {
     set((state) => {
@@ -379,58 +241,6 @@ export const PostStore = create<PostState>((set, get) => ({
     })
   },
 
-  setFollowingResults: ({ count, results }: FetchPostResponse) => {
-    set((state) => {
-      const updatedResults = results.map((item: Post) => ({
-        ...item,
-        isChecked: false,
-        isActive: false,
-      }))
-
-      const existingIds = new Set(
-        state.followingPostResults.map((post) => post._id)
-      )
-      const uniqueResults = updatedResults.filter(
-        (post) => !existingIds.has(post._id)
-      )
-
-      return {
-        loading: false,
-        hasMoreFollowing: state.page_size === results.length,
-        count,
-        followingPostResults: [...state.followingPostResults, ...uniqueResults],
-      }
-    })
-  },
-
-  setBookmarkedResults: ({ count, page_size, results }: FetchPostResponse) => {
-    set((state) => {
-      const updatedResults = results.map((item: Post) => ({
-        ...item,
-        isChecked: false,
-        isActive: false,
-      }))
-
-      const existingIds = new Set(
-        state.bookmarkedPostResults.map((post) => post._id)
-      )
-      const uniqueResults = updatedResults.filter(
-        (post) => !existingIds.has(post._id)
-      )
-
-      return {
-        loading: false,
-        hasMoreBookmarks: state.page_size === results.length,
-        count,
-        page_size,
-        bookmarkedPostResults: [
-          ...state.bookmarkedPostResults,
-          ...uniqueResults,
-        ],
-      }
-    })
-  },
-
   removePosts: (id: string) => {
     set((state) => ({
       postResults: state.postResults.filter((post) => post.postId !== id),
@@ -439,12 +249,12 @@ export const PostStore = create<PostState>((set, get) => ({
 
   setSearchedResult: () => {
     set((prev) => {
-      return { searchedPosts: prev.searchedPostResult, searchedPostResult: [] }
+      return { searchedPosts: prev.searchedPosts, searchedPostResult: [] }
     })
   },
 
   clearSearchedPosts: () => {
-    set({ searchedPostResult: [] })
+    set({ searchedPosts: [] })
   },
 
   setCurrentPage: (page: number) => {
@@ -478,11 +288,14 @@ export const PostStore = create<PostState>((set, get) => ({
 
   getSavedPosts: async (user) => {
     try {
-      const posts = await getPostsFromDB(20, 1)
+      const posts = await getRecordsFromDB<Post>('trace_posts', 20, 1)
       if (posts.length > 0) {
         set({ postResults: posts })
       }
-      get().getPosts(`/posts/?myId=${user?._id}&page_size=40&page=1`)
+
+      PostStore.getState().getPosts(
+        `/posts/?myId=${user?._id}&page_size=40&page=1`
+      )
     } catch (error: unknown) {
       console.log(error)
     } finally {
@@ -495,6 +308,8 @@ export const PostStore = create<PostState>((set, get) => ({
       const response = await apiRequest<FetchPostResponse>(url, {
         setLoading: PostStore.getState().setLoading,
       })
+      console.log('fetching posts')
+
       const data = response?.data
       if (data) {
         PostStore.getState().setProcessedResults(data)
@@ -568,46 +383,6 @@ export const PostStore = create<PostState>((set, get) => ({
     }
   },
 
-  getFollowingPosts: async (
-    url: string,
-    setMessage: (message: string, isError: boolean) => void
-  ) => {
-    try {
-      const response = await apiRequest<FetchPostResponse>(url, {
-        setMessage,
-        setLoading: PostStore.getState().setLoading,
-      })
-      const data = response?.data
-      if (data) {
-        PostStore.getState().setFollowingResults(data)
-      }
-    } catch (error: unknown) {
-      console.log(error)
-    } finally {
-      set({ loading: false })
-    }
-  },
-
-  getBookmarkedPosts: async (
-    url: string,
-    setMessage: (message: string, isError: boolean) => void
-  ) => {
-    try {
-      const response = await apiRequest<FetchPostResponse>(url, {
-        setMessage,
-        setLoading: PostStore.getState().setLoading,
-      })
-      const data = response?.data
-      if (data) {
-        PostStore.getState().setBookmarkedResults(data)
-      }
-    } catch (error: unknown) {
-      console.log(error)
-    } finally {
-      set({ loading: false })
-    }
-  },
-
   reshuffleResults: async () => {
     set((state) => ({
       postResults: state.postResults.map((item: Post) => ({
@@ -624,7 +399,7 @@ export const PostStore = create<PostState>((set, get) => ({
       const response = await apiRequest<FetchPostResponse>(url)
       const { results } = response?.data
       if (results) {
-        set({ searchedPostResult: results })
+        set({ searchedPosts: results })
       }
     } catch (error) {
       console.log(error)
@@ -683,7 +458,7 @@ export const PostStore = create<PostState>((set, get) => ({
     setMessage: (message: string, isError: boolean) => void,
     setProgress?: (int: number) => void
   ) => {
-    set({ loading: true, error: null })
+    set({ loading: true })
     const response = await apiRequest<Post>(url, {
       method: 'POST',
       body: updatedItem,
@@ -702,7 +477,7 @@ export const PostStore = create<PostState>((set, get) => ({
     updatedItem: FormData | Record<string, unknown>
   ) => {
     try {
-      set({ loading: true, error: null })
+      set({ loading: true })
       await apiRequest<PostResponse>(url, {
         method: 'POST',
         body: updatedItem,
@@ -710,7 +485,7 @@ export const PostStore = create<PostState>((set, get) => ({
     } catch (error) {
       console.log(error)
     } finally {
-      set({ loading: false, error: null })
+      set({ loading: false })
     }
   },
 
@@ -734,7 +509,7 @@ export const PostStore = create<PostState>((set, get) => ({
     updatedItem: FormData | Record<string, unknown>,
     setMessage: (message: string, isError: boolean) => void
   ) => {
-    set({ loading: true, error: null })
+    set({ loading: true })
     const response = await apiRequest<PostResponse>(url, {
       method: 'PATCH',
       body: updatedItem,
@@ -757,7 +532,7 @@ export const PostStore = create<PostState>((set, get) => ({
     url: string,
     updatedItem: FormData | Record<string, unknown>
   ) => {
-    set({ loading: true, error: null })
+    set({ loading: true })
     await apiRequest<PostResponse>(url, {
       method: 'POST',
       body: updatedItem,

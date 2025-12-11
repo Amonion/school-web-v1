@@ -1,12 +1,11 @@
 import Image from 'next/image'
-
 import { forwardRef } from 'react'
 import { truncateString } from '@/lib/helpers'
 import Link from 'next/link'
-import { Account } from '@/src/zustand/user/Account'
+import { User } from '@/src/zustand/user/User'
 
 interface AccountCardProps {
-  user: Account
+  user: User
 }
 
 const AccountCard = forwardRef<HTMLDivElement, AccountCardProps>(

@@ -1,25 +1,12 @@
 'use client'
 import { initializeSound } from '@/lib/sound'
 import useSocket from '@/src/useSocket'
-import {
-  ChatContent,
-  ChatStore,
-  saveOrUpdateMessageInDB,
-} from '@/src/zustand/chat/Chat'
-import FriendStore, { Friend } from '@/src/zustand/chat/Friend'
 import { MessageStore } from '@/src/zustand/notification/Message'
 import SchoolStore from '@/src/zustand/school/School'
 import { AuthStore } from '@/src/zustand/user/AuthStore'
 import OfficeStore from '@/src/zustand/utility/Office'
 import axios from 'axios'
-import {
-  createContext,
-  useEffect,
-  useContext,
-  ReactNode,
-  useMemo,
-  useState,
-} from 'react'
+import { createContext, useEffect, useContext, ReactNode, useMemo } from 'react'
 
 const GeneralContext = createContext<{
   socket: ReturnType<typeof useSocket> | null
@@ -31,48 +18,21 @@ interface GeneralProviderProps {
   children: ReactNode
 }
 
-type response = {
-  friend: Friend
-  connection: string
-  totalUnread: number
-  isFriends: boolean
-  userId: string
-  ids: number[]
-  username: string
-  pending: boolean
-  chat: ChatContent
-  chats: ChatContent[]
-}
-
 export const GeneralProvider = ({ children }: GeneralProviderProps) => {
   const socket = useSocket()
   const { setIp, setBaseUrl, setMessage, baseURL } = MessageStore()
-  const { getSavedFriends, getFriends, updatePendingFriendsChat } =
-    FriendStore()
   const { user } = AuthStore()
   const { getSchoolNotifications } = SchoolStore()
   const { officeForm } = OfficeStore()
-  const { connection, updatePendingChat } = ChatStore()
-  const [chat, setChat] = useState<ChatContent | null>(null)
 
   useEffect(() => {
     initializeSound()
-    getSavedFriends()
     const url =
       process.env.NODE_ENV === 'production'
         ? process.env.NEXT_PUBLIC_PROD_API_URL
         : process.env.NEXT_PUBLIC_DEV_API_URL
     setBaseUrl(String(url))
   }, [])
-
-  useEffect(() => {
-    if (user) {
-      getFriends(
-        `/chats/friends?username=${user.username}&page=1&page_size=40`,
-        setMessage
-      )
-    }
-  }, [user])
 
   useEffect(() => {
     //***********GET AND STORE IP ***********//
@@ -139,69 +99,6 @@ export const GeneralProvider = ({ children }: GeneralProviderProps) => {
       setMessage
     )
   }, [officeForm])
-
-  useEffect(() => {
-    if (!socket) return
-
-    if (user) {
-      socket.on(`updatePendingChat${user.username}`, (data: response) => {
-        updatePendingChat(data.chat)
-        setChat(data.chat)
-        updatePendingFriendsChat(data.friend)
-        FriendStore.setState((prev) => {
-          return {
-            friendForm: {
-              ...prev.friendForm,
-              isFriends: data.isFriends,
-            },
-          }
-        })
-      })
-
-      socket.on(`updateChatToDelivered${user.username}`, (data: response) => {
-        updatePendingChat(data.chat)
-        updatePendingFriendsChat(data.friend)
-      })
-
-      socket.on(`updateCheckedChats${user.username}`, (data: response) => {
-        for (let i = 0; i < data.chats.length; i++) {
-          const el = data.chats[i]
-          updatePendingChat(el)
-        }
-      })
-
-      socket.on(`updateChatWithFile${user.username}`, (data: response) => {
-        if (data.chat) {
-          console.log(data)
-          saveOrUpdateMessageInDB(data.chat)
-          ChatStore.setState((prev) => {
-            return {
-              chats: prev.chats.map((item) =>
-                item.timeNumber === data.chat.timeNumber ? data.chat : item
-              ),
-            }
-          })
-        }
-      })
-    }
-
-    return () => {
-      socket.off(`updateChatWithFile${user?.username}`)
-      socket.off(`updateCheckedChats${user?.username}`)
-      socket.off(`updateChatToDelivered${user?.username}`)
-      socket.off(`updatePendingChat${connection}`)
-    }
-  }, [user, socket])
-
-  useEffect(() => {
-    if (!socket) return
-    if (chat) {
-      socket.emit(`message`, { to: 'deliveredChat', chat })
-    }
-    return () => {
-      socket.off(`deliveredChat${user?.username}`)
-    }
-  }, [chat, socket])
 
   const updateUserPresence = async (ip: string, online: boolean) => {
     try {

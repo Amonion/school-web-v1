@@ -2,14 +2,11 @@ import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { NavStore } from '@/src/zustand/notification/Navigation'
-import PostDropList from '../Trace/PostResources/PostDropList'
-import PeopleDropList from '../Trace/PeopleResources/PeopleDropList'
-import AccountDropList from '../Trace/AccountResources/AccountDropList'
 // import SchoolDropList from '../Trace/SchoolResources/SchoolDropList'
 // import SchoolStore from '@/src/zustand/school/School'
 import { BioUserSchoolInfoStore } from '@/src/zustand/user/BioUserSchoolInfo'
 import { PostStore } from '@/src/zustand/post/Post'
-import AccountStore from '@/src/zustand/user/Account'
+import { AccountStore } from '@/src/zustand/Trace/Account'
 
 export default function TraceHeader() {
   const { setSearchedText, toggleVNav } = NavStore()
@@ -127,9 +124,9 @@ export default function TraceHeader() {
           </div>
         </div>
       )}
-      <PostDropList />
+      {/* <PostDropList />
       <PeopleDropList />
-      <AccountDropList />
+      <AccountDropList /> */}
     </div>
   )
 }

@@ -4,7 +4,7 @@ import { NavStore } from '@/src/zustand/notification/Navigation'
 import PostDropList from '../Trace/PostResources/PostDropList'
 import { BioUserSchoolInfoStore } from '@/src/zustand/user/BioUserSchoolInfo'
 import { PostStore } from '@/src/zustand/post/Post'
-import AccountStore from '@/src/zustand/user/Account'
+import AccountStore from '@/src/zustand/Trace/Account'
 
 export default function QuestionHeader() {
   const { setSearchedText, toggleVNav } = NavStore()
