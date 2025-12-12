@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import _debounce from 'lodash/debounce'
 import apiRequest from '@/lib/axios'
 import { User } from '../user/User'
-import { getRecordsFromDB } from '@/lib/indexDB'
+import { clearTable, getRecordsFromDB } from '@/lib/indexDB'
 import { IMedia, Post, PostEmpty } from '../post/Post'
 
 interface FetchPostResponse {
@@ -27,7 +27,7 @@ interface PostState {
   selectedMedia: IMedia | null
   loading: boolean
   searchedPosts: Post[]
-  text: string
+  postSearchtext: string
   hasMore: boolean
   isPlaying: boolean
   isMobile: boolean
@@ -51,17 +51,12 @@ interface PostState {
     url: string,
     setMessage: (message: string, isError: boolean) => void
   ) => Promise<void>
-  setProcessedResults: (data: FetchPostResponse) => void
+  setProcessedResults: (count: number, results: Post[]) => void
   processMoreResults: (data: FetchPostResponse) => void
   removePosts: (id: string) => void
   setCurrentPage: (page: number) => void
   setLoading?: (loading: boolean) => void
-  massDelete: (
-    url: string,
-    refreshUrl: string,
-    selectedPosts: Post[],
-    setMessage: (message: string, isError: boolean) => void
-  ) => Promise<void>
+
   deleteItem: (
     url: string,
     id: string,
@@ -95,8 +90,8 @@ interface PostState {
   togglePost: (index: number) => void
   toggleActive: (id: string) => void
   reshuffleResults: () => void
-  setSearchedResult: () => void
-  searchItem: (url: string) => void
+  setSearchedPosts: () => void
+  searchPost: (url: string) => void
   addMoreSearchItems: (url: string) => void
   setIsMobile: (mobile: boolean) => void
   setSelectedMedia: (media: IMedia | null) => void
@@ -112,7 +107,7 @@ export const PostStore = create<PostState>((set) => ({
   postResults: [],
   mediaResults: [],
   selectedMedia: null,
-  text: '',
+  postSearchtext: '',
   loading: false,
   searchedPosts: [],
   hasMore: false,
@@ -132,7 +127,7 @@ export const PostStore = create<PostState>((set) => ({
     })),
   resetForm: () => set({ postForm: PostEmpty }),
   setIsMobile: (mobile: boolean) => set({ isMobile: mobile }),
-  setText: (text) => set({ text: text }),
+  setText: (text) => set({ postSearchtext: text }),
   setSelectedMedia: (media) => set({ selectedMedia: media }),
   setFitMode: (mode: boolean) => set({ fitMode: mode }),
   setCurrentIndex: (index: number) => set({ currentIndex: index }),
@@ -191,7 +186,7 @@ export const PostStore = create<PostState>((set) => ({
     })
   },
 
-  setProcessedResults: ({ count, results }: FetchPostResponse) => {
+  setProcessedResults: (count, results) => {
     set((state) => {
       const updatedResults = results.map((item: Post) => ({
         ...item,
@@ -247,9 +242,9 @@ export const PostStore = create<PostState>((set) => ({
     }))
   },
 
-  setSearchedResult: () => {
+  setSearchedPosts: () => {
     set((prev) => {
-      return { searchedPosts: prev.searchedPosts, searchedPostResult: [] }
+      return { postResults: prev.searchedPosts, searchedPosts: [] }
     })
   },
 
@@ -291,6 +286,7 @@ export const PostStore = create<PostState>((set) => ({
       const posts = await getRecordsFromDB<Post>('trace_posts', 20, 1)
       if (posts.length > 0) {
         set({ postResults: posts })
+        PostStore.getState().setProcessedResults(20, posts)
       }
 
       PostStore.getState().getPosts(
@@ -308,11 +304,9 @@ export const PostStore = create<PostState>((set) => ({
       const response = await apiRequest<FetchPostResponse>(url, {
         setLoading: PostStore.getState().setLoading,
       })
-      console.log('fetching posts')
-
       const data = response?.data
       if (data) {
-        PostStore.getState().setProcessedResults(data)
+        PostStore.getState().setProcessedResults(data.count, data.results)
       }
     } catch (error: unknown) {
       console.log(error)
@@ -323,14 +317,15 @@ export const PostStore = create<PostState>((set) => ({
 
   getQueryPosts: async (url: string) => {
     try {
-      const response = await apiRequest<FetchPostResponse>(url, {
-        setLoading: PostStore.getState().setLoading,
-      })
+      set({ loading: true })
+      const response = await apiRequest<FetchPostResponse>(url)
       const data = response?.data
       if (data) {
+        clearTable('trace_posts')
+        PostStore.getState().setProcessedResults(20, data.results)
         set((prev) => {
           return {
-            searchedPosts: data.results,
+            postResults: data.results,
             hasMoreSearch: data.results.length === prev.page_size,
           }
         })
@@ -393,7 +388,7 @@ export const PostStore = create<PostState>((set) => ({
     }))
   },
 
-  searchItem: _debounce(async (url: string) => {
+  searchPost: _debounce(async (url: string) => {
     try {
       set({ loading: true })
       const response = await apiRequest<FetchPostResponse>(url)

@@ -67,7 +67,7 @@ const DesktopMediaViewer: React.FC<DesktopMediaViewerProps> = ({
           <img
             src={media.src}
             alt={media.content}
-            className="w-full max-h-full object-contain"
+            className="w-full max-h-[90vh] object-contain"
           />
         ) : media.type.includes('video') ? (
           <video

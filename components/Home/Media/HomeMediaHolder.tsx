@@ -78,7 +78,7 @@ const HomeMediaHolder: React.FC = () => {
     CommentStore.setState({ mainPost: comment })
     if (mediaResults[index].postId) {
       getComments(
-        `/posts/comments?page=${currentPage}&page_size=${page_size}&postType=comment&postId=${mediaResults[index].postId}&level=1`
+        `/comments?page=${currentPage}&page_size=${page_size}&postId=${mediaResults[index].postId}&level=1`
       )
     }
   }

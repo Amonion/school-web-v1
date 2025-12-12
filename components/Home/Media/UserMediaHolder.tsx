@@ -74,7 +74,7 @@ const UserMediaHolder: React.FC = () => {
     CommentStore.setState({ mainPost: comment })
     if (userMediaResults[index].postId) {
       getComments(
-        `/posts/comments?page=${currentPage}&page_size=${page_size}&postType=comment&postId=${userMediaResults[index].postId}&level=1`
+        `/comments?page=${currentPage}&page_size=${page_size}&postId=${userMediaResults[index].postId}&level=1`
       )
     }
   }

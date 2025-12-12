@@ -37,7 +37,7 @@ const UserPostMedia: React.FC<UserPostMediaProps> = ({ sources }) => {
     CommentStore.setState({ mainPost: comment })
     if (userMediaResults[index].postId) {
       getComments(
-        `/posts/comments?page=${currentPage}&page_size=${page_size}&postType=comment&postId=${userMediaResults[index].postId}&level=1`
+        `/comments?page=${currentPage}&page_size=${page_size}&postType=comment&postId=${userMediaResults[index].postId}&level=1`
       )
     }
   }

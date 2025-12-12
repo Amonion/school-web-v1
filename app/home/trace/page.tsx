@@ -1,5 +1,5 @@
 'use client'
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import EmptySearch from '@/components/Home/Trace/EmptySearch'
 import PostCard from '@/components/Home/Posts/PostCard'
 import { PostStore } from '@/src/zustand/Trace/TracePosts'
@@ -7,7 +7,18 @@ import SearchedPostCard from '@/components/Home/Posts/SearchedPosts'
 
 export default function SearchedPostList() {
   const lastCardRef = useRef<HTMLDivElement | null>(null)
-  const { postResults, loading, searchedPosts } = PostStore()
+  const { postResults, loading, searchedPosts, postSearchtext, searchPost } =
+    PostStore()
+
+  useEffect(() => {
+    if (postSearchtext.length > 0) {
+      searchPost(
+        `/posts/search?content=${postSearchtext}&username=${postSearchtext}&displayName=${postSearchtext}`
+      )
+    } else {
+      PostStore.setState({ searchedPosts: [] })
+    }
+  }, [postSearchtext])
 
   return (
     <div className="pb-[55px] sm:pb-0 min-h-[80vh] relative w-full">
@@ -19,7 +30,7 @@ export default function SearchedPostList() {
         </div>
       )}
 
-      {searchedPosts.length > 0 && (
+      {searchedPosts.length > 0 && postSearchtext.length > 0 && (
         <div className="absolute z-30 w-full top-0 left-0 bg-[var(--primary)] overflow-auto max-h-[300px] border border-[var(--border)]">
           {searchedPosts.map((post, index) => (
             <SearchedPostCard post={post} key={index} />

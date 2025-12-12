@@ -11,16 +11,21 @@ interface SearchedPostCardProps {
 const SearchedPostCard: React.FC<SearchedPostCardProps> = ({ post }) => {
   const router = useRouter()
   const params = useSearchParams()
-  const { text } = PostStore()
+  const { postSearchtext, setSearchedPosts } = PostStore()
 
   const onClick = () => {
     const newParams = new URLSearchParams(params.toString())
-    newParams.set('search', text)
+    if (postSearchtext.trim()) {
+      newParams.set('q', postSearchtext.trim())
+      setSearchedPosts()
+    } else {
+      newParams.delete('q')
+    }
     router.push(`?${newParams.toString()}`, { scroll: false })
   }
   return (
     <>
-      <div onClick={onClick} className="py-3 px-3">
+      <div onClick={onClick} className="py-3 px-3 cursor-pointer">
         <div className="flex items-start">
           <Image
             style={{ height: '30px', width: '30px', objectFit: 'cover' }}

@@ -1,42 +1,43 @@
 import Link from 'next/link'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { useState } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
 import { NavStore } from '@/src/zustand/notification/Navigation'
-// import SchoolDropList from '../Trace/SchoolResources/SchoolDropList'
-// import SchoolStore from '@/src/zustand/school/School'
 import { BioUserSchoolInfoStore } from '@/src/zustand/user/BioUserSchoolInfo'
-import { PostStore } from '@/src/zustand/post/Post'
 import { AccountStore } from '@/src/zustand/Trace/Account'
+import { PostStore } from '@/src/zustand/Trace/TracePosts'
 
 export default function TraceHeader() {
-  const { setSearchedText, toggleVNav } = NavStore()
-  const { setSearchedResult } = PostStore()
+  const { toggleVNav } = NavStore()
+  const { postSearchtext, setSearchedPosts, setText } = PostStore()
   const { setSearchedBioUserResult } = BioUserSchoolInfoStore()
   const { setSearchedAccountResult } = AccountStore()
-  // const { setSearchedSchoolResult } = SchoolStore()
   const pathName = usePathname()
-  const searchParams = useSearchParams()
   const router = useRouter()
-  const [paramText, setParamText] = useState(searchParams.get('q') || '')
 
   const handleSearch = () => {
     const params = new URLSearchParams(window.location.search)
-    if (paramText.trim()) {
-      params.set('q', paramText.trim())
-    } else {
-      params.delete('q')
-    }
-    router.replace(`?${params.toString()}`)
     if (pathName === '/home/trace') {
-      setSearchedResult()
+      if (postSearchtext.trim()) {
+        params.set('q', postSearchtext.trim())
+        setSearchedPosts()
+      } else {
+        params.delete('q')
+      }
     } else if (pathName === '/home/trace/people') {
       setSearchedBioUserResult()
     } else if (pathName === '/home/trace/accounts') {
       setSearchedAccountResult()
     }
-    // else if (pathName === '/home/trace/schools') {
-    //   setSearchedSchoolResult()
-    // }
+    router.replace(`?${params.toString()}`, { scroll: false })
+  }
+
+  const handleSetText = (e: string) => {
+    if (pathName === '/home/trace') {
+      setText(e)
+    } else if (pathName === '/home/trace/people') {
+      setSearchedBioUserResult()
+    } else if (pathName === '/home/trace/accounts') {
+      setSearchedAccountResult()
+    }
   }
 
   return (
@@ -56,8 +57,7 @@ export default function TraceHeader() {
           <input
             type="search"
             onChange={(e) => {
-              setSearchedText(e.target.value)
-              setParamText(e.target.value)
+              handleSetText(e.target.value)
             }}
             className={`bg-[var(--secondary)] border-none outline-none flex-1`}
             placeholder={
@@ -111,22 +111,9 @@ export default function TraceHeader() {
             >
               Accounts
             </Link>
-            {/* <Link
-              href={'/home/trace/schools'}
-              className={`${
-                pathName === '/home/trace/schools'
-                  ? 'bg-[var(--custom)] text-white'
-                  : 'bg-[var(--secondary)]'
-              } tracePill`}
-            >
-              Schools
-            </Link> */}
           </div>
         </div>
       )}
-      {/* <PostDropList />
-      <PeopleDropList />
-      <AccountDropList /> */}
     </div>
   )
 }
