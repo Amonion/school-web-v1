@@ -1,27 +1,23 @@
 'use client'
 import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
-import { useParams } from 'next/navigation' // ✅ Get dynamic route params
-import { MessageStore } from '@/src/zustand/notification/Message'
-import { PostStore } from '@/src/zustand/post/Post'
-import PostCard from '@/components/Home/Posts/PostCard'
+import { useParams } from 'next/navigation'
 import { AuthStore } from '@/src/zustand/user/AuthStore'
+import CommentStore from '@/src/zustand/post/Comment'
+import EachComment from '@/components/Home/Comment/EachComment'
 
 const UserPosts = () => {
   const { username } = useParams()
   // const [loading, setLoading] = useState(false);
   const [page_size] = useState(10)
-  const { setMessage } = MessageStore()
   const [currentPage, setCurrentPage] = useState(1)
   const lastPostRef = useRef<HTMLDivElement | null>(null)
   const { user } = AuthStore()
-  const { loading, postResults, getPosts, reshuffleResults, addMorePosts } =
-    PostStore()
+  const { loading, comments, getComments, reshuffleResults } = CommentStore()
 
   const findPosts = async () => {
-    getPosts(
-      `/posts/?username=${username}&myId=${user?._id}&ordering=-createdA&postType=comment&page_size=${page_size}&page=${currentPage}`,
-      setMessage
+    getComments(
+      `/posts/?username=${username}&myId=${user?._id}&ordering=-createdA&postType=comment&page_size=${page_size}&page=${currentPage}`
     )
   }
 
@@ -32,10 +28,10 @@ const UserPosts = () => {
   }, [username, user])
 
   useEffect(() => {
-    addMorePosts(
-      `/posts/?username=${username}&myId=${user?._id}&ordering=-createdAt&postType=comment&page_size=${page_size}&page=${currentPage}`,
-      setMessage
-    )
+    // addMorePosts(
+    //   `/posts/?username=${username}&myId=${user?._id}&ordering=-createdAt&postType=comment&page_size=${page_size}&page=${currentPage}`,
+    //   setMessage
+    // )
     return () => {
       reshuffleResults()
     }
@@ -55,16 +51,12 @@ const UserPosts = () => {
 
     observer.observe(lastPostRef.current)
     return () => observer.disconnect()
-  }, [postResults.length])
+  }, [comments.length])
 
   return (
     <>
-      {postResults.map((post, index) => (
-        <PostCard
-          key={index}
-          post={post}
-          lastRef={index === postResults.length - 1 ? lastPostRef : undefined}
-        />
+      {comments.map((post, index) => (
+        <EachComment key={index} comment={post} />
       ))}
       {loading && (
         <div className="flex relative items-center h-5 justify-center flex-wrap w-full">
@@ -73,7 +65,7 @@ const UserPosts = () => {
           ></i>
         </div>
       )}
-      {postResults.length === 0 && (
+      {comments.length === 0 && (
         <div className="relative flex-1 py-3 flex justify-center">
           <Image
             src="/images/not-found.png"
