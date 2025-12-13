@@ -25,6 +25,7 @@ import { UsersProvider } from '@/context/TeamContext/UsersContext'
 import { UserProvider } from '@/context/HomeContext/UserContext'
 import { PersonalNotificationProvider } from '@/context/HomeContext/PersonalNotificationContext'
 import { PostProvider } from '@/context/HomeContext/PostContext'
+import { MomentProvider } from '@/context/HomeContext/MomentContext'
 // import { UserProvider } from '@/context/HomeContext/UserContext'
 // import { UsersProvider } from '@/context/TeamContext/UsersContext'
 // import { ChatProvider } from '@/context/HomeContext/ChatContext'
@@ -179,21 +180,21 @@ export default function RootLayout({
       >
         {/* <GeneralProvider>
           <ChatProvider>
-            <TraceProvider>
-              <MomentProvider> */}
+            <TraceProvider> */}
         <UsersProvider>
           <UserProvider>
             <SocialNotificationProvider>
               <PostProvider>
                 <PersonalNotificationProvider>
-                  <ThemeProvider>{isMounted && children}</ThemeProvider>
+                  <MomentProvider>
+                    <ThemeProvider>{isMounted && children}</ThemeProvider>
+                  </MomentProvider>
                 </PersonalNotificationProvider>
               </PostProvider>
             </SocialNotificationProvider>
           </UserProvider>
         </UsersProvider>
-        {/* </MomentProvider>
-            </TraceProvider>
+        {/* </TraceProvider>
           </ChatProvider>
         </GeneralProvider> */}
       </body>
