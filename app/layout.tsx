@@ -26,6 +26,7 @@ import { UserProvider } from '@/context/HomeContext/UserContext'
 import { PersonalNotificationProvider } from '@/context/HomeContext/PersonalNotificationContext'
 import { PostProvider } from '@/context/HomeContext/PostContext'
 import { MomentProvider } from '@/context/HomeContext/MomentContext'
+import { TraceProvider } from '@/context/HomeContext/TraceContext'
 // import { UserProvider } from '@/context/HomeContext/UserContext'
 // import { UsersProvider } from '@/context/TeamContext/UsersContext'
 // import { ChatProvider } from '@/context/HomeContext/ChatContext'
@@ -179,23 +180,23 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-[100vh] bg-[var(--white-gray)] text-[var(--text-main-color)]`}
       >
         {/* <GeneralProvider>
-          <ChatProvider>
-            <TraceProvider> */}
+          <ChatProvider> */}
         <UsersProvider>
           <UserProvider>
-            <SocialNotificationProvider>
-              <PostProvider>
-                <PersonalNotificationProvider>
-                  <MomentProvider>
-                    <ThemeProvider>{isMounted && children}</ThemeProvider>
-                  </MomentProvider>
-                </PersonalNotificationProvider>
-              </PostProvider>
-            </SocialNotificationProvider>
+            <TraceProvider>
+              <SocialNotificationProvider>
+                <PostProvider>
+                  <PersonalNotificationProvider>
+                    <MomentProvider>
+                      <ThemeProvider>{isMounted && children}</ThemeProvider>
+                    </MomentProvider>
+                  </PersonalNotificationProvider>
+                </PostProvider>
+              </SocialNotificationProvider>
+            </TraceProvider>
           </UserProvider>
         </UsersProvider>
-        {/* </TraceProvider>
-          </ChatProvider>
+        {/* </ChatProvider>
         </GeneralProvider> */}
       </body>
     </html>
