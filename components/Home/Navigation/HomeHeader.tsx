@@ -1,8 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState } from 'react'
 import { AuthStore } from '@/src/zustand/user/AuthStore'
-import { MessageStore } from '@/src/zustand/notification/Message'
 import { UserNotificationStore } from '@/src/zustand/notification/UserNotification'
 import { NavStore } from '@/src/zustand/notification/Navigation'
 import { PostStore } from '@/src/zustand/post/Post'
@@ -12,18 +10,13 @@ export default function HomeHeader() {
   const { personalUnread, officialUnread } = UserNotificationStore()
   const { unreadNotifications } = SocialNotificationStore()
   const { user } = AuthStore()
-  const { setMessage } = MessageStore()
   const { toggleVNav, toggleAsideVNav, setScrollUp } = NavStore()
-  const { getPosts, page_size } = PostStore()
-  const [sort] = useState('-createdAt')
+  const { getSavedPosts } = PostStore()
 
   const refresh = async () => {
     setScrollUp()
     if (user) {
-      getPosts(
-        `/posts/?myId=${user._id}&page_size=${page_size}&page=1&ordering=${sort}&postType=main`,
-        setMessage
-      )
+      getSavedPosts(user)
     }
   }
 
