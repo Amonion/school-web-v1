@@ -23,6 +23,7 @@ import useSocket from '@/src/useSocket'
 import { SocialNotificationProvider } from '@/context/SocialNotificationContext'
 import { UsersProvider } from '@/context/TeamContext/UsersContext'
 import { UserProvider } from '@/context/HomeContext/UserContext'
+import { PersonalNotificationProvider } from '@/context/HomeContext/PersonalNotificationContext'
 // import { UserProvider } from '@/context/HomeContext/UserContext'
 // import { UsersProvider } from '@/context/TeamContext/UsersContext'
 // import { ChatProvider } from '@/context/HomeContext/ChatContext'
@@ -179,17 +180,17 @@ export default function RootLayout({
           <ChatProvider>
             <TraceProvider>
               <MomentProvider>
-                <PostProvider>
-                  <PersonalNotificationProvider> */}
+                <PostProvider> */}
         <UsersProvider>
           <UserProvider>
             <SocialNotificationProvider>
-              <ThemeProvider>{isMounted && children}</ThemeProvider>
+              <PersonalNotificationProvider>
+                <ThemeProvider>{isMounted && children}</ThemeProvider>
+              </PersonalNotificationProvider>
             </SocialNotificationProvider>
           </UserProvider>
         </UsersProvider>
-        {/* </PersonalNotificationProvider>
-                </PostProvider>
+        {/* </PostProvider>
               </MomentProvider>
             </TraceProvider>
           </ChatProvider>
