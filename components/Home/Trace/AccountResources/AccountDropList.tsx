@@ -2,7 +2,7 @@
 import Image from 'next/image'
 import { truncateString } from '@/lib/helpers'
 import { NavStore } from '@/src/zustand/notification/Navigation'
-import AccountStore from '@/src/zustand/Trace/Account'
+import { AccountStore } from '@/src/zustand/Trace/Account'
 
 export default function AccountDropList() {
   const { searchedText, headerHeight } = NavStore()
