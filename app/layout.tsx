@@ -22,6 +22,7 @@ import { getPendingMessages } from '@/lib/indexDB'
 import useSocket from '@/src/useSocket'
 import { SocialNotificationProvider } from '@/context/SocialNotificationContext'
 import { UsersProvider } from '@/context/TeamContext/UsersContext'
+import { UserProvider } from '@/context/HomeContext/UserContext'
 // import { UserProvider } from '@/context/HomeContext/UserContext'
 // import { UsersProvider } from '@/context/TeamContext/UsersContext'
 // import { ChatProvider } from '@/context/HomeContext/ChatContext'
@@ -179,15 +180,15 @@ export default function RootLayout({
             <TraceProvider>
               <MomentProvider>
                 <PostProvider>
-                  <PersonalNotificationProvider>
-                    <UserProvider> */}
+                  <PersonalNotificationProvider> */}
         <UsersProvider>
-          <SocialNotificationProvider>
-            <ThemeProvider>{isMounted && children}</ThemeProvider>
-          </SocialNotificationProvider>
+          <UserProvider>
+            <SocialNotificationProvider>
+              <ThemeProvider>{isMounted && children}</ThemeProvider>
+            </SocialNotificationProvider>
+          </UserProvider>
         </UsersProvider>
-        {/* </UserProvider>
-                  </PersonalNotificationProvider>
+        {/* </PersonalNotificationProvider>
                 </PostProvider>
               </MomentProvider>
             </TraceProvider>
