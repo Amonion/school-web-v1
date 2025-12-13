@@ -14,19 +14,19 @@ import React from 'react'
 import { useEffect, useState } from 'react'
 import { ThemeProvider } from '@/context/ThemeProvider'
 import { MessageStore } from '@/src/zustand/notification/Message'
-import { GeneralProvider } from '@/context/GeneralContext'
-import { PersonalNotificationProvider } from '@/context/HomeContext/PersonalNotificationContext'
+// import { GeneralProvider } from '@/context/GeneralContext'
+// import { PersonalNotificationProvider } from '@/context/HomeContext/PersonalNotificationContext'
 import { usePathname } from 'next/navigation'
 import CompanyStore from '@/src/zustand/app/Company'
 import { getPendingMessages } from '@/lib/indexDB'
 import useSocket from '@/src/useSocket'
 import { SocialNotificationProvider } from '@/context/SocialNotificationContext'
-import { UserProvider } from '@/context/HomeContext/UserContext'
-import { UsersProvider } from '@/context/TeamContext/UsersContext'
-import { ChatProvider } from '@/context/HomeContext/ChatContext'
-import { TraceProvider } from '@/context/HomeContext/TraceContext'
-import { PostProvider } from '@/context/HomeContext/PostContext'
-import { MomentProvider } from '@/context/HomeContext/MomentContext'
+// import { UserProvider } from '@/context/HomeContext/UserContext'
+// import { UsersProvider } from '@/context/TeamContext/UsersContext'
+// import { ChatProvider } from '@/context/HomeContext/ChatContext'
+// import { TraceProvider } from '@/context/HomeContext/TraceContext'
+// import { PostProvider } from '@/context/HomeContext/PostContext'
+// import { MomentProvider } from '@/context/HomeContext/MomentContext'
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -173,25 +173,25 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-[100vh] bg-[var(--white-gray)] text-[var(--text-main-color)]`}
       >
-        <GeneralProvider>
+        {/* <GeneralProvider>
           <ChatProvider>
             <TraceProvider>
               <MomentProvider>
                 <PostProvider>
                   <PersonalNotificationProvider>
                     <UserProvider>
-                      <UsersProvider>
-                        <SocialNotificationProvider>
-                          <ThemeProvider>{isMounted && children}</ThemeProvider>
-                        </SocialNotificationProvider>
-                      </UsersProvider>
+                      <UsersProvider> */}
+        <SocialNotificationProvider>
+          <ThemeProvider>{isMounted && children}</ThemeProvider>
+        </SocialNotificationProvider>
+        {/* </UsersProvider>
                     </UserProvider>
                   </PersonalNotificationProvider>
                 </PostProvider>
               </MomentProvider>
             </TraceProvider>
           </ChatProvider>
-        </GeneralProvider>
+        </GeneralProvider> */}
       </body>
     </html>
   )
