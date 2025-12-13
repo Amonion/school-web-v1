@@ -27,12 +27,7 @@ import { PersonalNotificationProvider } from '@/context/HomeContext/PersonalNoti
 import { PostProvider } from '@/context/HomeContext/PostContext'
 import { MomentProvider } from '@/context/HomeContext/MomentContext'
 import { TraceProvider } from '@/context/HomeContext/TraceContext'
-// import { UserProvider } from '@/context/HomeContext/UserContext'
-// import { UsersProvider } from '@/context/TeamContext/UsersContext'
-// import { ChatProvider } from '@/context/HomeContext/ChatContext'
-// import { TraceProvider } from '@/context/HomeContext/TraceContext'
-// import { PostProvider } from '@/context/HomeContext/PostContext'
-// import { MomentProvider } from '@/context/HomeContext/MomentContext'
+import { ChatProvider } from '@/context/HomeContext/ChatContext'
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -179,8 +174,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-[100vh] bg-[var(--white-gray)] text-[var(--text-main-color)]`}
       >
-        {/* <GeneralProvider>
-          <ChatProvider> */}
+        {/* <GeneralProvider> */}
         <UsersProvider>
           <UserProvider>
             <TraceProvider>
@@ -188,7 +182,9 @@ export default function RootLayout({
                 <PostProvider>
                   <PersonalNotificationProvider>
                     <MomentProvider>
-                      <ThemeProvider>{isMounted && children}</ThemeProvider>
+                      <ChatProvider>
+                        <ThemeProvider>{isMounted && children}</ThemeProvider>
+                      </ChatProvider>
                     </MomentProvider>
                   </PersonalNotificationProvider>
                 </PostProvider>
@@ -196,8 +192,7 @@ export default function RootLayout({
             </TraceProvider>
           </UserProvider>
         </UsersProvider>
-        {/* </ChatProvider>
-        </GeneralProvider> */}
+        {/* </GeneralProvider> */}
       </body>
     </html>
   )
