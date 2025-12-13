@@ -4,13 +4,11 @@ import { NavStore } from '@/src/zustand/notification/Navigation'
 import PostDropList from '../Trace/PostResources/PostDropList'
 import { BioUserSchoolInfoStore } from '@/src/zustand/user/BioUserSchoolInfo'
 import { PostStore } from '@/src/zustand/post/Post'
-import AccountStore from '@/src/zustand/Trace/Account'
 
 export default function QuestionHeader() {
   const { setSearchedText, toggleVNav } = NavStore()
   const { setSearchedResult } = PostStore()
   const { setSearchedBioUserResult } = BioUserSchoolInfoStore()
-  const { setSearchedAccountResult } = AccountStore()
   const pathName = usePathname()
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -29,7 +27,6 @@ export default function QuestionHeader() {
     } else if (pathName === '/home/trace/people') {
       setSearchedBioUserResult()
     } else if (pathName === '/home/trace/accounts') {
-      setSearchedAccountResult()
     }
     // else if (pathName === '/home/trace/schools') {
     //   setSearchedSchoolResult()
