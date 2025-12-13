@@ -202,8 +202,7 @@ interface PostState {
   updatePost: (
     url: string,
     updatedItem: FormData | Record<string, unknown>,
-    setMessage: (message: string, isError: boolean) => void,
-    refreshUrl?: string
+    setMessage: (message: string, isError: boolean) => void
   ) => Promise<void>
   postItem: (
     url: string,
@@ -223,7 +222,7 @@ interface PostState {
   setCurrentIndex: (index: number) => void
 }
 
-export const PostStore = create<PostState>((set, get) => ({
+export const PostStore = create<PostState>((set) => ({
   links: null,
   count: 0,
   page_size: 20,
@@ -482,7 +481,9 @@ export const PostStore = create<PostState>((set, get) => ({
       if (posts.length > 0) {
         set({ postResults: posts })
       }
-      get().getPosts(`/posts/?myId=${user?._id}&page_size=40&page=1`)
+      PostStore.getState().getPosts(
+        `/posts/?myId=${user?._id}&page_size=40&page=1`
+      )
     } catch (error: unknown) {
       console.log(error)
     } finally {
@@ -729,17 +730,12 @@ export const PostStore = create<PostState>((set, get) => ({
     }
   },
 
-  updatePost: async (
-    url: string,
-    updatedItem: FormData | Record<string, unknown>,
-    setMessage: (message: string, isError: boolean) => void
-  ) => {
+  updatePost: async (url, updatedItem, setMessage) => {
     set({ loading: true, error: null })
     const response = await apiRequest<PostResponse>(url, {
       method: 'PATCH',
       body: updatedItem,
       setMessage,
-      setLoading: PostStore.getState().setLoading,
     })
     const data = response?.data?.data
     if (data) {

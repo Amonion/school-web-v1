@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import apiRequest from '@/lib/axios'
 import { initDB } from '@/lib/indexDB'
+import { User } from '../user/User'
 const MOMENTS_STORE = 'moments'
 
 export const getMomentsFromDB = async (page = 1, limit = 20) => {
@@ -142,11 +143,8 @@ interface MomentState {
   setIsEditing: (state: boolean, id: string, index: number) => void
   setForm: (key: keyof Moment, value: Moment[keyof Moment]) => void
   resetForm: () => void
-  getSavedMoments: () => void
-  getMoments: (
-    url: string,
-    setMessage: (message: string, isError: boolean) => void
-  ) => Promise<void>
+  getSavedMoments: (user: User) => void
+  getMoments: (url: string) => Promise<void>
   setProcessedResults: (data: FetchMomentResponse) => void
   deleteMoment: (
     url: string,
@@ -227,13 +225,18 @@ export const MomentStore = create<MomentState>((set) => ({
     })
   },
 
-  getSavedMoments: async () => {
+  getSavedMoments: async (user) => {
     try {
       set({ loading: true })
       const moments = await getMomentsFromDB()
       if (moments) {
         set({ moments: moments })
       }
+      MomentStore.getState().getMoments(
+        `/posts/moments/?myId=${
+          user._id
+        }&page_size=20&page=${1}&ordering=-createdAt`
+      )
     } catch (error: unknown) {
       console.log(error)
     } finally {
@@ -269,11 +272,9 @@ export const MomentStore = create<MomentState>((set) => ({
     })
   },
 
-  getMoments: async (url, setMessage) => {
+  getMoments: async (url) => {
     try {
-      const response = await apiRequest<FetchMomentResponse>(url, {
-        setMessage,
-      })
+      const response = await apiRequest<FetchMomentResponse>(url)
       const data = response?.data
       if (data) {
         const moments = MomentStore.getState().moments

@@ -2,10 +2,14 @@
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import { useParams, usePathname } from 'next/navigation'
-import PositionStore, { Position } from '@/src/zustand/app/Position'
+import PositionStore, {
+  Position,
+  PositionEmpty,
+} from '@/src/zustand/app/Position'
 import { MessageStore } from '@/src/zustand/notification/Message'
 import LinkedPagination from '../LinkedPagination'
 import CreatePosition from './CreatePosition'
+import CustomBtn from '@/components/CustomBtn'
 
 const PositionTable: React.FC = () => {
   const url = '/company/positions/'
@@ -59,6 +63,11 @@ const PositionTable: React.FC = () => {
     PositionStore.setState({ positionFormData: item })
     showPositionForm(true)
   }
+
+  const displayPositionForm = () => {
+    PositionStore.setState({ positionFormData: PositionEmpty })
+    showPositionForm(true)
+  }
   return (
     <>
       {positionResults.length > 0 ? (
@@ -109,7 +118,14 @@ const PositionTable: React.FC = () => {
                 >
                   {item.position}
                 </td>
-                <td>{item.duties}</td>
+                <td>
+                  <div
+                    className=""
+                    dangerouslySetInnerHTML={{
+                      __html: item.duties,
+                    }}
+                  />
+                </td>
                 <td>${item.salary}</td>
                 <td>
                   <div>{item.level}</div>
@@ -146,6 +162,13 @@ const PositionTable: React.FC = () => {
               onClick={DeleteItems}
               className="bi bi-trash text-lg cursor-pointer mr-3 text-[var(--custom)]"
             ></i>
+            <div className="ml-auto">
+              <CustomBtn
+                onClick={displayPositionForm}
+                loading={false}
+                label={'Create Position'}
+              />
+            </div>
           </div>
         )}
       </div>

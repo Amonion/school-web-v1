@@ -3,10 +3,12 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect, useRef } from 'react'
 import { useParams } from 'next/navigation'
-import StaffStore from '@/src/zustand/app/Staff'
+import StaffStore, { Staff } from '@/src/zustand/app/Staff'
 import { MessageStore } from '@/src/zustand/notification/Message'
 import LinkedPagination from '../LinkedPagination'
 import CustomBtn from '../../CustomBtn'
+import CountryStore from '@/src/zustand/place/CountryOrigin'
+import StaffForm from './StaffForm'
 
 const ComponentStaffs: React.FC = () => {
   const url = '/staffs/'
@@ -17,6 +19,9 @@ const ComponentStaffs: React.FC = () => {
     loading,
     isAllChecked,
     searchedStaffs,
+    isForm,
+    showForm,
+    fillForm,
     searchStaff,
     getItems,
     toggleAllSelected,
@@ -28,17 +33,26 @@ const ComponentStaffs: React.FC = () => {
   const [sort] = useState('-createdAt')
   const { setMessage } = MessageStore()
   const inputRef = useRef<HTMLInputElement>(null)
-
+  const { countries, getCountries } = CountryStore()
+  const params = `?page_size=${page_size}&page=${
+    page ? page : 1
+  }&ordering=${sort}&isActive=true`
   // useEffect(() => {
   //   reshuffleResults()
   // }, [pathname])
 
   useEffect(() => {
-    const params = `?page_size=${page_size}&page=${
-      page ? page : 1
-    }&ordering=${sort}&isActive=true`
     getItems(`${url}${params}`, setMessage)
   }, [page])
+
+  useEffect(() => {
+    if (countries.length === 0) {
+      getCountries(
+        `/places/countries/?country=&page_size=350&field=country&sort=country`,
+        setMessage
+      )
+    }
+  }, [])
 
   const makeUsersStaffs = async () => {
     if (selectedItems.length === 0) {
@@ -47,13 +61,12 @@ const ComponentStaffs: React.FC = () => {
     }
     const usersIds = selectedItems.map((user) => user.bioUserId)
 
-    await massDelete(
-      `${url}?page_size=${page_size}&page=${
-        page ? page : 1
-      }&ordering=${sort}&isActive=true`,
-      { usersIds },
-      setMessage
-    )
+    await massDelete(`${url}${params}`, { usersIds }, setMessage)
+  }
+
+  const showStaff = async (staff: Staff) => {
+    fillForm(staff)
+    showForm(true)
   }
 
   const handleSearchStaffs = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -176,12 +189,12 @@ const ComponentStaffs: React.FC = () => {
                     )}
                   </td>
                   <td>
-                    <Link
-                      className="card_list_item"
-                      href={`/team/users/onverification/verification-details/?username=${item.bioUserUsername}/`}
+                    <div
+                      onClick={() => showStaff(item)}
+                      className="card_list_item cursor-pointer"
                     >
                       {item.firstName} {item.lastName}
-                    </Link>
+                    </div>
                   </td>
                   <td>
                     <div>{item.position}</div>
@@ -246,6 +259,7 @@ const ComponentStaffs: React.FC = () => {
           page_size={20}
         />
       </div>
+      {isForm && <StaffForm />}
     </>
   )
 }

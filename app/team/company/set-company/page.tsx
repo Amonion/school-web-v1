@@ -231,7 +231,7 @@ const CreateCompany: React.FC = () => {
           ></textarea>
         </div>
 
-        <div className="table-action flex flex-wrap">
+        <div className="table-action gap-5 flex flex-wrap">
           {loading ? (
             <button className="custom_btn">
               <i className="bi bi-opencollective loading"></i>
@@ -244,9 +244,6 @@ const CreateCompany: React.FC = () => {
               </button>
               <Link href="/team/company" className="custom_btn ">
                 Staff Table
-              </Link>
-              <Link href="/team/company/branches" className="custom_btn">
-                Branches Table
               </Link>
             </>
           )}

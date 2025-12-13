@@ -63,15 +63,17 @@ interface PositionsState {
     setMessage: (message: string, isError: boolean) => void,
     setAction: (isLoading: boolean, isSuccess: boolean) => void
   ) => Promise<void>
-  updateItem: (
+  updatePosition: (
     url: string,
     updatedItem: FormData | Record<string, unknown>,
-    setMessage: (message: string, isError: boolean) => void
+    setMessage: (message: string, isError: boolean) => void,
+    redirect?: () => void
   ) => Promise<void>
-  postItem: (
+  createPosition: (
     url: string,
     updatedItem: FormData | Record<string, unknown>,
-    setMessage: (message: string, isError: boolean) => void
+    setMessage: (message: string, isError: boolean) => void,
+    redirect?: () => void
   ) => Promise<void>
   toggleChecked: (index: number) => void
   toggleActive: (index: number) => void
@@ -214,43 +216,37 @@ const PositionStore = create<PositionsState>((set) => ({
     }
   },
 
-  updateItem: async (
-    url: string,
-    updatedItem: FormData | Record<string, unknown>,
-    setMessage: (message: string, isError: boolean) => void
-  ) => {
-    set({ loading: true })
-    const response = await apiRequest<FetchPositionResponse>(url, {
-      method: 'PATCH',
-      body: updatedItem,
-      setMessage,
-      setLoading: PositionStore.getState().setLoading,
-    })
-    if (response?.status !== 404 && response?.data) {
-      set({ loading: false })
-      PositionStore.getState().setProcessedResults(response.data)
-    } else {
-      set({ loading: false })
+  updatePosition: async (url, updatedItem, setMessage, redirect) => {
+    try {
+      const response = await apiRequest<FetchPositionResponse>(url, {
+        method: 'PATCH',
+        body: updatedItem,
+        setMessage,
+        setLoading: PositionStore.getState().setLoading,
+      })
+      if (response?.data) {
+        PositionStore.getState().setProcessedResults(response.data)
+      }
+      if (redirect) redirect()
+    } catch (error) {
+      console.log(error)
     }
   },
 
-  postItem: async (
-    url: string,
-    updatedItem: FormData | Record<string, unknown>,
-    setMessage: (message: string, isError: boolean) => void
-  ) => {
-    set({ loading: true })
-    const response = await apiRequest<FetchPositionResponse>(url, {
-      method: 'POST',
-      body: updatedItem,
-      setMessage,
-      setLoading: PositionStore.getState().setLoading,
-    })
-    if (response?.status !== 404 && response?.data) {
-      set({ loading: false })
-      PositionStore.getState().setProcessedResults(response.data)
-    } else {
-      set({ loading: false })
+  createPosition: async (url, updatedItem, setMessage, redirect) => {
+    try {
+      const response = await apiRequest<FetchPositionResponse>(url, {
+        method: 'POST',
+        body: updatedItem,
+        setMessage,
+        setLoading: PositionStore.getState().setLoading,
+      })
+      if (response?.data) {
+        PositionStore.getState().setProcessedResults(response.data)
+      }
+      if (redirect) redirect()
+    } catch (error) {
+      console.log(error)
     }
   },
 

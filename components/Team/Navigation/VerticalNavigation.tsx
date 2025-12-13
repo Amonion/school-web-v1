@@ -153,7 +153,7 @@ export default function VerticalNavigation() {
             News
           </Link>
 
-          <div className={`v_nav_items`}>
+          <div className={`v_nav_items line`}>
             <div className="flex cursor-pointer items-center py-2">
               <i className="bi bi-trophy mr-3"></i>
               Competitions
@@ -177,7 +177,7 @@ export default function VerticalNavigation() {
             </div>
           </div>
 
-          <div className={`v_nav_items`}>
+          <div className={`v_nav_items line`}>
             <div className="flex cursor-pointer items-center py-2">
               <i className="bi bi-envelope mr-3"></i>
               Messages
@@ -198,7 +198,7 @@ export default function VerticalNavigation() {
             </div>
           </div>
 
-          <div className={`v_nav_items`}>
+          <div className={`v_nav_items line`}>
             <div className="flex cursor-pointer items-center py-2">
               <i className="bi bi-diagram-3 mr-3"></i>
               Company
@@ -215,9 +215,6 @@ export default function VerticalNavigation() {
               </Link>
               <Link className="inner_nav_items" href="/team/company/expenses">
                 Expenses
-              </Link>
-              <Link className="inner_nav_items" href="/team/company">
-                Branches
               </Link>
             </div>
           </div>

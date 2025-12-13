@@ -12,13 +12,8 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 export default function Moments() {
-  const {
-    moments,
-    activeMomentIndex,
-    activeMoment,
-    openMomentModal,
-    userHasMoment,
-  } = MomentStore()
+  const { moments, activeMomentIndex, activeMoment, openMomentModal } =
+    MomentStore()
   const { isMobile } = CommentStore()
   const { user } = AuthStore()
   const touchStartY = useRef(0)
@@ -61,32 +56,28 @@ export default function Moments() {
 
       <div className="w-full overflow-x-auto py-2 mb-2">
         <div className="flex gap-2 sm:gap-3 px-2 md:px-0">
-          {!userHasMoment && (
-            <Link
-              href={`/home/moment/create-moment`}
-              className="story bg-[var(--primary)] relative flex flex-col justify-between p-1 cursor-pointer"
-            >
-              <div className="absolute z-0 w-full h-2/3 top-0 left-0">
-                {user && (
-                  <Image
-                    src={
-                      user.picture
-                        ? String(user?.picture)
-                        : '/images/avatar.jpg'
-                    }
-                    alt={user?.username}
-                    fill
-                    className="object-cover"
-                  />
-                )}
-                <div className="w-10 z-10 absolute left-[50%] -bottom-5 translate-x-[-50%] h-10 border-[var(--border)] rounded-full bg-[var(--secondary)] flex items-center justify-center text-[var(--custom)] border">
-                  <Plus size={20} />
-                </div>
+          <Link
+            href={`/home/moment/create-moment`}
+            className="story bg-[var(--primary)] relative flex flex-col justify-between p-1 cursor-pointer"
+          >
+            <div className="absolute z-0 w-full h-2/3 top-0 left-0">
+              {user && (
+                <Image
+                  src={
+                    user.picture ? String(user?.picture) : '/images/avatar.jpg'
+                  }
+                  alt={user?.username}
+                  fill
+                  className="object-cover"
+                />
+              )}
+              <div className="w-10 z-10 absolute left-[50%] -bottom-5 translate-x-[-50%] h-10 border-[var(--border)] rounded-full bg-[var(--secondary)] flex items-center justify-center text-[var(--custom)] border">
+                <Plus size={20} />
               </div>
+            </div>
 
-              <span className="text-[12px] mt-auto">Share moments</span>
-            </Link>
-          )}
+            <span className="text-[12px] mt-auto">Share moments</span>
+          </Link>
 
           {moments.map((moment, idx) => (
             <div

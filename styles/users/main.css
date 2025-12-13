@@ -65,10 +65,10 @@ ol li{
 }
 
 .card_body {
-  @apply bg-[var(--white)] py-5  md:px-5 px-[10px] md:rounded-xl rounded-none;
+  @apply bg-[var(--white)] py-5 lg:min-w-[700px] md:px-5 px-[10px] md:rounded-xl rounded-none;
 }
 .card_body.sharp {
-  @apply bg-[var(--white)] py-5  md:px-5 px-[10px] md:rounded-none rounded-none;
+  @apply bg-[var(--white)] w-full py-5  md:px-5 px-[10px] md:rounded-none rounded-none;
 }
 
 .card_body.pad {
@@ -186,7 +186,6 @@ ol li{
   @apply w-full z-30 absolute left-0  border border-[var(--border)] bg-[var(--primary)] max-h-[300px] overflow-auto rounded-[5px]
 }
 
-
 .dropList {
  @apply transition-[height] h-0  duration-300  max-h-[300px] left-0 w-full top-[60px] z-30  rounded-[5px] overflow-hidden bg-[var(--primary)]
 
@@ -194,6 +193,9 @@ ol li{
 
 .dropList.rel{
   @apply relative top-0 mt-1 h-auto max-h-[300px] overflow-auto border border-[var(--border)]
+}
+.dropList.abs{
+  @apply absolute min-w-[200px] top-[60px] mt-1 h-auto max-h-[300px] overflow-auto border border-[var(--border)]
 }
 
 .eachComment{
@@ -214,6 +216,10 @@ ol li{
 
 .follow_btn.active {
   @apply bg-[var(--custom-color)] text-white  border-[var(--custom)];
+}
+
+.formField{
+  @apply flex flex-col relative mb-4 min-w-[200px]
 }
 
 .full_chat_wrapper {

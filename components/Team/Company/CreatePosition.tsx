@@ -6,6 +6,7 @@ import PositionStore from '@/src/zustand/app/Position'
 import { MessageStore } from '@/src/zustand/notification/Message'
 import CustomBtn from '@/components/CustomBtn'
 import { useParams } from 'next/navigation'
+import QuillEditor from '../Editor/QuillEditor'
 
 const CreatePosition: React.FC = () => {
   const url = '/company/positions/'
@@ -21,8 +22,8 @@ const CreatePosition: React.FC = () => {
     loading,
     showPositionForm,
     setPositionForm,
-    postItem,
-    updateItem,
+    createPosition,
+    updatePosition,
   } = PositionStore()
 
   const handleInputChange = (
@@ -37,7 +38,7 @@ const CreatePosition: React.FC = () => {
       {
         name: 'duties',
         value: positionFormData.duties,
-        rules: { blank: true, minLength: 1, maxLength: 100 },
+        rules: { blank: true, minLength: 1 },
         field: 'Duties',
       },
       {
@@ -61,7 +62,7 @@ const CreatePosition: React.FC = () => {
       {
         name: 'position',
         value: positionFormData.position,
-        rules: { blank: true, minLength: 3, maxLength: 100 },
+        rules: { blank: true, minLength: 3, maxLength: 500 },
         field: 'Position',
       },
     ]
@@ -84,13 +85,14 @@ const CreatePosition: React.FC = () => {
     }
     const data = appendForm(inputsToValidate)
     if (positionFormData._id) {
-      updateItem(
+      updatePosition(
         `${url}${positionFormData._id}/${queryParams}`,
         data,
-        setMessage
+        setMessage,
+        () => showPositionForm(false)
       )
     } else {
-      await postItem(url, data, setMessage)
+      await createPosition(url, data, setMessage, () => showPositionForm(false))
     }
   }
 
@@ -168,14 +170,11 @@ const CreatePosition: React.FC = () => {
               <label className="label" htmlFor="">
                 Duties
               </label>
-              <textarea
-                value={positionFormData.duties}
-                onChange={handleInputChange}
-                className="form-input"
-                placeholder="Start writin"
-                name="duties"
-                id=""
-              ></textarea>
+              <QuillEditor
+                contentValue={positionFormData.duties}
+                placeHolder="Write user duties here..."
+                onChange={(content) => setPositionForm('duties', content)}
+              />
             </div>
             <div className="table-action flex">
               <div className="">

@@ -66,15 +66,17 @@ interface StaffsState {
   selectedItems: Staff[]
   searchedStaffs: Staff[]
   isAllChecked: boolean
+  isForm: boolean
   staffForm: Staff
   setForm: (key: keyof Staff, value: Staff[keyof Staff]) => void
   resetForm: () => void
+  fillForm: (f: Staff) => void
+  showForm: (s: boolean) => void
   getItems: (
     url: string,
     setMessage: (message: string, isError: boolean) => void
   ) => Promise<void>
   setProcessedResults: (data: FetchStaffsResponse) => void
-  setLoading?: (loading: boolean) => void
   massDelete: (
     url: string,
     selectedItems: Record<string, unknown>,
@@ -84,11 +86,11 @@ interface StaffsState {
     url: string,
     setMessage: (message: string, isError: boolean) => void
   ) => Promise<void>
-  updateItem: (
+  updateStaff: (
     url: string,
     updatedItem: FormData | Record<string, unknown>,
     setMessage: (message: string, isError: boolean) => void,
-    refreshUrl?: string
+    refreshUrl?: () => void
   ) => Promise<void>
   postItem: (
     url: string,
@@ -110,6 +112,7 @@ const StaffStore = create<StaffsState>((set) => ({
   selectedItems: [],
   searchedStaffs: [],
   isAllChecked: false,
+  isForm: false,
   staffForm: StaffEmpty,
   setForm: (key, value) =>
     set((state) => ({
@@ -121,6 +124,10 @@ const StaffStore = create<StaffsState>((set) => ({
   resetForm: () =>
     set({
       staffForm: StaffEmpty,
+    }),
+  fillForm: (form) =>
+    set({
+      staffForm: form,
     }),
 
   setProcessedResults: ({ count, page_size, results }: FetchStaffsResponse) => {
@@ -140,6 +147,9 @@ const StaffStore = create<StaffsState>((set) => ({
     }
   },
 
+  showForm: (loadState: boolean) => {
+    set({ isForm: loadState })
+  },
   setLoading: (loadState: boolean) => {
     set({ loading: loadState })
   },
@@ -151,7 +161,6 @@ const StaffStore = create<StaffsState>((set) => ({
     try {
       const response = await apiRequest<FetchStaffsResponse>(url, {
         setMessage,
-        setLoading: StaffStore.getState().setLoading,
       })
       const data = response?.data
       if (data) {
@@ -201,15 +210,20 @@ const StaffStore = create<StaffsState>((set) => ({
     set({
       loading: true,
     })
-    const response = await apiRequest<FetchStaffsResponse>(url, {
-      method: 'PATCH',
-      body: selectedItems,
-      setMessage,
-      setLoading: StaffStore.getState().setLoading,
-    })
-    const data = response.data
-    if (data) {
-      StaffStore.getState().setProcessedResults(data)
+    try {
+      const response = await apiRequest<FetchStaffsResponse>(url, {
+        method: 'PATCH',
+        body: selectedItems,
+        setMessage,
+      })
+      const data = response.data
+      if (data) {
+        StaffStore.getState().setProcessedResults(data)
+      }
+    } catch (error) {
+      console.log(error)
+    } finally {
+      set({ loading: false })
     }
   },
 
@@ -217,47 +231,53 @@ const StaffStore = create<StaffsState>((set) => ({
     url: string,
     setMessage: (message: string, isError: boolean) => void
   ) => {
-    set({
-      loading: true,
-    })
-    const response = await apiRequest<FetchStaffsResponse>(url, {
-      method: 'DELETE',
-      setMessage,
-      setLoading: StaffStore.getState().setLoading,
-    })
-    if (response) {
+    try {
+      set({ loading: true })
+      const response = await apiRequest<FetchStaffsResponse>(url, {
+        method: 'DELETE',
+        setMessage,
+      })
+      if (response) {
+      }
+    } catch (error) {
+      console.log(error)
+    } finally {
+      set({ loading: false })
     }
   },
 
-  updateItem: async (
-    url: string,
-    updatedItem: FormData | Record<string, unknown>,
-    setMessage: (message: string, isError: boolean) => void
-  ) => {
-    const response = await apiRequest<FetchStaffsResponse>(url, {
-      method: 'PATCH',
-      body: updatedItem,
-      setMessage,
-      setLoading: StaffStore.getState().setLoading,
-    })
-    if (response?.status !== 404 && response?.data) {
-      StaffStore.getState().setProcessedResults(response.data)
+  updateStaff: async (url, updatedItem, setMessage, redirect) => {
+    try {
+      const response = await apiRequest<FetchStaffsResponse>(url, {
+        method: 'PATCH',
+        body: updatedItem,
+        setMessage,
+      })
+      if (response?.data) {
+        StaffStore.getState().setProcessedResults(response.data)
+      }
+      if (redirect) redirect()
+    } catch (error) {
+      console.log(error)
+    } finally {
+      set({ loading: false })
     }
   },
 
-  postItem: async (
-    url: string,
-    updatedItem: FormData | Record<string, unknown>,
-    setMessage: (message: string, isError: boolean) => void
-  ) => {
-    const response = await apiRequest<FetchStaffsResponse>(url, {
-      method: 'POST',
-      body: updatedItem,
-      setMessage,
-      setLoading: StaffStore.getState().setLoading,
-    })
-    if (response?.status !== 404 && response?.data) {
-      StaffStore.getState().setProcessedResults(response.data)
+  postItem: async (url, updatedItem, setMessage) => {
+    try {
+      const response = await apiRequest<FetchStaffsResponse>(url, {
+        method: 'POST',
+        body: updatedItem,
+        setMessage,
+      })
+      if (response?.data) {
+        StaffStore.getState().setProcessedResults(response.data)
+      }
+    } catch (error) {
+      console.log(error)
+    } finally {
+      set({ loading: false })
     }
   },
 

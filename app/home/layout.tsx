@@ -4,7 +4,7 @@ import '../../styles/users/main.css'
 import '../../styles/users/onboard.css'
 import UserResponse from '../../components/Messages/UserResponse'
 import UserAlert from '@/components/Messages/UserAlert'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { usePathname } from 'next/navigation'
 import AsideFriends from '@/components/Home/Navigation/AsideFriends'
 import VerticalNavigation from '@/components/Home/Navigation/VerticalNavigation'
@@ -12,9 +12,6 @@ import { NavStore } from '@/src/zustand/notification/Navigation'
 import MainHeader from '@/components/Home/Navigation/MainHeader'
 import MobileNav from '@/components/Home/Navigation/MobileNav'
 import CommentBottomSheet from '@/components/Home/Comment/CommentBottomSheet'
-import { AuthStore } from '@/src/zustand/user/AuthStore'
-import { deleteAllMomentsFromDB, MomentStore } from '@/src/zustand/post/Moment'
-import { MessageStore } from '@/src/zustand/notification/Message'
 
 export default function RootLayout({
   children,
@@ -24,11 +21,7 @@ export default function RootLayout({
   const { headerHeight, setShowHeader, setHeaderHeight } = NavStore()
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
   const lastScrollY = useRef(0)
-  const { getMoments, getSavedMoments } = MomentStore()
   const isOutOfView = useRef(false)
-  const { user } = AuthStore()
-  const { setMessage } = MessageStore()
-  const [command] = useState('delet')
   const pathname = usePathname()
 
   useEffect(() => {
@@ -54,21 +47,6 @@ export default function RootLayout({
       container.removeEventListener('scroll', handleScroll)
     }
   }, [])
-
-  useEffect(() => {
-    if (command === 'delete') {
-      deleteAllMomentsFromDB()
-    }
-    if (user && command !== 'delete') {
-      getSavedMoments()
-      getMoments(
-        `/posts/moments/?myId=${
-          user._id
-        }&page_size=20&page=${1}&ordering=-createdAt`,
-        setMessage
-      )
-    }
-  }, [user])
 
   useEffect(() => {
     if (pathname.includes('/home/friends')) {
