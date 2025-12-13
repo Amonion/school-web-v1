@@ -21,6 +21,7 @@ import CompanyStore from '@/src/zustand/app/Company'
 import { getPendingMessages } from '@/lib/indexDB'
 import useSocket from '@/src/useSocket'
 import { SocialNotificationProvider } from '@/context/SocialNotificationContext'
+import { UsersProvider } from '@/context/TeamContext/UsersContext'
 // import { UserProvider } from '@/context/HomeContext/UserContext'
 // import { UsersProvider } from '@/context/TeamContext/UsersContext'
 // import { ChatProvider } from '@/context/HomeContext/ChatContext'
@@ -179,13 +180,13 @@ export default function RootLayout({
               <MomentProvider>
                 <PostProvider>
                   <PersonalNotificationProvider>
-                    <UserProvider>
-                      <UsersProvider> */}
-        <SocialNotificationProvider>
-          <ThemeProvider>{isMounted && children}</ThemeProvider>
-        </SocialNotificationProvider>
-        {/* </UsersProvider>
-                    </UserProvider>
+                    <UserProvider> */}
+        <UsersProvider>
+          <SocialNotificationProvider>
+            <ThemeProvider>{isMounted && children}</ThemeProvider>
+          </SocialNotificationProvider>
+        </UsersProvider>
+        {/* </UserProvider>
                   </PersonalNotificationProvider>
                 </PostProvider>
               </MomentProvider>
