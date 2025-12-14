@@ -24,7 +24,7 @@ const PostStat: React.FC<PostProps> = ({ post }) => {
     setIsLiked(true)
     PostStore.setState((state) => {
       const updatedPosts = state.postResults.map((p) =>
-        p.username === post.username
+        p._id === post._id
           ? {
               ...p,
               liked: !p.liked,
@@ -37,7 +37,7 @@ const PostStat: React.FC<PostProps> = ({ post }) => {
     })
 
     const updatedPost = PostStore.getState().postResults.find(
-      (p) => p.username === post.username
+      (p) => p._id === post._id
     )
 
     updatePost(
@@ -51,7 +51,7 @@ const PostStat: React.FC<PostProps> = ({ post }) => {
     setIsSaved(true)
     PostStore.setState((state) => {
       const updatedPosts = state.postResults.map((p) =>
-        p.username === post.username
+        p._id === post._id
           ? {
               ...p,
               bookmarked: !p.bookmarked,
@@ -64,7 +64,7 @@ const PostStat: React.FC<PostProps> = ({ post }) => {
     })
 
     const updatedPost = PostStore.getState().postResults.find(
-      (p) => p.username === post.username
+      (p) => p._id === post._id
     )
 
     updatePost(
