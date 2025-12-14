@@ -1,7 +1,6 @@
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { NavStore } from '@/src/zustand/notification/Navigation'
-import PostDropList from '../Trace/PostResources/PostDropList'
 import { BioUserSchoolInfoStore } from '@/src/zustand/user/BioUserSchoolInfo'
 
 export default function QuestionHeader() {
@@ -65,8 +64,6 @@ export default function QuestionHeader() {
           <i className="bi bi-search common-icon "></i>
         </div>
       </div>
-
-      <PostDropList />
     </div>
   )
 }
