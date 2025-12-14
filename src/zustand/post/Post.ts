@@ -1,5 +1,4 @@
 import { create } from 'zustand'
-import _debounce from 'lodash/debounce'
 import apiRequest from '@/lib/axios'
 import { User } from '../user/User'
 import { initDB } from '@/lib/indexDB'
@@ -122,7 +121,6 @@ export const PostEmpty = {
 }
 
 interface PostState {
-  links: { next: string | null; previous: string | null } | null
   count: number
   page_size: number
   currentPage: number
@@ -133,22 +131,16 @@ interface PostState {
   followingPostResults: Post[]
   bookmarkedPostResults: Post[]
   loading: boolean
-  error: string | null
-  successs?: string | null
   selectedPosts: Post[]
-  searchedPostResult: Post[]
-  searchedPosts: Post[]
   hasMore: boolean
   isPlaying: boolean
   isMobile: boolean
   fitMode: boolean
-  hasMoreSearch: boolean
   hasMoreBookmarks: boolean
   hasMoreFollowing: boolean
   postForm: Post
   setForm: (key: keyof Post, value: Post[keyof Post]) => void
   resetForm: () => void
-  clearSearchedPosts: () => void
   getPosts: (url: string) => Promise<void>
   getSavedPosts: (user: User) => Promise<void>
   addMorePosts: (
@@ -163,12 +155,11 @@ interface PostState {
     url: string,
     setMessage: (message: string, isError: boolean) => void
   ) => Promise<void>
-  getQueryPosts: (url: string) => Promise<void>
   getAPost: (
     url: string,
     setMessage: (message: string, isError: boolean) => void
   ) => Promise<void>
-  setProcessedResults: (data: FetchPostResponse) => void
+  setProcessedResults: (posts: Post[]) => void
   processMoreResults: (data: FetchPostResponse) => void
   setFollowingResults: (data: FetchPostResponse) => void
   setBookmarkedResults: (data: FetchPostResponse) => void
@@ -213,9 +204,6 @@ interface PostState {
   togglePost: (index: number) => void
   toggleActive: (id: string) => void
   reshuffleResults: () => void
-  setSearchedResult: () => void
-  searchItem: (url: string) => void
-  addMoreSearchItems: (url: string) => void
   setIsMobile: (mobile: boolean) => void
   setSelectedMedia: (media: IMedia | null) => void
   setFitMode: (mode: boolean) => void
@@ -223,7 +211,6 @@ interface PostState {
 }
 
 export const PostStore = create<PostState>((set) => ({
-  links: null,
   count: 0,
   page_size: 20,
   currentPage: 1,
@@ -234,12 +221,8 @@ export const PostStore = create<PostState>((set) => ({
   bookmarkedPostResults: [],
   selectedMedia: null,
   loading: false,
-  error: null,
   selectedPosts: [],
-  searchedPostResult: [],
-  searchedPosts: [],
   hasMore: false,
-  hasMoreSearch: true,
   isPlaying: true,
   isMobile: false,
   fitMode: false,
@@ -328,7 +311,7 @@ export const PostStore = create<PostState>((set) => ({
     })
   },
 
-  setProcessedResults: ({ count, results }: FetchPostResponse) => {
+  setProcessedResults: (results) => {
     set((state) => {
       const updatedResults = results.map((item: Post) => ({
         ...item,
@@ -371,7 +354,6 @@ export const PostStore = create<PostState>((set) => ({
       return {
         hasMore: state.page_size === results.length,
         loading: false,
-        count,
         postResults: updatedResults,
         mediaResults: mediaResults,
       }
@@ -436,16 +418,6 @@ export const PostStore = create<PostState>((set) => ({
     }))
   },
 
-  setSearchedResult: () => {
-    set((prev) => {
-      return { searchedPosts: prev.searchedPostResult, searchedPostResult: [] }
-    })
-  },
-
-  clearSearchedPosts: () => {
-    set({ searchedPostResult: [] })
-  },
-
   setCurrentPage: (page: number) => {
     set({ currentPage: page })
   },
@@ -479,6 +451,7 @@ export const PostStore = create<PostState>((set) => ({
     try {
       const posts = await getPostsFromDB(20, 1)
       if (posts.length > 0) {
+        PostStore.getState().setProcessedResults(posts)
         set({ postResults: posts })
       }
       PostStore.getState().getPosts(
@@ -498,28 +471,7 @@ export const PostStore = create<PostState>((set) => ({
       })
       const data = response?.data
       if (data) {
-        PostStore.getState().setProcessedResults(data)
-      }
-    } catch (error: unknown) {
-      console.log(error)
-    } finally {
-      set({ loading: false })
-    }
-  },
-
-  getQueryPosts: async (url: string) => {
-    try {
-      const response = await apiRequest<FetchPostResponse>(url, {
-        setLoading: PostStore.getState().setLoading,
-      })
-      const data = response?.data
-      if (data) {
-        set((prev) => {
-          return {
-            searchedPosts: data.results,
-            hasMoreSearch: data.results.length === prev.page_size,
-          }
-        })
+        PostStore.getState().setProcessedResults(data.results)
       }
     } catch (error: unknown) {
       console.log(error)
@@ -540,27 +492,6 @@ export const PostStore = create<PostState>((set) => ({
       const data = response?.data
       if (data) {
         PostStore.getState().processMoreResults(data)
-      }
-    } catch (error: unknown) {
-      console.log(error)
-    } finally {
-      set({ loading: false })
-    }
-  },
-
-  addMoreSearchItems: async (url: string) => {
-    try {
-      const response = await apiRequest<FetchPostResponse>(url, {
-        setLoading: PostStore.getState().setLoading,
-      })
-      const { results } = response?.data
-      if (results) {
-        set((prev) => {
-          return {
-            searchedPosts: [...prev.searchedPosts, ...results],
-            hasMoreSearch: results.length === prev.page_size,
-          }
-        })
       }
     } catch (error: unknown) {
       console.log(error)
@@ -619,21 +550,6 @@ export const PostStore = create<PostState>((set) => ({
     }))
   },
 
-  searchItem: _debounce(async (url: string) => {
-    try {
-      set({ loading: true })
-      const response = await apiRequest<FetchPostResponse>(url)
-      const { results } = response?.data
-      if (results) {
-        set({ searchedPostResult: results })
-      }
-    } catch (error) {
-      console.log(error)
-    } finally {
-      set({ loading: false })
-    }
-  }, 1000),
-
   massDelete: async (
     url: string,
     refreshUrl: string,
@@ -684,7 +600,7 @@ export const PostStore = create<PostState>((set) => ({
     setMessage: (message: string, isError: boolean) => void,
     setProgress?: (int: number) => void
   ) => {
-    set({ loading: true, error: null })
+    set({ loading: true })
     const response = await apiRequest<Post>(url, {
       method: 'POST',
       body: updatedItem,
@@ -703,7 +619,7 @@ export const PostStore = create<PostState>((set) => ({
     updatedItem: FormData | Record<string, unknown>
   ) => {
     try {
-      set({ loading: true, error: null })
+      set({ loading: true })
       await apiRequest<PostResponse>(url, {
         method: 'POST',
         body: updatedItem,
@@ -711,7 +627,7 @@ export const PostStore = create<PostState>((set) => ({
     } catch (error) {
       console.log(error)
     } finally {
-      set({ loading: false, error: null })
+      set({ loading: false })
     }
   },
 
@@ -758,7 +674,7 @@ export const PostStore = create<PostState>((set) => ({
     url: string,
     updatedItem: FormData | Record<string, unknown>
   ) => {
-    set({ loading: true, error: null })
+    set({ loading: true })
     await apiRequest<PostResponse>(url, {
       method: 'POST',
       body: updatedItem,
