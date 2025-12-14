@@ -466,11 +466,11 @@ const SocialStore = create<PostState>((set, get) => ({
                 ? { ...post, blocked: data.blocked }
                 : post
             ),
-            searchedPosts: state.searchedPosts.map((post) =>
-              post.userId === data.accountUserId
-                ? { ...post, blocked: data.blocked }
-                : post
-            ),
+            // searchedPosts: state.searchedPosts.map((post) =>
+            //   post.userId === data.accountUserId
+            //     ? { ...post, blocked: data.blocked }
+            //     : post
+            // ),
           }
         })
       }
@@ -505,11 +505,11 @@ const SocialStore = create<PostState>((set, get) => ({
                 ? { ...post, blocked: false, isActive: false }
                 : post
             ),
-            searchedPosts: state.searchedPosts.map((post) =>
-              post.userId === data.id
-                ? { ...post, blocked: false, isActive: false }
-                : post
-            ),
+            // searchedPosts: state.searchedPosts.map((post) =>
+            //   post.userId === data.id
+            //     ? { ...post, blocked: false, isActive: false }
+            //     : post
+            // ),
           }
         })
       }
@@ -573,11 +573,11 @@ const SocialStore = create<PostState>((set, get) => ({
                 ? { ...post, followed: false, isActive: false }
                 : post
             ),
-            searchedPosts: state.searchedPosts.map((post) =>
-              post.userId === data.id
-                ? { ...post, followed: false, isActive: false }
-                : post
-            ),
+            // searchedPosts: state.searchedPosts.map((post) =>
+            //   post.userId === data.id
+            //     ? { ...post, followed: false, isActive: false }
+            //     : post
+            // ),
           }
         })
       }
@@ -610,9 +610,9 @@ const SocialStore = create<PostState>((set, get) => ({
             postResults: state.postResults.map((post) =>
               post.userId === data.id ? { ...post, followed: true } : post
             ),
-            searchedPosts: state.searchedPosts.map((post) =>
-              post.userId === data.id ? { ...post, followed: true } : post
-            ),
+            // searchedPosts: state.searchedPosts.map((post) =>
+            //   post.userId === data.id ? { ...post, followed: true } : post
+            // ),
           }
         })
       }
@@ -642,9 +642,9 @@ const SocialStore = create<PostState>((set, get) => ({
           postResults: state.postResults.filter(
             (post) => post.userId !== data.accountUserId
           ),
-          searchedPosts: state.searchedPosts.filter(
-            (post) => post.userId !== data.accountUserId
-          ),
+          // searchedPosts: state.searchedPosts.filter(
+          //   (post) => post.userId !== data.accountUserId
+          // ),
           loading: false,
         }))
       }
