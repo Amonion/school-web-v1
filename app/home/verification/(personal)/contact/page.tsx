@@ -18,7 +18,7 @@ export default function Origin() {
   const { user, bioUser, bioUserState } = AuthStore()
   const { setMessage } = MessageStore()
   const { setAlert } = AlartStore()
-  const url = '/users/bio-user/'
+  const url = '/biousers/'
   const [isCountryList, setCountryList] = useState(false)
   const [isStateList, setStateList] = useState(false)
   const [isAreaList, setIsAreaList] = useState(false)

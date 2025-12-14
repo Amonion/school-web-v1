@@ -16,7 +16,7 @@ export default function Document() {
   const { user, bioUser } = AuthStore()
   const { documents, getDocuments } = DocumentStore()
   const { setMessage } = MessageStore()
-  const url = '/users/bio-user/'
+  const url = '/biousers/'
   const { setAlert } = AlartStore()
   const router = useRouter()
 

@@ -12,7 +12,7 @@ export default function Related() {
   const { bioUserForm, setForm, loading, updateMyBioUser } = BioUserStore()
   const { bioUser, bioUserState, user } = AuthStore()
   const { setMessage } = MessageStore()
-  const url = '/users/bio-user/'
+  const url = '/biousers/'
   const { setAlert } = AlartStore()
   const router = useRouter()
 

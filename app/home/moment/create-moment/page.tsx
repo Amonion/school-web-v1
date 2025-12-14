@@ -6,17 +6,17 @@ import {
   MomentMediaEmpty,
   MomentStore,
 } from '@/src/zustand/post/Moment'
-import { Edit, ImageIcon, Palette, Smile, Trash, VideoIcon } from 'lucide-react'
+import { ImageIcon, Palette, Smile, Trash, VideoIcon } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import Picker from '@emoji-mart/react'
 import { useTheme } from '@/context/ThemeProvider'
 import data from '@emoji-mart/data'
 import axios from 'axios'
 import { MessageStore } from '@/src/zustand/notification/Message'
-import { usePersonalNotificationContext } from '@/context/HomeContext/PersonalNotificationContext'
 import { AuthStore } from '@/src/zustand/user/AuthStore'
 import Spinner from '@/components/LoadingAnimations/Spinner'
 import { usePathname, useRouter } from 'next/navigation'
+import { usePersonalNotificationContext } from '@/context/HomeContext/PersonalNotificationContext'
 
 interface MomentResponse {
   data: Moment
@@ -176,7 +176,7 @@ export default function CreateMoment() {
       addMomentMedia((prev) => {
         return prev.map((item, index) =>
           editingIndex === index
-            ? { ...momentMedia, duration, createdAt: new Date().toISOString() }
+            ? { ...momentMedia, duration, createdAt: new Date() }
             : item
         )
       })
@@ -184,10 +184,7 @@ export default function CreateMoment() {
     } else {
       const duration = getMediaDuration()
       addMomentMedia((prev) => {
-        return [
-          ...prev,
-          { ...momentMedia, duration, createdAt: new Date().toISOString() },
-        ]
+        return [...prev, { ...momentMedia, duration, createdAt: new Date() }]
       })
     }
 
@@ -423,7 +420,9 @@ export default function CreateMoment() {
           <div
             style={{
               backgroundColor: momentMedia.backgroundColor,
-              backgroundImage: momentMedia?.preview
+              backgroundImage: momentMedia.src
+                ? `url(${momentMedia.src})`
+                : momentMedia?.preview
                 ? `url(${momentMedia.preview})`
                 : undefined,
               backgroundSize: momentMedia?.preview ? 'cover' : undefined,
@@ -546,31 +545,32 @@ export default function CreateMoment() {
                 <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 p-3">
                   {momentMedias.map((item, index) => (
                     <div
+                      onClick={() => editMoment(index)}
                       key={index}
                       style={{
                         backgroundColor: item.backgroundColor,
-                        backgroundImage: item?.preview
+                        backgroundImage: item.src
+                          ? `url(${item.src})`
+                          : item?.preview
                           ? `url(${item.preview})`
                           : undefined,
                         backgroundSize: item?.preview ? 'cover' : undefined,
                         backgroundRepeat: 'no-repeat',
                         backgroundPosition: 'center',
                       }}
-                      className={`w-full h-[110px] relative px-1 text-center rounded-[5px] overflow-hidden flex justify-center items-center`}
+                      className={`w-full cursor-pointer h-[110px] relative px-1 text-center rounded-[5px] overflow-hidden flex justify-center items-center`}
                     >
                       {
                         <div className="text-white line-clamp-3 overflow-ellipsis relative my-auto text-[12px] leading-[20px] z-10">
                           {item.content}
                         </div>
                       }
-                      <div className="absolute text-white flex items-center bottom-1 right-0">
-                        {!item.preview && (
-                          <Edit
-                            onClick={() => editMoment(index)}
-                            size={14}
-                            className="mr-3 cursor-pointer textShadow"
-                          />
-                        )}
+                      <div
+                        onClick={(e) => {
+                          e.stopPropagation()
+                        }}
+                        className="absolute text-white flex items-center bottom-1 right-0"
+                      >
                         <Trash
                           onClick={() => removeMoment(index)}
                           size={14}
@@ -584,100 +584,7 @@ export default function CreateMoment() {
             </div>
           )}
         </div>
-        {/* <div className={`mt-auto bg-[var(--primary)] relative p-2 sm:p-3`}>
-          {isColor && (
-            <div className="flex absolute -top-7 left-0">
-              {colors.map((color, index) => (
-                <div
-                  onClick={() => selectColor(color)}
-                  className="w-5 h-5 cursor-pointer rounded-full mr-3"
-                  style={{ backgroundColor: color }}
-                  key={index}
-                ></div>
-              ))}
-            </div>
-          )}
-          <div className="flex items-end gap-2">
-            <label className="cursor-pointer mb-2">
-              <input
-                type="file"
-                accept="image/*,video/*"
-                className="hidden"
-                onChange={handleFileUpload}
-              />
-              <ImageIcon size={22} className="text-[var(--custom)]" />
-            </label>
-            <Palette
-              onClick={() => setIsColor(!isColor)}
-              size={22}
-              className="cursor-pointer mb-2"
-            />
-            <div
-              className={`flex-1 flex items-end bg-[var(--secondary)] rounded-[25px] px-2`}
-            >
-              <Smile
-                onClick={() => setShowEmojiPicker((prev) => !prev)}
-                className="text-[var(--custom)] cursor-pointer mr-2 mb-2"
-              />
-              <textarea
-                placeholder="Add a comment..."
-                value={momentMedia.content}
-                ref={textareaRef}
-                onChange={(e) => {
-                  MomentStore.setState((prev) => {
-                    return {
-                      momentMedia: {
-                        ...prev.momentMedia,
-                        content: e.target.value,
-                      },
-                    }
-                  })
-                  e.target.style.height = 'auto'
-                  e.target.style.height = `${Math.min(
-                    e.target.scrollHeight,
-                    120
-                  )}px`
-                }}
-                rows={1}
-                className="flex-1 bg-transparent  py-2 placeholder-gray-400 outline-none  resize-none overflow-y-auto max-h-[120px]"
-              />
-            </div>
 
-            {loading ? (
-              <Spinner size={20} />
-            ) : canAdd ? (
-              <button onClick={addMomemt} className={`mb-2`}>
-                <Plus
-                  size={18}
-                  className={`${canAdd ? 'text-[var(--custom)]' : ''}`}
-                />
-              </button>
-            ) : (
-              momentMedias.length > 0 && (
-                <button
-                  onClick={submitMoment}
-                  disabled={!canSend}
-                  className={`mb-2`}
-                >
-                  <Send size={18} className={`text-[var(--custom)]`} />
-                </button>
-              )
-            )}
-            {showEmojiPicker && (
-              <div
-                ref={emojiPickerRef}
-                className="w-full absolute bottom-[70px] mt-2 h-[200px] overflow-y-scroll"
-              >
-                <Picker
-                  data={data}
-                  onEmojiSelect={addEmoji}
-                  theme={`${theme}`}
-                  style={{ width: '100%' }}
-                />
-              </div>
-            )}
-          </div>
-        </div> */}
         {/* </div> */}
       </div>
     </>

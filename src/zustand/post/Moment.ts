@@ -84,6 +84,7 @@ export interface MomentMedia {
   backgroundColor: string
   duration: number
   isViewed: boolean
+  createdAt: Date | string | number
 }
 
 export const MomentMediaEmpty = {
@@ -94,6 +95,7 @@ export const MomentMediaEmpty = {
   content: '',
   duration: 0,
   isViewed: false,
+  createdAt: '',
 }
 
 export interface Moment {
@@ -150,10 +152,9 @@ interface MomentState {
     url: string,
     setMessage: (message: string, isError: boolean) => void
   ) => Promise<void>
-  postItem: (
+  updateMoment: (
     url: string,
-    updatedItem: FormData | Record<string, unknown>,
-    setMessage: (message: string, isError: boolean) => void
+    updatedItem: FormData | Record<string, unknown>
   ) => Promise<void>
 }
 
@@ -277,37 +278,20 @@ export const MomentStore = create<MomentState>((set) => ({
       const response = await apiRequest<FetchMomentResponse>(url)
       const data = response?.data
       if (data) {
-        const moments = MomentStore.getState().moments
-        if (data.results.length > 0) {
-          const newMoments = data.results.filter(
-            (item) => !moments.some((m) => m._id === item._id)
-          )
-          if (newMoments.length > 0) {
-            set((prev) => {
-              return {
-                moments: [...prev.moments, ...newMoments],
-              }
-            })
-            console.log(newMoments)
-            await saveMomentsToDB(newMoments)
-          } else {
-            console.log('No new moments to add.')
-          }
-        } else {
-          deleteAllMomentsFromDB()
-        }
+        const fetchedMoments = data.results
+        set({ moments: fetchedMoments })
+        await saveMomentsToDB(fetchedMoments)
       }
     } catch (error: unknown) {
       console.log(error)
     }
   },
 
-  postItem: async (url, updatedItem, setMessage) => {
+  updateMoment: async (url, updatedItem) => {
     set({ loading: true })
     const response = await apiRequest<FetchMomentResponse>(url, {
-      method: 'POST',
+      method: 'PATCH',
       body: updatedItem,
-      setMessage,
     })
     const data = response?.data
     if (data) {

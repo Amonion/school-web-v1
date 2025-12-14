@@ -10,6 +10,7 @@ import CommentStore from '@/src/zustand/post/Comment'
 import DesktopMomentViewer from './DesktopMomentViewer'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import EachMoment from './EachMoment'
 
 export default function Moments() {
   const { moments, activeMomentIndex, activeMoment, openMomentModal } =
@@ -80,66 +81,12 @@ export default function Moments() {
           </Link>
 
           {moments.map((moment, idx) => (
-            <div
-              key={moment._id}
-              onClick={() => openMomentModal(idx)}
-              className="story"
-            >
-              {moment.media.length > 0 &&
-              moment.media[0].type.includes('image') ? (
-                <Image
-                  src={moment?.media[0].src}
-                  alt={moment?.username}
-                  fill
-                  className="object-cover w-full h-full"
-                />
-              ) : moment.media.length > 0 &&
-                moment.media[0].type.includes('video') ? (
-                <Image
-                  src={moment?.media[0].preview}
-                  alt={moment?.username}
-                  fill
-                  className="object-cover w-full h-full"
-                />
-              ) : (
-                moment.media.length > 0 && (
-                  <div
-                    style={{
-                      backgroundColor: moment.media[0].backgroundColor,
-
-                      backgroundRepeat: 'no-repeat',
-                      backgroundPosition: 'center',
-                    }}
-                    className={`w-full h-full relative px-1 text-center rounded-[5px] overflow-hidden flex justify-center items-center`}
-                  >
-                    <div
-                      className={`text-white line-clamp-3 overflow-ellipsis relative my-auto text-[12px] leading-[20px] z-10`}
-                    >
-                      {moment.media[0].content}
-                    </div>
-                  </div>
-                )
-              )}
-              <div className="absolute top-3 left-1 flex items-center gap-1">
-                <div
-                  className={`w-7 h-7 min-w-7 relative rounded-full overflow-hidden border-1 ${
-                    moment.media.length > 0 && moment.media[0].isViewed
-                      ? 'border-[var(--custom)]'
-                      : 'border-white/30'
-                  }`}
-                >
-                  <Image
-                    src={moment.picture}
-                    alt={moment.username}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <div className="text-white text-sm line-clamp-1 max-w-[6rem]">
-                  {moment.displayName ?? moment.username}
-                </div>
-              </div>
-            </div>
+            <EachMoment
+              key={idx}
+              moment={moment}
+              idx={idx}
+              openMomentModal={openMomentModal}
+            />
           ))}
         </div>
       </div>
