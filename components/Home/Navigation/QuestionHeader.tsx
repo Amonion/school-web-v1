@@ -3,11 +3,9 @@ import { useState } from 'react'
 import { NavStore } from '@/src/zustand/notification/Navigation'
 import PostDropList from '../Trace/PostResources/PostDropList'
 import { BioUserSchoolInfoStore } from '@/src/zustand/user/BioUserSchoolInfo'
-import { PostStore } from '@/src/zustand/post/Post'
 
 export default function QuestionHeader() {
   const { setSearchedText, toggleVNav } = NavStore()
-  const { setSearchedResult } = PostStore()
   const { setSearchedBioUserResult } = BioUserSchoolInfoStore()
   const pathName = usePathname()
   const searchParams = useSearchParams()
@@ -23,7 +21,6 @@ export default function QuestionHeader() {
     }
     router.replace(`?${params.toString()}`)
     if (pathName === '/home/trace') {
-      setSearchedResult()
     } else if (pathName === '/home/trace/people') {
       setSearchedBioUserResult()
     } else if (pathName === '/home/trace/accounts') {
