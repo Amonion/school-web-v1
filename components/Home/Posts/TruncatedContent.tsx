@@ -18,7 +18,7 @@ const TruncatedContent: React.FC<Props> = ({ content, post, limit = 300 }) => {
   const toggleContent = () => setShowFull((prev) => !prev)
 
   const htmlToDisplay =
-    showFull || !isLong ? content : plainText.substring(0, limit) + '...'
+    showFull || !isLong ? content : content.substring(0, 2000) + '...'
 
   const moveToPost = (id: string) => {
     PostStore.setState({ postForm: post })

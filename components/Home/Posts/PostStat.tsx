@@ -41,7 +41,7 @@ const PostStat: React.FC<PostProps> = ({ post }) => {
     )
 
     updatePost(
-      `/posts/stats`,
+      `/posts/like`,
       { likes: updatedPost?.liked, id: post._id, userId: user?._id },
       setMessage
     )
@@ -68,7 +68,7 @@ const PostStat: React.FC<PostProps> = ({ post }) => {
     )
 
     updatePost(
-      `/posts/stats`,
+      `/posts/bookmarks`,
       { bookmarks: updatedPost?.bookmarked, id: post._id, userId: user?._id },
       setMessage
     )
@@ -87,7 +87,7 @@ const PostStat: React.FC<PostProps> = ({ post }) => {
   const fetchComments = async () => {
     CommentStore.setState({ comments: [] })
     getComments(
-      `/posts/comments/?postId=${post._id}&level=1&myId=${user?._id}&page_size=30&page=1&ordering=-createdAt`
+      `/comments/?postId=${post._id}&level=1&myId=${user?._id}&page_size=30&page=1&ordering=-createdAt`
     )
   }
 

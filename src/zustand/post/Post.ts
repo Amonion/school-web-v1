@@ -731,21 +731,26 @@ export const PostStore = create<PostState>((set) => ({
   },
 
   updatePost: async (url, updatedItem, setMessage) => {
-    set({ loading: true, error: null })
-    const response = await apiRequest<PostResponse>(url, {
-      method: 'PATCH',
-      body: updatedItem,
-      setMessage,
-    })
-    const data = response?.data?.data
-    if (data) {
-      PostStore.setState((state) => ({
-        postResults: state.postResults.map((post) =>
-          post.userId === data.userId
-            ? { ...post, followed: data.followed, isActive: false }
-            : post
-        ),
-      }))
+    try {
+      const response = await apiRequest<PostResponse>(url, {
+        method: 'PATCH',
+        body: updatedItem,
+        setMessage,
+      })
+      const data = response?.data?.data
+      if (data) {
+        PostStore.setState((state) => ({
+          postResults: state.postResults.map((post) =>
+            post.userId === data.userId
+              ? { ...post, followed: data.followed, isActive: false }
+              : post
+          ),
+        }))
+      }
+    } catch (error) {
+      console.log(error)
+    } finally {
+      set({ loading: false })
     }
   },
 
