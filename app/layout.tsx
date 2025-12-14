@@ -28,6 +28,7 @@ import { PostProvider } from '@/context/HomeContext/PostContext'
 import { MomentProvider } from '@/context/HomeContext/MomentContext'
 import { TraceProvider } from '@/context/HomeContext/TraceContext'
 import { ChatProvider } from '@/context/HomeContext/ChatContext'
+import { GeneralProvider } from '@/context/GeneralContext'
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -174,25 +175,25 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-[100vh] bg-[var(--white-gray)] text-[var(--text-main-color)]`}
       >
-        {/* <GeneralProvider> */}
-        <UsersProvider>
-          <UserProvider>
-            <TraceProvider>
-              <SocialNotificationProvider>
-                <PostProvider>
-                  <PersonalNotificationProvider>
-                    <MomentProvider>
-                      <ChatProvider>
-                        <ThemeProvider>{isMounted && children}</ThemeProvider>
-                      </ChatProvider>
-                    </MomentProvider>
-                  </PersonalNotificationProvider>
-                </PostProvider>
-              </SocialNotificationProvider>
-            </TraceProvider>
-          </UserProvider>
-        </UsersProvider>
-        {/* </GeneralProvider> */}
+        <GeneralProvider>
+          <UsersProvider>
+            <UserProvider>
+              <TraceProvider>
+                <SocialNotificationProvider>
+                  <PostProvider>
+                    <PersonalNotificationProvider>
+                      <MomentProvider>
+                        <ChatProvider>
+                          <ThemeProvider>{isMounted && children}</ThemeProvider>
+                        </ChatProvider>
+                      </MomentProvider>
+                    </PersonalNotificationProvider>
+                  </PostProvider>
+                </SocialNotificationProvider>
+              </TraceProvider>
+            </UserProvider>
+          </UsersProvider>
+        </GeneralProvider>
       </body>
     </html>
   )
