@@ -1,7 +1,7 @@
 'use client'
-import { PostStore } from '@/src/zustand/post/Post'
 import { AccountStore } from '@/src/zustand/Trace/Account'
 import { PeopleStore } from '@/src/zustand/Trace/People'
+import { PostStore } from '@/src/zustand/Trace/TracePosts'
 import { AuthStore } from '@/src/zustand/user/AuthStore'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { useEffect } from 'react'
