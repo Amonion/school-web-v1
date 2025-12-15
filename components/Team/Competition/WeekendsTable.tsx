@@ -8,9 +8,7 @@ import {
   formatDateToDDMMYY,
   formatTimeTo12Hour,
 } from '@/lib/helpers'
-import _debounce from 'lodash/debounce'
 import { AlartStore, MessageStore } from '@/src/zustand/notification/Message'
-import NewsStore from '@/src/zustand/news/News'
 import LinkedPagination from '@/components/Team/LinkedPagination'
 import {
   Edit,
@@ -22,26 +20,27 @@ import {
   Trash,
   User,
 } from 'lucide-react'
+import WeekendStore, { Weekend } from '@/src/zustand/exam/Weekend'
 
-const News: React.FC = () => {
+const WeekendsTable: React.FC = () => {
   const {
-    getItems,
+    getWeekends,
     massDelete,
     deleteItem,
-    updateNews,
+    updateWeekend,
     toggleAllSelected,
     toggleChecked,
     setLoading,
     toggleActive,
     reshuffleResults,
-    searchNews,
-    searchedNews,
+    searchWeekends,
+    searchedWeekends,
     isAllChecked,
     selectedItems,
     loading,
     count,
-    news,
-  } = NewsStore()
+    weekends,
+  } = WeekendStore()
   const [page_size] = useState(20)
   const [sort] = useState('-createdAt')
   const { setMessage } = MessageStore()
@@ -49,7 +48,7 @@ const News: React.FC = () => {
   const { page } = useParams()
   const { setAlert } = AlartStore()
   const inputRef = useRef<HTMLInputElement>(null)
-  const url = '/news'
+  const url = '/weekends'
 
   useEffect(() => {
     reshuffleResults()
@@ -59,10 +58,10 @@ const News: React.FC = () => {
     const params = `?page_size=${page_size}&page=${
       page ? page : 1
     }&ordering=${sort}`
-    getItems(`${url}${params}`, setMessage)
+    getWeekends(`${url}${params}`, setMessage)
   }, [page])
 
-  const deleteNews = async (id: string, index: number) => {
+  const deleteWekend = async (id: string, index: number) => {
     toggleActive(index)
     const params = `?page_size=${page_size}&page=${
       page ? page : 1
@@ -73,25 +72,22 @@ const News: React.FC = () => {
   const startDelete = (id: string, index: number) => {
     setAlert(
       'Warning',
-      'Are you sure you want to delete this news?',
+      'Are you sure you want to delete this weekends?',
       true,
-      () => deleteNews(id, index)
+      () => deleteWekend(id, index)
     )
   }
 
-  const handleSearchNews = _debounce(
-    async (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value
-      if (value.trim().length > 0) {
-        searchNews(
-          `${url}/search?author=${value}&content=${value}&title=${value}&subtitle=${value}&page_size=${page_size}`
-        )
-      } else {
-        NewsStore.setState({ searchedNews: [] })
-      }
-    },
-    1000
-  )
+  const handleSearchWeekends = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    if (value.trim().length > 0) {
+      searchWeekends(
+        `${url}/search?author=${value}&content=${value}&title=${value}&subtitle=${value}&page_size=${page_size}`
+      )
+    } else {
+      WeekendStore.setState({ searchedWeekends: [] })
+    }
+  }
 
   const DeleteItems = async () => {
     if (selectedItems.length === 0) {
@@ -102,7 +98,18 @@ const News: React.FC = () => {
     await massDelete(`${url}/mass-delete`, { ids: ids }, setMessage)
   }
 
-  const setNewsApproval = async (isPublished: boolean, id: string) => {
+  const setWeekendApproval = async (
+    item: Weekend,
+    isPublished: boolean,
+    id: string
+  ) => {
+    if (!item.startAt || !item.endAt) {
+      setMessage(
+        'To publish, you must set up starting time and ending time.',
+        false
+      )
+      return
+    }
     const params = `?page_size=${page_size}&page=${
       page ? page : 1
     }&ordering=${sort}`
@@ -110,29 +117,30 @@ const News: React.FC = () => {
       isPublished: !isPublished,
       publishedAt: new Date().toISOString(),
     }
-    updateNews(`${url}/${id}${params}`, form, setMessage)
+    updateWeekend(`${url}/${id}${params}`, form, setMessage)
   }
+
   const updateItem = async (form: Record<string, unknown>, id: string) => {
     const params = `?page_size=${page_size}&page=${
       page ? page : 1
     }&ordering=${sort}`
-    updateNews(`${url}/${id}${params}`, form, setMessage)
+    updateWeekend(`${url}/${id}${params}`, form, setMessage)
   }
 
   return (
     <>
       <div className="card_body sharp mb-5">
         <div className="text-lg text-[var(--text-secondary)]">
-          Table of News
+          Table of Weekends
         </div>
         <div className="relative mb-2">
           <div className={`input_wrap ml-auto active `}>
             <input
               ref={inputRef}
               type="search"
-              onChange={handleSearchNews}
+              onChange={handleSearchWeekends}
               className={`transparent-input flex-1 `}
-              placeholder="Search news"
+              placeholder="Search weekends"
             />
             {loading ? (
               <i className="bi bi-opencollective common-icon loading"></i>
@@ -141,15 +149,15 @@ const News: React.FC = () => {
             )}
           </div>
 
-          {searchedNews.length > 0 && (
+          {searchedWeekends.length > 0 && (
             <div
               className={`dropdownList ${
-                searchedNews.length > 0
+                searchedWeekends.length > 0
                   ? 'overflow-auto'
                   : 'overflow-hidden h-0'
               }`}
             >
-              {searchedNews.map((item, index) => (
+              {searchedWeekends.map((item, index) => (
                 <div key={index} className="input_drop_list">
                   <Link
                     href={`/school/students/student/${item._id}`}
@@ -163,7 +171,7 @@ const News: React.FC = () => {
           )}
         </div>
       </div>
-      {news.map((item, index) => (
+      {weekends.map((item, index) => (
         <div key={index} className="card_body sharp mb-1">
           <div className="">
             <div className="flex relative items-start mb-5">
@@ -201,7 +209,7 @@ const News: React.FC = () => {
                   {item.title}
                 </div>
                 <div className="line-clamp-2 overflow-ellipsis">
-                  {item.subtitle}
+                  {item.instruction}
                 </div>
               </div>
               <div className="absolute gap-2 top-[-10px] right-0 flex items-center">
@@ -227,7 +235,7 @@ const News: React.FC = () => {
                 >
                   main
                 </div>
-                <Link href={`/team/news/edit-news/${item._id}`}>
+                <Link href={`/team/competitions/weekends/edit/${item._id}`}>
                   <Edit className="cursor-pointer" size={18} />
                 </Link>
 
@@ -240,7 +248,7 @@ const News: React.FC = () => {
             </div>
             <div className="flex text-sm mb-2">
               <div className="flex items-center mr-3">
-                <User size={14} className="mr-1" /> {item.author}
+                <User size={14} className="mr-1" /> {item.bioUserUsername}
               </div>
               <div className="flex items-center mr-3">
                 <Globe size={14} className="mr-1" /> {item.priority}
@@ -262,7 +270,7 @@ const News: React.FC = () => {
                 {formatDateToDDMMYY(item.createdAt)} |{' '}
                 {formatTimeTo12Hour(item.createdAt)}
               </div>
-              {item.publishedAt && (
+              {item.isPublished && (
                 <div className="flex items-center text-sm">
                   <Rocket className="w-3 h-3 mr-2" />
                   {formatDateToDDMMYY(item.publishedAt)} |{' '}
@@ -292,7 +300,9 @@ const News: React.FC = () => {
                 </div>
               </div>
               <div
-                onClick={() => setNewsApproval(item.isPublished, item._id)}
+                onClick={() =>
+                  setWeekendApproval(item, item.isPublished, item._id)
+                }
                 className={`${
                   !item.isPublished
                     ? 'bg-[var(--custom)]'
@@ -327,7 +337,10 @@ const News: React.FC = () => {
             <div onClick={DeleteItems} className="tableActions">
               <i className="bi bi-trash"></i>
             </div>
-            <Link href={`/team/news/create-news`} className="tableActions">
+            <Link
+              href={`/team/competitions/weekends/create`}
+              className="tableActions"
+            >
               <i className="bi bi-plus-circle"></i>
             </Link>
             {/* <div onClick={updateExam} className="tableActions">
@@ -338,10 +351,14 @@ const News: React.FC = () => {
       </div>
 
       <div className="card_body sharp">
-        <LinkedPagination url="/team/news" count={count} page_size={20} />
+        <LinkedPagination
+          url="/team/competitions/weekends"
+          count={count}
+          page_size={20}
+        />
       </div>
     </>
   )
 }
 
-export default News
+export default WeekendsTable

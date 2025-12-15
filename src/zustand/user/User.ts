@@ -110,6 +110,7 @@ export const UserEmpty = {
   postMedia: 0,
   country: '',
   state: '',
+  area: '',
   signupIp: '',
   signupLocation: { lat: 0, lng: 0 },
   staffPositions: [],
@@ -440,6 +441,7 @@ export interface User {
   posts: number
   country: string
   state: string
+  area: string
   signupIp: string
   signupLocation: { lat: number; lng: number }
   staffPositions: string[]

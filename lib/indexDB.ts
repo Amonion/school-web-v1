@@ -2,7 +2,7 @@ import { ChatContent } from '@/src/zustand/chat/Chat'
 import { openDB } from 'idb'
 
 const DB_NAME = 'chatDB'
-const DB_VERSION = 8
+const DB_VERSION = 9
 const MESSAGES_STORE = 'messages'
 const FRIENDS_STORE = 'friends'
 const MOMENTS_STORE = 'moments'
@@ -11,6 +11,7 @@ const NEWS_STORE = 'news'
 const TRACE_POSTS_STORE = 'trace_posts'
 const PEOPLE_STORE = 'people'
 const ACCOUNT_STORE = 'accounts'
+const GIVEAWAY_STORE = 'giveaway'
 
 export const initDB = async () => {
   return openDB(DB_NAME, DB_VERSION, {
@@ -58,6 +59,18 @@ export const initDB = async () => {
           autoIncrement: true,
         })
         store.createIndex('title', 'title')
+        store.createIndex('createdAt', 'createdAt')
+      }
+      if (!db.objectStoreNames.contains(GIVEAWAY_STORE)) {
+        const store = db.createObjectStore(GIVEAWAY_STORE, {
+          keyPath: '_id',
+          autoIncrement: true,
+        })
+        store.createIndex('title', 'title')
+        store.createIndex('country', 'country')
+        store.createIndex('state', 'state')
+        store.createIndex('area', 'area')
+        store.createIndex('question', 'question')
         store.createIndex('createdAt', 'createdAt')
       }
       if (!db.objectStoreNames.contains(TRACE_POSTS_STORE)) {

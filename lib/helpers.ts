@@ -24,6 +24,12 @@ type file = {
 
 let pdfjs: typeof import('pdfjs-dist') | null = null
 
+export const toDateTimeLocal = (value: string | Date | null): string => {
+  if (!value) return ''
+  const date = typeof value === 'string' ? new Date(value) : value
+  return date.toISOString().slice(0, 16)
+}
+
 export async function loadPdfJs() {
   if (!pdfjs) {
     const mod = await import('pdfjs-dist')

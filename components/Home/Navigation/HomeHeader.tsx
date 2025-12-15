@@ -68,7 +68,7 @@ export default function HomeHeader() {
         <Link href={`/news`} className="">
           <i className={`bi bi-globe font-bold text-xl`}></i>
         </Link>
-        <Link href={`/home/following`} className="">
+        <Link href={`/giveaway`} className="">
           <i className={`bi bi-gift font-bold text-xl`}></i>
         </Link>
 

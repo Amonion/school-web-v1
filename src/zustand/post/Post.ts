@@ -452,7 +452,6 @@ export const PostStore = create<PostState>((set) => ({
       const posts = await getPostsFromDB(20, 1)
       if (posts.length > 0) {
         PostStore.getState().setProcessedResults(posts)
-        set({ postResults: posts })
       }
       PostStore.getState().getPosts(
         `/posts/?myId=${user?._id}&page_size=40&page=1`

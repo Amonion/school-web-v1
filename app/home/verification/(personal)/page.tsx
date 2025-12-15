@@ -221,7 +221,10 @@ export default function UserBio() {
 
             <div className="flex flex-col">
               <label className="label" htmlFor="">
-                Date of Birth
+                Date of Birth{' '}
+                <span className="text-sm text-[var(--custom)]">
+                  (dd/mm/yyyy)
+                </span>
               </label>
               {/* <div className="flex justify-between">
                 <div className="form-input sm w-input mr-6">
