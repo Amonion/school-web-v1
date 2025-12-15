@@ -1,7 +1,6 @@
 import { create } from 'zustand'
 import apiRequest from '@/lib/axios'
 import _debounce from 'lodash/debounce'
-import { AxiosError } from 'axios'
 
 interface FetchResponse {
   message: string
@@ -20,31 +19,36 @@ export interface Expenses {
   isChecked?: boolean
   isActive?: boolean
 }
+export const ExpensesForm = {
+  _id: '',
+  name: '',
+  amount: 0,
+  receipt: '',
+  description: '',
+  createdAt: null,
+}
 
 interface ExpensesState {
-  links: { next: string | null; previous: string | null } | null
   count: number
   page_size: number
   results: Expenses[]
   uploads: Expenses[]
   loading: boolean
-  error: string | null
-  successs?: string | null
-  selectedItems: Expenses[]
-  searchResult: Expenses[]
-  searchedResults: Expenses[]
+  selectedExpenses: Expenses[]
+  searchedExpenses: Expenses[]
   isAllChecked: boolean
-  formData: Expenses
+  isExpenseForm: boolean
+  expensesForm: Expenses
   setForm: (key: keyof Expenses, value: Expenses[keyof Expenses]) => void
-  resetForm: () => void
-  getItems: (url: string) => Promise<void>
+  resetForm: (form: Expenses) => void
+  getExpenses: (url: string) => Promise<void>
   getUploads: (url: string) => Promise<void>
   setProcessedResults: (data: FetchResponse) => void
   setProcessedUploads: (data: FetchResponse) => void
   setLoading?: (loading: boolean) => void
   massDelete: (
     url: string,
-    selectedItems: Expenses[],
+    selectedExpenses: Expenses[],
     setMessage: (message: string, isError: boolean) => void
   ) => Promise<void>
   deleteItem: (
@@ -54,61 +58,52 @@ interface ExpensesState {
   updateItem: (
     url: string,
     updatedItem: FormData,
-    setMessage: (message: string, isError: boolean) => void
+    setMessage: (message: string, isError: boolean) => void,
+    redirect?: () => void
   ) => Promise<void>
   postItem: (
     url: string,
     updatedItem: FormData,
-    setMessage: (message: string, isError: boolean) => void
+    setMessage: (message: string, isError: boolean) => void,
+    redirect?: () => void
   ) => Promise<void>
   toggleChecked: (index: number) => void
   toggleActive: (index: number) => void
   toggleAllSelected: () => void
   reshuffleResults: () => void
-  searchItem: (url: string) => void
+  searchExpenses: (url: string) => void
+  showForm: (state: boolean) => void
 }
 
 const ExpensesStore = create<ExpensesState>((set) => ({
-  links: null,
   count: 0,
   page_size: 0,
   results: [],
   uploads: [],
   loading: false,
-  error: null,
-  selectedItems: [],
-  searchResult: [],
-  searchedResults: [],
+  selectedExpenses: [],
+  searchedExpenses: [],
   isAllChecked: false,
-  formData: {
-    _id: '',
-    name: '',
-    amount: 0,
-    receipt: '',
-    description: '',
-    createdAt: null,
-  },
+  isExpenseForm: false,
+  expensesForm: ExpensesForm,
   setForm: (key, value) =>
     set((state) => ({
-      formData: {
-        ...state.formData,
+      expensesForm: {
+        ...state.expensesForm,
         [key]: value,
       },
     })),
-  resetForm: () =>
+  resetForm: (form) =>
     set({
-      formData: {
-        _id: '',
-        name: '',
-        amount: 0,
-        receipt: '',
-        description: '',
-        createdAt: null,
-      },
+      expensesForm: form,
     }),
 
-  setLoading: (loadState: boolean) => {
+  setLoading: (loadState) => {
     set({ loading: loadState })
+  },
+
+  showForm: (loadState) => {
+    set({ isExpenseForm: loadState })
   },
 
   setProcessedResults: ({ count, page_size, results }: FetchResponse) => {
@@ -145,7 +140,7 @@ const ExpensesStore = create<ExpensesState>((set) => ({
     }
   },
 
-  getItems: async (url: string) => {
+  getExpenses: async (url: string) => {
     try {
       const response = await apiRequest<FetchResponse>(url, {
         setLoading: ExpensesStore.getState().setLoading,
@@ -183,7 +178,7 @@ const ExpensesStore = create<ExpensesState>((set) => ({
     }))
   },
 
-  searchItem: _debounce(async (url: string) => {
+  searchExpenses: _debounce(async (url: string) => {
     try {
       const response = await apiRequest<FetchResponse>(url)
       if (response) {
@@ -193,30 +188,22 @@ const ExpensesStore = create<ExpensesState>((set) => ({
           isChecked: false,
           isActive: false,
         }))
-        set({ searchedResults: updatedResults })
+        set({ searchedExpenses: updatedResults })
       }
     } catch (error: unknown) {
-      if (error instanceof AxiosError && error.response?.data?.message) {
-        set({
-          error: error.message || 'Failed to search items',
-          loading: false,
-        })
-      } else {
-        set({
-          error: 'Failed to search items',
-          loading: false,
-        })
-      }
+      console.log(error)
+    } finally {
+      set({ loading: false })
     }
   }, 1000),
 
-  massDelete: async (url, selectedItems, setMessage) => {
+  massDelete: async (url, selectedExpenses, setMessage) => {
     set({
       loading: true,
     })
     const response = await apiRequest<FetchResponse>(url, {
       method: 'PATCH',
-      body: selectedItems,
+      body: selectedExpenses,
       setMessage,
       setLoading: ExpensesStore.getState().setLoading,
     })
@@ -239,39 +226,37 @@ const ExpensesStore = create<ExpensesState>((set) => ({
     }
   },
 
-  updateItem: async (url, updatedItem, setMessage) => {
-    set({ loading: true, error: null })
-    const response = await apiRequest<FetchResponse>(url, {
-      method: 'PATCH',
-      body: updatedItem,
-      setMessage,
-      setLoading: ExpensesStore.getState().setLoading,
-    })
-    if (response?.status !== 404 && response?.data) {
-      set({ loading: false, error: null })
-      ExpensesStore.getState().setProcessedResults(response.data)
-    } else {
-      set({ loading: false, error: null })
+  updateItem: async (url, updatedItem, setMessage, redirect) => {
+    try {
+      const response = await apiRequest<FetchResponse>(url, {
+        method: 'PATCH',
+        body: updatedItem,
+        setMessage,
+        setLoading: ExpensesStore.getState().setLoading,
+      })
+      if (response?.data) {
+        ExpensesStore.getState().setProcessedResults(response.data)
+      }
+      if (redirect) redirect()
+    } catch (error) {
+      console.log(error)
     }
   },
 
-  postItem: async (
-    url: string,
-    updatedItem: FormData | Record<string, unknown>,
-    setMessage: (message: string, isError: boolean) => void
-  ) => {
-    set({ loading: true, error: null })
-    const response = await apiRequest<FetchResponse>(url, {
-      method: 'POST',
-      body: updatedItem,
-      setMessage,
-      setLoading: ExpensesStore.getState().setLoading,
-    })
-    if (response?.status !== 404 && response?.data) {
-      set({ loading: false, error: null })
-      ExpensesStore.getState().setProcessedResults(response.data)
-    } else {
-      set({ loading: false, error: null })
+  postItem: async (url, updatedItem, setMessage, redirect) => {
+    try {
+      const response = await apiRequest<FetchResponse>(url, {
+        method: 'POST',
+        body: updatedItem,
+        setMessage,
+        setLoading: ExpensesStore.getState().setLoading,
+      })
+      if (response?.data) {
+        ExpensesStore.getState().setProcessedResults(response.data)
+      }
+      if (redirect) redirect()
+    } catch (error) {
+      console.log(error)
     }
   },
 
@@ -299,13 +284,13 @@ const ExpensesStore = create<ExpensesState>((set) => ({
       const isAllChecked = updatedResults.every(
         (tertiary) => tertiary.isChecked
       )
-      const updatedSelectedItems = updatedResults.filter(
+      const updatedSelectedExpenses = updatedResults.filter(
         (tertiary) => tertiary.isChecked
       )
 
       return {
         results: updatedResults,
-        selectedItems: updatedSelectedItems,
+        selectedExpenses: updatedSelectedExpenses,
         isAllChecked,
       }
     })
@@ -320,11 +305,11 @@ const ExpensesStore = create<ExpensesState>((set) => ({
         isChecked: isAllChecked,
       }))
 
-      const updatedSelectedItems = isAllChecked ? updatedResults : []
+      const updatedSelectedExpenses = isAllChecked ? updatedResults : []
 
       return {
         results: updatedResults,
-        selectedItems: updatedSelectedItems,
+        selectedExpenses: updatedSelectedExpenses,
         isAllChecked,
       }
     })
