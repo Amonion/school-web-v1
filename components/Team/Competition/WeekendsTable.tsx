@@ -319,11 +319,13 @@ const WeekendsTable: React.FC = () => {
           </div>
         </div>
       ))}
+
       {loading && (
         <div className="flex w-full justify-center py-5">
           <i className="bi bi-opencollective loading"></i>
         </div>
       )}
+
       <div className="card_body sharp mb-3">
         <div className="flex flex-wrap items-center">
           <div className="grid mr-auto grid-cols-4 gap-2 w-[160px]">

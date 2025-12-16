@@ -36,20 +36,19 @@ export const CountryEmpty = {
 }
 
 interface CountryState {
-  links: { next: string | null; previous: string | null } | null
   count: number
   page_size: number
   countries: Country[]
   loadingCountries: boolean
-  error: string | null
-  successs?: string | null
   selectedCountries: Country[]
-  searchedItems: Country[]
+  searchedCountries: Country[]
   isAllCountriesChecked: boolean
   country: Country
   allCountries: boolean
+  isCountryForm: boolean
   setItemForm: (key: keyof Country, value: Country[keyof Country]) => void
-  resetForm: () => void
+  resetForm: (form: Country) => void
+  showCountryForm: (state: boolean) => void
   setAllCountries: () => void
   getCountries: (
     url: string,
@@ -85,18 +84,17 @@ interface CountryState {
   toggleActiveCountry: (index: number) => void
   toggleAllSelectedCountry: () => void
   reshuffleResults: () => void
-  searchItem: (url: string) => void
+  searchCountry: (url: string) => void
 }
 
 const CountryStore = create<CountryState>((set) => ({
-  links: null,
   count: 0,
   page_size: 0,
   countries: [],
   loadingCountries: false,
-  error: null,
+  isCountryForm: false,
   selectedCountries: [],
-  searchedItems: [],
+  searchedCountries: [],
   isAllCountriesChecked: false,
   allCountries: false,
   country: CountryEmpty,
@@ -107,10 +105,7 @@ const CountryStore = create<CountryState>((set) => ({
         [key]: value,
       },
     })),
-  resetForm: () =>
-    set({
-      country: CountryEmpty,
-    }),
+  resetForm: (form) => set({ country: form }),
 
   setAllCountries: () => {
     set((state) => {
@@ -143,6 +138,9 @@ const CountryStore = create<CountryState>((set) => ({
     }
   },
 
+  showCountryForm: (loadState: boolean) => {
+    set({ isCountryForm: loadState })
+  },
   setLoading: (loadState: boolean) => {
     set({ loadingCountries: loadState })
   },
@@ -206,13 +204,13 @@ const CountryStore = create<CountryState>((set) => ({
     }))
   },
 
-  searchItem: _debounce(async (url: string) => {
+  searchCountry: _debounce(async (url: string) => {
     const response = await apiRequest<FetchResponse>(url, {
       setLoading: CountryStore.getState().setLoading,
     })
     const results = response?.data.results
     if (results) {
-      set({ searchedItems: results })
+      set({ searchedCountries: results })
     }
   }, 1000),
 
@@ -251,7 +249,7 @@ const CountryStore = create<CountryState>((set) => ({
     updatedItem: FormData | Record<string, unknown>,
     setMessage: (message: string, isError: boolean) => void
   ) => {
-    set({ loadingCountries: true, error: null })
+    set({ loadingCountries: true })
     const response = await apiRequest<FetchResponse>(url, {
       method: 'PATCH',
       body: updatedItem,
@@ -268,7 +266,7 @@ const CountryStore = create<CountryState>((set) => ({
     updatedItem: FormData | Record<string, unknown>,
     setMessage: (message: string, isError: boolean) => void
   ) => {
-    set({ loadingCountries: true, error: null })
+    set({ loadingCountries: true })
     const response = await apiRequest<FetchResponse>(url, {
       method: 'POST',
       body: updatedItem,
