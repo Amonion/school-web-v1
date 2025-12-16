@@ -97,6 +97,41 @@ export interface BioUserSchoolInfo {
   isChecked?: boolean
 }
 
+export const PastSchoolEmpty = {
+  admittedAt: null,
+  bioUserId: '',
+  bioUserPassport: '',
+  bioUserUsername: '',
+  bioUserDisplayName: '',
+  graduatedAt: null,
+  isAdvanced: false,
+  isNew: false,
+  isSchoolVerified: false,
+  schoolArea: '',
+  schoolArm: '',
+  schoolLevel: 0,
+  schoolLevelName: '',
+  schoolContinent: '',
+  schoolCountry: '',
+  schoolCountryFlag: '',
+  schoolCountrySymbol: '',
+  schoolDepartment: '',
+  schoolDepartmentId: '',
+  schoolDepartmentUsername: '',
+  schoolFaculty: '',
+  schoolFacultyId: '',
+  schoolFacultyUsername: '',
+  schoolId: '',
+  schoolLogo: '',
+  schoolName: '',
+  schoolPicture: '',
+  schoolPlaceId: '',
+  schoolState: '',
+  schoolCertificate: '',
+  schoolTempCertificate: '',
+  schoolUsername: '',
+}
+
 export interface PastSchool {
   admittedAt: Date | null
   bioUserId: string
@@ -160,7 +195,7 @@ interface UsersState {
   searchedBioUsersSchoolInfo: BioUserSchoolInfo[]
   isAllChecked: boolean
   bioUserSchoolForm: BioUserSchoolInfo
-  bioUserPastSchoolForm: BioUserSchoolInfo
+  bioUserPastSchoolForm: PastSchool
   setBioUserPastSchoolForm: (
     key: keyof BioUserSchoolInfo,
     value: BioUserSchoolInfo[keyof BioUserSchoolInfo]
@@ -221,7 +256,7 @@ export const BioUserSchoolInfoStore = create<UsersState>((set) => ({
   searchedBioUserResult: [],
   isAllChecked: false,
   bioUserSchoolForm: BioUserSchoolInfoEmpty,
-  bioUserPastSchoolForm: BioUserSchoolInfoEmpty,
+  bioUserPastSchoolForm: PastSchoolEmpty,
   setBioUserPastSchoolForm: (key, value) =>
     set((state) => ({
       bioUserPastSchoolForm: {

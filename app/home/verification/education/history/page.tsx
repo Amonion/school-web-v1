@@ -3,9 +3,10 @@ import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import _debounce from 'lodash/debounce'
 import {
-  BioUserSchoolInfo,
   BioUserSchoolInfoEmpty,
   BioUserSchoolInfoStore,
+  PastSchool,
+  PastSchoolEmpty,
 } from '@/src/zustand/user/BioUserSchoolInfo'
 import AcademicStore, { AcademicLevel } from '@/src/zustand/school/Academic'
 import { AuthStore } from '@/src/zustand/user/AuthStore'
@@ -25,18 +26,14 @@ export default function History() {
   const {
     setBioUserPastSchoolForm,
     updateBioUserSchoolInfo,
+    setBioUserSchoolInfoForm,
     bioUserSchoolForm,
     bioUserPastSchoolForm,
     loading,
     pastSchools,
   } = BioUserSchoolInfoStore()
-  const {
-    toggleActive,
-    getAcademics,
-    activeLevel,
-    academicResults,
-    setActiveLevel,
-  } = AcademicStore()
+  const { toggleActive, getAcademics, activeLevel, academicResults } =
+    AcademicStore()
   const { bioUser, bioUserSchoolInfo, bioUserState } = AuthStore()
   const { setMessage } = MessageStore()
   const url = '/biousers-school/'
@@ -49,6 +46,7 @@ export default function History() {
   const { countries, getCountries } = CountryStore()
   const { states, getStates } = StateStore()
   const { area, getArea } = AreaStore()
+  const [isAdvanced, setIsAdvanced] = useState(false)
   const { faculties, getFaculties } = FacultyStore()
   const { departments, getDepartments } = DepartmentStore()
   const [isCountryList, setCountryList] = useState(false)
@@ -58,9 +56,10 @@ export default function History() {
   const [schoolName, setSchoolName] = useState('')
   const [facultyName, setFacultyName] = useState('')
   const [departmentName, setDepartmentName] = useState('')
-  const [editIndex, setEditingIndex] = useState(0)
   const [isAdmittedList, setIsAdmittedList] = useState(false)
   const [isGraduatedList, setIsGraduatedList] = useState(false)
+  const [editIndex, setEditIndex] = useState<number | null>(null)
+
   // const [pastSchools, setPastSchools] = useState<SchoolHistory[]>([]);
   const { setAlert } = AlartStore()
   const router = useRouter()
@@ -90,6 +89,12 @@ export default function History() {
     }
   }, [bioUserState])
 
+  useEffect(() => {
+    if (bioUserSchoolInfo) {
+      BioUserSchoolInfoStore.setState({ bioUserSchoolForm: bioUserSchoolInfo })
+    }
+  }, [bioUserSchoolInfo])
+
   const schoolNameChange = () => {
     setBioUserPastSchoolForm('schoolFaculty', '')
     setFacultyList(false)
@@ -106,7 +111,7 @@ export default function History() {
       setMessage
     )
     getAcademics(
-      `/academic-levels/?inSchool=${bioUserPastSchoolForm.inSchool}&country=${country}`,
+      `/academic-levels/?inSchool=false&country=${country}`,
       setMessage
     )
     setFacultyList(false)
@@ -226,160 +231,312 @@ export default function History() {
   const resetSchool = () => {
     setCountryList(false)
     BioUserSchoolInfoStore.setState({
-      bioUserPastSchoolForm: BioUserSchoolInfoEmpty,
+      bioUserSchoolForm: BioUserSchoolInfoEmpty,
     })
   }
+
+  // const addSchool = () => {
+  //   if (isEditingSchool) {
+  //     BioUserSchoolInfoStore.setState((prev) => {
+  //       const updatedPastSchools = prev.bioUserSchoolForm.pastSchools.map(
+  //         (item, index) => (index === editIndex ? bioUserPastSchoolForm : item)
+  //       )
+
+  //       const sortedPastSchools = [...updatedPastSchools].sort((a, b) => {
+  //         const dateA = a.graduatedAt ? new Date(a.graduatedAt) : new Date(0)
+  //         const dateB = b.graduatedAt ? new Date(b.graduatedAt) : new Date(0)
+  //         return Number(dateA) - Number(dateB)
+  //       })
+
+  //       return {
+  //         ...prev,
+  //         bioUserSchoolForm: {
+  //           ...prev.bioUserSchoolForm,
+  //           pastSchools: sortedPastSchools,
+  //         },
+  //       }
+  //     })
+  //   } else {
+  //     const inputsToValidate = [
+  //       {
+  //         name: 'schoolContinent',
+  //         value: bioUserPastSchoolForm.schoolContinent,
+  //         rules: { blank: true, minLength: 3, maxLength: 100 },
+  //         field: 'continent',
+  //       },
+  //       {
+  //         name: 'schoolCountry',
+  //         value: bioUserPastSchoolForm.schoolCountry,
+  //         rules: { blank: true, minLength: 3, maxLength: 100 },
+  //         field: 'Country',
+  //       },
+  //       {
+  //         name: 'schoolCountrySymbol',
+  //         value: bioUserPastSchoolForm.schoolCountrySymbol,
+  //         rules: { blank: true, maxLength: 100 },
+  //         field: 'Country',
+  //       },
+  //       {
+  //         name: 'schoolCountryFlag',
+  //         value: bioUserPastSchoolForm.schoolCountryFlag,
+  //         rules: { blank: false, maxLength: 100 },
+  //         field: 'Country Flag',
+  //       },
+  //       {
+  //         name: 'schoolState',
+  //         value: bioUserPastSchoolForm.schoolState,
+  //         rules: { blank: true, minLength: 2, maxLength: 100 },
+  //         field: 'State',
+  //       },
+  //       {
+  //         name: 'schoolArea',
+  //         value: bioUserPastSchoolForm.schoolArea,
+  //         rules: { blank: true, minLength: 2, maxLength: 100 },
+  //         field: 'Area',
+  //       },
+  //       {
+  //         name: 'schoolAcademicLevel',
+  //         value: JSON.stringify(bioUserPastSchoolForm.schoolAcademicLevel),
+  //         rules: { blank: true, minLength: 2, maxLength: 10000 },
+  //         field: 'Current academic level',
+  //       },
+  //       {
+  //         name: 'schoolYear',
+  //         value: bioUserPastSchoolForm.schoolYear,
+  //         rules: {
+  //           blank: bioUserPastSchoolForm.inSchool ? false : true,
+  //           minLength: 2,
+  //           maxLength: 1000,
+  //         },
+  //         field: 'School Year',
+  //       },
+  //       {
+  //         name: 'isAdvanced',
+  //         value: bioUserPastSchoolForm.isAdvanced,
+  //         rules: { blank: false, maxLength: 1000 },
+  //         field: 'Is Advanced',
+  //       },
+  //       {
+  //         name: 'admittedAt',
+  //         value: bioUserPastSchoolForm.admittedAt,
+  //         rules: { blank: true, minLength: 2, maxLength: 1000 },
+  //         field: 'Entry Date',
+  //       },
+  //       {
+  //         name: 'graduatedAt',
+  //         value: bioUserPastSchoolForm.graduatedAt,
+  //         rules: {
+  //           blank: bioUserPastSchoolForm.inSchool ? false : true,
+  //           minLength: 2,
+  //           maxLength: 1000,
+  //         },
+  //         field: 'Graduated Date',
+  //       },
+  //       {
+  //         name: 'schoolName',
+  //         value: bioUserPastSchoolForm.schoolName.trim(),
+  //         rules: { blank: true, minLength: 2, maxLength: 1000 },
+  //         field: 'Current school',
+  //       },
+  //       {
+  //         name: 'schoolLogo',
+  //         value: bioUserPastSchoolForm.schoolLogo,
+  //         rules: { blank: false, maxLength: 1000 },
+  //         field: 'Current school logo',
+  //       },
+  //       {
+  //         name: 'schoolId',
+  //         value: bioUserPastSchoolForm.schoolId,
+  //         rules: { blank: false, maxLength: 100 },
+  //         field: 'Current school id',
+  //       },
+  //       {
+  //         name: 'schoolFaculty',
+  //         value: bioUserPastSchoolForm.schoolFaculty.trim(),
+  //         rules: { blank: false, maxLength: 1000 },
+  //         field: 'Current faculty',
+  //       },
+  //       {
+  //         name: 'schoolFacultyId',
+  //         value: bioUserPastSchoolForm.schoolFacultyId.trim(),
+  //         rules: { blank: false, maxLength: 1000 },
+  //         field: 'Current faculty id',
+  //       },
+  //       {
+  //         name: 'schoolFacultyUsername',
+  //         value: bioUserPastSchoolForm.schoolFacultyUsername,
+  //         rules: { blank: false, maxLength: 100 },
+  //         field: 'Current faculty username',
+  //       },
+  //       {
+  //         name: 'schoolDepartment',
+  //         value: bioUserPastSchoolForm.schoolDepartment.trim(),
+  //         rules: { blank: false, maxLength: 100 },
+  //         field: 'Current department',
+  //       },
+  //       {
+  //         name: 'schoolDepartmentId',
+  //         value: bioUserPastSchoolForm.schoolDepartmentId.trim(),
+  //         rules: { blank: false, maxLength: 100 },
+  //         field: 'Current department',
+  //       },
+  //       {
+  //         name: 'schoolDepartmentUsername',
+  //         value: bioUserPastSchoolForm.schoolDepartmentUsername,
+  //         rules: { blank: false, maxLength: 100 },
+  //         field: 'Current department username',
+  //       },
+  //     ]
+
+  //     const { messages } = validateInputs(inputsToValidate)
+  //     const getFirstNonEmptyMessage = (
+  //       messages: Record<string, string>
+  //     ): string | null => {
+  //       for (const key in messages) {
+  //         if (messages[key].trim() !== '') {
+  //           return messages[key]
+  //         }
+  //       }
+  //       return null
+  //     }
+
+  //     const firstNonEmptyMessage = getFirstNonEmptyMessage(messages)
+  //     if (firstNonEmptyMessage) {
+  //       setMessage(firstNonEmptyMessage, false)
+  //       return
+  //     }
+
+  //     BioUserSchoolInfoStore.setState((prev) => {
+  //       // Append the new school
+  //       const updatedPastSchools = [
+  //         ...prev.bioUserSchoolForm.pastSchools,
+  //         bioUserPastSchoolForm,
+  //       ]
+
+  //       // Sort the updated array by graduatedAt (ascending)
+  //       const sortedPastSchools = [...updatedPastSchools].sort((a, b) => {
+  //         // Optional: Handle null/undefined graduatedAt (treat as earliest date)
+  //         const dateA = a.graduatedAt ? new Date(a.graduatedAt) : new Date(0) // Epoch start as fallback
+  //         const dateB = b.graduatedAt ? new Date(b.graduatedAt) : new Date(0)
+
+  //         return Number(dateA) - Number(dateB)
+  //       })
+
+  //       return {
+  //         ...prev,
+  //         bioUserSchoolForm: {
+  //           ...prev.bioUserSchoolForm,
+  //           pastSchools: sortedPastSchools,
+  //         },
+  //       }
+  //     })
+  //   }
+
+  //   AcademicStore.getState().resetForm()
+  //   setActiveLevel({
+  //     level: 0,
+  //     levelName: '',
+  //     maxLevelName: '',
+  //     subsectionDegree: '',
+  //     degree: '',
+  //   })
+  //   resetSchool()
+  // }
 
   const addSchool = () => {
     if (isEditingSchool) {
       BioUserSchoolInfoStore.setState((prev) => {
-        const updatedPastSchools = prev.bioUserSchoolForm.pastSchools.map(
-          (item, index) => (index === editIndex ? bioUserPastSchoolForm : item)
+        const newItems = prev.pastSchools.map((item, index) =>
+          index === editIndex
+            ? {
+                ...bioUserPastSchoolForm,
+                bioUserUsername: String(bioUser?.bioUserUsername),
+                bioUserId: String(bioUser?._id),
+                bioUserPicture: String(bioUser?.bioUserPicture),
+                bioUserDisplayName: String(bioUser?.bioUserDisplayName),
+              }
+            : item
         )
-
-        const sortedPastSchools = [...updatedPastSchools].sort((a, b) => {
-          const dateA = a.graduatedAt ? new Date(a.graduatedAt) : new Date(0)
-          const dateB = b.graduatedAt ? new Date(b.graduatedAt) : new Date(0)
-          return Number(dateA) - Number(dateB)
-        })
-
         return {
-          ...prev,
-          bioUserSchoolForm: {
-            ...prev.bioUserSchoolForm,
-            pastSchools: sortedPastSchools,
-          },
+          pastSchools: newItems,
         }
+      })
+      BioUserSchoolInfoStore.setState({
+        bioUserPastSchoolForm: PastSchoolEmpty,
       })
     } else {
       const inputsToValidate = [
         {
-          name: 'schoolContinent',
-          value: bioUserPastSchoolForm.schoolContinent,
-          rules: { blank: true, minLength: 3, maxLength: 100 },
-          field: 'continent',
-        },
-        {
-          name: 'schoolCountry',
-          value: bioUserPastSchoolForm.schoolCountry,
-          rules: { blank: true, minLength: 3, maxLength: 100 },
-          field: 'Country',
-        },
-        {
-          name: 'schoolCountrySymbol',
-          value: bioUserPastSchoolForm.schoolCountrySymbol,
-          rules: { blank: true, maxLength: 100 },
-          field: 'Country',
-        },
-        {
-          name: 'schoolCountryFlag',
-          value: bioUserPastSchoolForm.schoolCountryFlag,
-          rules: { blank: false, maxLength: 100 },
-          field: 'Country Flag',
+          name: 'schoolArea',
+          value: bioUserPastSchoolForm.schoolArea,
+          rules: { blank: true, minLength: 2 },
+          field: 'School Area',
         },
         {
           name: 'schoolState',
           value: bioUserPastSchoolForm.schoolState,
-          rules: { blank: true, minLength: 2, maxLength: 100 },
-          field: 'State',
+          rules: { blank: true },
+          field: 'School State',
         },
         {
-          name: 'schoolArea',
-          value: bioUserPastSchoolForm.schoolArea,
-          rules: { blank: true, minLength: 2, maxLength: 100 },
-          field: 'Area',
+          name: 'schoolCountry',
+          value: bioUserPastSchoolForm.schoolCountry,
+          rules: { blank: true, minLength: 2 },
+          field: 'School Country',
         },
         {
-          name: 'schoolAcademicLevel',
-          value: JSON.stringify(bioUserPastSchoolForm.schoolAcademicLevel),
-          rules: { blank: true, minLength: 2, maxLength: 10000 },
-          field: 'Current academic level',
+          name: 'schoolContinent',
+          value: bioUserPastSchoolForm.schoolContinent,
+          rules: { blank: true },
+          field: 'School Continent',
         },
         {
-          name: 'schoolYear',
-          value: bioUserPastSchoolForm.schoolYear,
-          rules: {
-            blank: bioUserPastSchoolForm.inSchool ? false : true,
-            minLength: 2,
-            maxLength: 1000,
-          },
-          field: 'School Year',
+          name: 'schoolCountryFlag',
+          value: bioUserPastSchoolForm.schoolCountryFlag,
+          rules: { blank: true },
+          field: 'School Country Flag',
         },
         {
-          name: 'isAdvanced',
-          value: bioUserPastSchoolForm.isAdvanced,
-          rules: { blank: false, maxLength: 1000 },
-          field: 'Is Advanced',
+          name: 'schoolName',
+          value: bioUserPastSchoolForm.schoolName.trim(),
+          rules: { blank: false, minLength: 2 },
+          field: 'School Name',
+        },
+        {
+          name: 'schoolLogo',
+          value: bioUserPastSchoolForm.schoolLogo,
+          rules: { blank: true },
+          field: 'School Name',
+        },
+        {
+          name: 'schoolDepartmentId',
+          value: bioUserPastSchoolForm.schoolDepartmentId.trim(),
+          rules: { blank: true },
+          field: 'Department Name',
+        },
+        {
+          name: 'schoolDepartment',
+          value: bioUserPastSchoolForm.schoolDepartment.trim(),
+          rules: { blank: isAdvanced ? false : true },
+          field: 'Department Name',
+        },
+        {
+          name: 'schoolDepartmentUsername',
+          value: bioUserPastSchoolForm.schoolDepartmentUsername,
+          rules: { blank: true },
+          field: 'Department Username',
         },
         {
           name: 'admittedAt',
           value: bioUserPastSchoolForm.admittedAt,
-          rules: { blank: true, minLength: 2, maxLength: 1000 },
+          rules: { blank: false, minLength: 2 },
           field: 'Entry Date',
         },
         {
           name: 'graduatedAt',
           value: bioUserPastSchoolForm.graduatedAt,
-          rules: {
-            blank: bioUserPastSchoolForm.inSchool ? false : true,
-            minLength: 2,
-            maxLength: 1000,
-          },
-          field: 'Graduated Date',
-        },
-        {
-          name: 'schoolName',
-          value: bioUserPastSchoolForm.schoolName.trim(),
-          rules: { blank: true, minLength: 2, maxLength: 1000 },
-          field: 'Current school',
-        },
-        {
-          name: 'schoolLogo',
-          value: bioUserPastSchoolForm.schoolLogo,
-          rules: { blank: false, maxLength: 1000 },
-          field: 'Current school logo',
-        },
-        {
-          name: 'schoolId',
-          value: bioUserPastSchoolForm.schoolId,
-          rules: { blank: false, maxLength: 100 },
-          field: 'Current school id',
-        },
-        {
-          name: 'schoolFaculty',
-          value: bioUserPastSchoolForm.schoolFaculty.trim(),
-          rules: { blank: false, maxLength: 1000 },
-          field: 'Current faculty',
-        },
-        {
-          name: 'schoolFacultyId',
-          value: bioUserPastSchoolForm.schoolFacultyId.trim(),
-          rules: { blank: false, maxLength: 1000 },
-          field: 'Current faculty id',
-        },
-        {
-          name: 'schoolFacultyUsername',
-          value: bioUserPastSchoolForm.schoolFacultyUsername,
-          rules: { blank: false, maxLength: 100 },
-          field: 'Current faculty username',
-        },
-        {
-          name: 'schoolDepartment',
-          value: bioUserPastSchoolForm.schoolDepartment.trim(),
-          rules: { blank: false, maxLength: 100 },
-          field: 'Current department',
-        },
-        {
-          name: 'schoolDepartmentId',
-          value: bioUserPastSchoolForm.schoolDepartmentId.trim(),
-          rules: { blank: false, maxLength: 100 },
-          field: 'Current department',
-        },
-        {
-          name: 'schoolDepartmentUsername',
-          value: bioUserPastSchoolForm.schoolDepartmentUsername,
-          rules: { blank: false, maxLength: 100 },
-          field: 'Current department username',
+          rules: { blank: false, minLength: 2 },
+          field: 'Exit Date',
         },
       ]
 
@@ -400,42 +557,26 @@ export default function History() {
         setMessage(firstNonEmptyMessage, false)
         return
       }
-
       BioUserSchoolInfoStore.setState((prev) => {
-        // Append the new school
-        const updatedPastSchools = [
-          ...prev.bioUserSchoolForm.pastSchools,
-          bioUserPastSchoolForm,
-        ]
-
-        // Sort the updated array by graduatedAt (ascending)
-        const sortedPastSchools = [...updatedPastSchools].sort((a, b) => {
-          // Optional: Handle null/undefined graduatedAt (treat as earliest date)
-          const dateA = a.graduatedAt ? new Date(a.graduatedAt) : new Date(0) // Epoch start as fallback
-          const dateB = b.graduatedAt ? new Date(b.graduatedAt) : new Date(0)
-
-          return Number(dateA) - Number(dateB)
-        })
-
         return {
-          ...prev,
-          bioUserSchoolForm: {
-            ...prev.bioUserSchoolForm,
-            pastSchools: sortedPastSchools,
-          },
+          pastSchools: [
+            ...prev.pastSchools,
+            {
+              ...bioUserPastSchoolForm,
+              bioUserId: String(bioUser?._id),
+              bioUserUsername: String(bioUser?.bioUserUsername),
+              bioUserPicture: String(bioUser?.bioUserPicture),
+              bioUserDisplayName: String(bioUser?.bioUserDisplayName),
+            },
+          ],
         }
       })
     }
 
     AcademicStore.getState().resetForm()
-    setActiveLevel({
-      level: 0,
-      levelName: '',
-      maxLevelName: '',
-      subsectionDegree: '',
-      degree: '',
-    })
     resetSchool()
+    setIsAdvanced(false)
+    setEditIndex(null)
   }
 
   const tempDelete = (indexToRemove: number) => {
@@ -449,8 +590,8 @@ export default function History() {
     })
   }
 
-  const tempEdit = (index: number, item: BioUserSchoolInfo) => {
-    setEditingIndex(index)
+  const tempEdit = (index: number, item: PastSchool) => {
+    setEditIndex(index)
     setEditingSchool(true)
     getStates(
       `/places/state/?country=${item.schoolCountry}&page_size=350&field=state&sort=state`,
@@ -460,7 +601,7 @@ export default function History() {
       `/places/area/?state=${item.schoolState}&page_size=350&field=area&sort=area`
     )
     getAcademics(
-      `/academic-levels/?inSchool=${bioUserPastSchoolForm.inSchool}&country=${item.schoolCountry}`,
+      `/academic-levels/?inSchool=false&country=${item.schoolCountry}`,
       setMessage
     )
     BioUserSchoolInfoStore.setState({ bioUserPastSchoolForm: item })
@@ -779,9 +920,9 @@ export default function History() {
 
   return (
     <>
-      {bioUserSchoolForm.pastSchools.length > 0 && (
+      {pastSchools.length > 0 && (
         <div className="mt-10">
-          {bioUserSchoolForm.pastSchools.map((item, index) => (
+          {pastSchools.map((item, index) => (
             <div key={index} className="round_box mb-5">
               <div className="m-1 mb-5">
                 <div className="text-sm">Place of Education</div>
@@ -793,9 +934,7 @@ export default function History() {
 
               <div className="m-1 mb-5">
                 <div className="text-sm">Education Level</div>
-                <div className="selected_item">
-                  {item.schoolAcademicLevel.levelName}
-                </div>
+                <div className="selected_item">{item.schoolLevelName}</div>
               </div>
 
               <div className="m-1 mb-5">
@@ -880,17 +1019,17 @@ export default function History() {
 
             <div className="flex justify-center">
               <div
-                onClick={() => setBioUserPastSchoolForm('hasPastSchool', true)}
+                onClick={() => setBioUserSchoolInfoForm('hasPastSchool', true)}
                 className={`btn mx-1 ${
-                  bioUserPastSchoolForm.hasPastSchool === true ? '' : 'line'
+                  bioUserSchoolForm.hasPastSchool === true ? '' : 'line'
                 }`}
               >
                 Yes I have
               </div>
               <div
-                onClick={() => setBioUserPastSchoolForm('hasPastSchool', false)}
+                onClick={() => setBioUserSchoolInfoForm('hasPastSchool', false)}
                 className={`btn mx-1 ${
-                  bioUserPastSchoolForm.hasPastSchool === false ? '' : 'line'
+                  bioUserSchoolForm.hasPastSchool === false ? '' : 'line'
                 }`}
               >
                 No I have not
@@ -898,7 +1037,7 @@ export default function History() {
             </div>
           </div>
 
-          {bioUserPastSchoolForm.hasPastSchool && (
+          {bioUserSchoolForm.hasPastSchool && (
             <div className="flex flex-col w-full mb-4">
               <div className="flex flex-col relative mb-4">
                 <label className="label flex items-center w-full" htmlFor="">
@@ -1032,7 +1171,7 @@ export default function History() {
                       item.isActive
                         ? 'text-[var(--custom)]'
                         : item.levelName ===
-                          bioUserPastSchoolForm.schoolAcademicLevel.levelName
+                          bioUserPastSchoolForm.schoolLevelName
                         ? 'text-[var(--custom)]'
                         : ''
                     }`}
@@ -1041,8 +1180,9 @@ export default function History() {
                     <div className="radio_circle">
                       {(item.isActive ||
                         item.levelName ===
-                          bioUserPastSchoolForm.schoolAcademicLevel
-                            .levelName) && <div className="radio_dot"></div>}
+                          bioUserPastSchoolForm.schoolLevelName) && (
+                        <div className="radio_dot"></div>
+                      )}
                     </div>
                     {item.levelName}
                   </div>
@@ -1122,7 +1262,7 @@ export default function History() {
 
           {bioUserPastSchoolForm.isAdvanced ? (
             <>
-              {bioUserPastSchoolForm.schoolAcademicLevel.levelName !== '' &&
+              {bioUserPastSchoolForm.schoolLevelName !== '' &&
                 bioUserPastSchoolForm.schoolName !== '' && (
                   <>
                     <div className="relative mb-10">
@@ -1251,7 +1391,7 @@ export default function History() {
                 </div>
                 {/* )} */}
               </div>
-              {!bioUserPastSchoolForm.inSchool && (
+              {!bioUserSchoolForm.inSchool && (
                 <div className="relative">
                   <label className="label flex items-center w-full" htmlFor="">
                     Year of Graduation
@@ -1303,8 +1443,7 @@ export default function History() {
               <div>Processing...</div>
             </div>
           ) : (
-            (pastSchools.length > 0 ||
-              !bioUserPastSchoolForm.hasPastSchool) && (
+            (pastSchools.length > 0 || !bioUserSchoolForm.hasPastSchool) && (
               <div onClick={handleSubmit} className="btn">
                 Submit Form
               </div>
