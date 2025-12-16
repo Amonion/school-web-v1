@@ -20,18 +20,11 @@ const CreateBank: React.FC = () => {
   const [isUsernameInput, setUsernameInput] = useState(true)
   const [isUsernameTaken, setUsername] = useState(false)
 
-  const {
-    country,
-    getCountry,
-    loadingCountries,
-    resetForm,
-    updateItem,
-    postItem,
-  } = CountryStore()
+  const { country, getCountry, loadingCountries, updateItem, postItem } =
+    CountryStore()
   const { setBankForm, itemFormData, getBank, resetBankForm } = BankStore()
 
   useEffect(() => {
-    resetForm()
     resetBankForm()
   }, [])
 
