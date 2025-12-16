@@ -51,7 +51,7 @@ export const CountdownCellExam = ({
   const { d, h, m, s } = formatCountdown(timeLeft)
 
   return (
-    <td className="text-sm">
+    <td className="">
       {d}d : {h}h : {m}m : {s}s
     </td>
   )

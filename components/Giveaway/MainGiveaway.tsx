@@ -1,12 +1,13 @@
 'use client'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
-import { formatCount, formatRelativeDate } from '@/lib/helpers'
-import { Eye, Heart } from 'lucide-react'
+import { formatCount, formatMoney } from '@/lib/helpers'
+import { Bell, MessageCircle, Users } from 'lucide-react'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { EffectFade, Autoplay } from 'swiper/modules'
 import Link from 'next/link'
 import WeekendStore, { Weekend } from '@/src/zustand/exam/Weekend'
+import { CountdownCellExam } from '../CountDownCell'
 
 const MainGiveaway: React.FC = () => {
   const { giveaways } = WeekendStore()
@@ -16,6 +17,12 @@ const MainGiveaway: React.FC = () => {
     const filt = giveaways.filter((item) => item.isMain)
     setMainWeekends(filt)
   }, [giveaways])
+
+  const getRemainingTime = (startAt: string | Date) => {
+    const startTime = new Date(startAt).getTime()
+    const now = Date.now()
+    return Math.max(startTime - now, 0)
+  }
 
   return (
     <div className="w-full overflow-hidden">
@@ -46,10 +53,14 @@ const MainGiveaway: React.FC = () => {
                   />
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-                <div className="absolute right-1 top-2 rounded-[25px] bg-black/50 text-white py-1 px-2 text-[12px] items-center flex">
-                  {formatRelativeDate(String(item?.publishedAt))}
-                </div>
-                <div className="absolute bottom-0 p-2 sm:p-5 pr-7">
+                {item.startAt && (
+                  <div className="absolute right-1 top-2 rounded-[25px] bg-black/50 text-white py-1 px-2 text-[12px] items-center flex">
+                    <CountdownCellExam
+                      startingTime={getRemainingTime(item.startAt)}
+                    />
+                  </div>
+                )}
+                <div className="absolute flex flex-col items-start bottom-0 p-2 sm:p-5 pr-7">
                   <Link
                     href={`/news/${item._id}`}
                     className="text-lg text-white sm:text-xl sm:font-semibold mb-1"
@@ -64,20 +75,31 @@ const MainGiveaway: React.FC = () => {
                       {item.instruction}
                     </Link>
                   )}
+                  {item.price && (
+                    <div className="rounded-[25px] mt-2 bg-black/50 text-white py-1 px-2 font-bold">
+                      ₦{formatMoney(item.price)}
+                    </div>
+                  )}
                 </div>
                 <div
                   className={`text-white absolute z-20 bottom-5 right-2 sm:right-4 flex flex-col items-center gap-4`}
                 >
-                  <span className="actionIndicator">
-                    <Eye size={18} />
+                  <span className="actionIndicator cursor-pointer">
+                    <Bell size={18} />
                     {item.views > 0 && (
-                      <div className="">{formatCount(item.views)}</div>
+                      <div className="shadow-sm">{formatCount(item.likes)}</div>
                     )}
                   </span>
                   <span className="actionIndicator">
-                    <Heart size={18} />
+                    <Users size={18} />
                     {item.views > 0 && (
                       <div className="shadow-sm">{formatCount(item.likes)}</div>
+                    )}
+                  </span>
+                  <span className="actionIndicator">
+                    <MessageCircle size={18} />
+                    {item.views > 0 && (
+                      <div className="">{formatCount(item.comments)}</div>
                     )}
                   </span>
                 </div>

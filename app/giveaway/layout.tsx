@@ -10,8 +10,8 @@ import VerticalNavigation from '@/components/Home/Navigation/VerticalNavigation'
 import { NavStore } from '@/src/zustand/notification/Navigation'
 import MobileNav from '@/components/Home/Navigation/MobileNav'
 import CommentBottomSheet from '@/components/Home/Comment/CommentBottomSheet'
-import AsideNews from '@/components/News/Navigation/AsideNews'
 import NewsHeader from '@/components/News/Navigation/NewsHeader'
+import ActiveGiveaways from '@/components/Giveaway/ActiveGiveaways'
 
 export default function RootLayout({
   children,
@@ -87,7 +87,7 @@ export default function RootLayout({
                 {children}
               </div>
             </div>
-            <AsideNews />
+            <ActiveGiveaways />
           </div>
         </div>
       </div>

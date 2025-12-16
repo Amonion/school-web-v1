@@ -30,6 +30,12 @@ export const toDateTimeLocal = (value: string | Date | null): string => {
   return date.toISOString().slice(0, 16)
 }
 
+export const getRemainingTime = (startAt: string | Date) => {
+  const startTime = new Date(startAt).getTime()
+  const now = Date.now()
+  return Math.max(startTime - now, 0)
+}
+
 export async function loadPdfJs() {
   if (!pdfjs) {
     const mod = await import('pdfjs-dist')
