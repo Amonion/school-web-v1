@@ -406,191 +406,184 @@ export default function Current() {
       return
     }
 
-    const array0 = [
-      {
-        name: 'inSchool',
-        value: bioUserSchoolForm.inSchool,
-        rules: { blank: true, maxLength: 100 },
-        field: 'In school',
-      },
-      {
-        name: 'isEducation',
-        value: true,
-        rules: { blank: true, maxLength: 100 },
-        field: 'In school',
-      },
-    ]
-
-    const array1 = [
-      {
-        name: 'schoolContinent',
-        value: bioUserSchoolForm.schoolContinent,
-        rules: { blank: true, minLength: 3, maxLength: 100 },
-        field: 'continent',
-      },
-      {
-        name: 'bioUSerId',
-        value: String(bioUser?._id),
-        rules: { blank: true, maxLength: 100 },
-        field: 'continent',
-      },
-      {
-        name: 'schoolCountry',
-        value: bioUserSchoolForm.schoolCountry,
-        rules: { blank: true, minLength: 3, maxLength: 100 },
-        field: 'Country',
-      },
-      {
-        name: 'schoolCountrySymbol',
-        value: bioUserSchoolForm.schoolCountrySymbol,
-        rules: { blank: true, maxLength: 100 },
-        field: 'Country',
-      },
-      {
-        name: 'schoolCountryFlag',
-        value: bioUserSchoolForm.schoolCountryFlag,
-        rules: { blank: false, maxLength: 100 },
-        field: 'Country Flag',
-      },
-      {
-        name: 'schoolState',
-        value: bioUserSchoolForm.schoolState,
-        rules: { blank: true, minLength: 2, maxLength: 100 },
-        field: 'State',
-      },
-      {
-        name: 'schoolArea',
-        value: bioUserSchoolForm.schoolArea,
-        rules: { blank: true, minLength: 2, maxLength: 100 },
-        field: 'Area',
-      },
-      {
-        name: 'schoolAcademicLevel',
-        value: JSON.stringify(bioUserSchoolForm.schoolAcademicLevel),
-        rules: { blank: true, minLength: 2, maxLength: 10000 },
-        field: 'Current academic level',
-      },
-      {
-        name: 'action',
-        value: 'Education',
-        rules: { blank: true },
-        field: 'Education',
-      },
-      {
-        name: 'isEducation',
-        value: true,
-        rules: { blank: true },
-        field: 'Education',
-      },
-      {
-        name: 'ID',
-        value: String(user?._id),
-        rules: { blank: true },
-        field: 'ID ',
-      },
-    ]
-
-    const array2 = [
-      {
-        name: 'schoolYear',
-        value: bioUserSchoolForm.schoolYear,
-        rules: {
-          blank: bioUserSchoolForm.inSchool ? false : true,
-          minLength: 2,
-          maxLength: 1000,
-        },
-        field: 'School Year',
-      },
-      {
-        name: 'isAdvanced',
-        value: bioUserSchoolForm.isAdvanced,
-        rules: { blank: false, maxLength: 1000 },
-        field: 'Is Advanced',
-      },
-      {
-        name: 'admittedAt',
-        value: bioUserSchoolForm.admittedAt,
-        rules: { blank: true, minLength: 2, maxLength: 1000 },
-        field: 'Entry Date',
-      },
-      {
-        name: 'graduatedAt',
-        value: bioUserSchoolForm.graduatedAt,
-        rules: {
-          blank: bioUserSchoolForm.inSchool ? false : true,
-          minLength: 2,
-          maxLength: 1000,
-        },
-        field: 'Graduated Date',
-      },
-      {
-        name: 'schoolName',
-        value: bioUserSchoolForm.schoolName.trim(),
-        rules: { blank: true, minLength: 2, maxLength: 1000 },
-        field: 'Current school',
-      },
-      {
-        name: 'schoolLogo',
-        value: bioUserSchoolForm.schoolLogo,
-        rules: { blank: false, maxLength: 1000 },
-        field: 'Current school logo',
-      },
-      {
-        name: 'schoolId',
-        value: bioUserSchoolForm.schoolId,
-        rules: { blank: false, maxLength: 100 },
-        field: 'Current school id',
-      },
-      {
-        name: 'isNew',
-        value: isNew,
-        rules: { blank: false, maxLength: 100 },
-        field: 'Is school recorded',
-      },
-      {
-        name: 'schoolFaculty',
-        value: bioUserSchoolForm.schoolFaculty.trim(),
-        rules: { blank: false, maxLength: 1000 },
-        field: 'Current faculty',
-      },
-      {
-        name: 'schoolFacultyId',
-        value: bioUserSchoolForm.schoolFacultyId.trim(),
-        rules: { blank: false, maxLength: 1000 },
-        field: 'Current faculty id',
-      },
-      {
-        name: 'schoolFacultyUsername',
-        value: bioUserSchoolForm.schoolFacultyUsername,
-        rules: { blank: false, maxLength: 100 },
-        field: 'Current faculty username',
-      },
-      {
-        name: 'schoolDepartment',
-        value: bioUserSchoolForm.schoolDepartment.trim(),
-        rules: { blank: false, maxLength: 100 },
-        field: 'Current department',
-      },
-      {
-        name: 'schoolDepartmentId',
-        value: bioUserSchoolForm.schoolDepartmentId.trim(),
-        rules: { blank: false, maxLength: 100 },
-        field: 'Current department',
-      },
-      {
-        name: 'schoolDepartmentUsername',
-        value: bioUserSchoolForm.schoolDepartmentUsername,
-        rules: { blank: false, maxLength: 100 },
-        field: 'Current department username',
-      },
-    ]
-
-    const inputsToValidate = bioUserSchoolForm.inSchool
-      ? [...array1, ...array2]
-      : array0
+    const inputArray = bioUserSchoolForm.inSchool
+      ? [
+          {
+            name: 'schoolContinent',
+            value: bioUserSchoolForm.schoolContinent,
+            rules: { blank: true, minLength: 3, maxLength: 100 },
+            field: 'continent',
+          },
+          {
+            name: 'bioUSerId',
+            value: String(bioUser?._id),
+            rules: { blank: true, maxLength: 100 },
+            field: 'continent',
+          },
+          {
+            name: 'schoolCountry',
+            value: bioUserSchoolForm.schoolCountry,
+            rules: { blank: true, minLength: 3, maxLength: 100 },
+            field: 'Country',
+          },
+          {
+            name: 'schoolCountrySymbol',
+            value: bioUserSchoolForm.schoolCountrySymbol,
+            rules: { blank: true, maxLength: 100 },
+            field: 'Country',
+          },
+          {
+            name: 'schoolCountryFlag',
+            value: bioUserSchoolForm.schoolCountryFlag,
+            rules: { blank: false, maxLength: 100 },
+            field: 'Country Flag',
+          },
+          {
+            name: 'schoolState',
+            value: bioUserSchoolForm.schoolState,
+            rules: { blank: true, minLength: 2, maxLength: 100 },
+            field: 'State',
+          },
+          {
+            name: 'schoolArea',
+            value: bioUserSchoolForm.schoolArea,
+            rules: { blank: true, minLength: 2, maxLength: 100 },
+            field: 'Area',
+          },
+          {
+            name: 'schoolAcademicLevel',
+            value: JSON.stringify(bioUserSchoolForm.schoolAcademicLevel),
+            rules: { blank: true, minLength: 2, maxLength: 10000 },
+            field: 'Current academic level',
+          },
+          {
+            name: 'action',
+            value: 'Education',
+            rules: { blank: true },
+            field: 'Education',
+          },
+          {
+            name: 'isEducation',
+            value: true,
+            rules: { blank: true },
+            field: 'Education',
+          },
+          {
+            name: 'ID',
+            value: String(user?._id),
+            rules: { blank: true },
+            field: 'ID ',
+          },
+        ]
+      : [
+          {
+            name: 'inSchool',
+            value: bioUserSchoolForm.inSchool,
+            rules: { blank: true, maxLength: 100 },
+            field: 'In school',
+          },
+          {
+            name: 'isEducation',
+            value: true,
+            rules: { blank: true, maxLength: 100 },
+            field: 'In school',
+          },
+          {
+            name: 'schoolYear',
+            value: bioUserSchoolForm.schoolYear,
+            rules: {
+              blank: bioUserSchoolForm.inSchool ? false : true,
+              minLength: 2,
+              maxLength: 1000,
+            },
+            field: 'School Year',
+          },
+          {
+            name: 'isAdvanced',
+            value: bioUserSchoolForm.isAdvanced,
+            rules: { blank: false, maxLength: 1000 },
+            field: 'Is Advanced',
+          },
+          {
+            name: 'admittedAt',
+            value: bioUserSchoolForm.admittedAt,
+            rules: { blank: true, minLength: 2, maxLength: 1000 },
+            field: 'Entry Date',
+          },
+          {
+            name: 'graduatedAt',
+            value: bioUserSchoolForm.graduatedAt,
+            rules: {
+              blank: bioUserSchoolForm.inSchool ? false : true,
+              minLength: 2,
+              maxLength: 1000,
+            },
+            field: 'Graduated Date',
+          },
+          {
+            name: 'schoolName',
+            value: bioUserSchoolForm.schoolName.trim(),
+            rules: { blank: true, minLength: 2, maxLength: 1000 },
+            field: 'Current school',
+          },
+          {
+            name: 'schoolLogo',
+            value: bioUserSchoolForm.schoolLogo,
+            rules: { blank: false, maxLength: 1000 },
+            field: 'Current school logo',
+          },
+          {
+            name: 'schoolId',
+            value: bioUserSchoolForm.schoolId,
+            rules: { blank: false, maxLength: 100 },
+            field: 'Current school id',
+          },
+          {
+            name: 'isNew',
+            value: isNew,
+            rules: { blank: false, maxLength: 100 },
+            field: 'Is school recorded',
+          },
+          {
+            name: 'schoolFaculty',
+            value: bioUserSchoolForm.schoolFaculty.trim(),
+            rules: { blank: false, maxLength: 1000 },
+            field: 'Current faculty',
+          },
+          {
+            name: 'schoolFacultyId',
+            value: bioUserSchoolForm.schoolFacultyId.trim(),
+            rules: { blank: false, maxLength: 1000 },
+            field: 'Current faculty id',
+          },
+          {
+            name: 'schoolFacultyUsername',
+            value: bioUserSchoolForm.schoolFacultyUsername,
+            rules: { blank: false, maxLength: 100 },
+            field: 'Current faculty username',
+          },
+          {
+            name: 'schoolDepartment',
+            value: bioUserSchoolForm.schoolDepartment.trim(),
+            rules: { blank: false, maxLength: 100 },
+            field: 'Current department',
+          },
+          {
+            name: 'schoolDepartmentId',
+            value: bioUserSchoolForm.schoolDepartmentId.trim(),
+            rules: { blank: false, maxLength: 100 },
+            field: 'Current department',
+          },
+          {
+            name: 'schoolDepartmentUsername',
+            value: bioUserSchoolForm.schoolDepartmentUsername,
+            rules: { blank: false, maxLength: 100 },
+            field: 'Current department username',
+          },
+        ]
 
     if (bioUserSchoolForm.inSchool) {
-      const { messages } = validateInputs(inputsToValidate)
+      const { messages } = validateInputs(inputArray)
       const getFirstNonEmptyMessage = (
         messages: Record<string, string>
       ): string | null => {
@@ -610,7 +603,7 @@ export default function Current() {
       e.preventDefault()
     }
 
-    const data = appendForm(inputsToValidate)
+    const data = appendForm(inputArray)
 
     setAlert(
       'Warning',
