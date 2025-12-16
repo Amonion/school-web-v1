@@ -517,7 +517,7 @@ export default function History() {
         {
           name: 'schoolDepartment',
           value: bioUserPastSchoolForm.schoolDepartment.trim(),
-          rules: { blank: isAdvanced ? false : true },
+          rules: { blank: isAdvanced ? true : false },
           field: 'Department Name',
         },
         {
