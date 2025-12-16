@@ -499,19 +499,19 @@ export default function History() {
         {
           name: 'schoolName',
           value: bioUserPastSchoolForm.schoolName.trim(),
-          rules: { blank: false, minLength: 2 },
+          rules: { blank: true, minLength: 2 },
           field: 'School Name',
         },
         {
           name: 'schoolLogo',
           value: bioUserPastSchoolForm.schoolLogo,
-          rules: { blank: true },
-          field: 'School Name',
+          rules: { blank: false },
+          field: 'School Logo',
         },
         {
           name: 'schoolDepartmentId',
           value: bioUserPastSchoolForm.schoolDepartmentId.trim(),
-          rules: { blank: true },
+          rules: { blank: false },
           field: 'Department Name',
         },
         {
@@ -523,7 +523,7 @@ export default function History() {
         {
           name: 'schoolDepartmentUsername',
           value: bioUserPastSchoolForm.schoolDepartmentUsername,
-          rules: { blank: true },
+          rules: { blank: false },
           field: 'Department Username',
         },
         {

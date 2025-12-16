@@ -338,6 +338,7 @@ export const BioUserSchoolInfoStore = create<UsersState>((set) => ({
       })
       const data = response?.data
       if (data) {
+        console.log(data)
         set({ pastSchools: data.pastSchools })
       }
     } catch (error: unknown) {
