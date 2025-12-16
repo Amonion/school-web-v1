@@ -3,7 +3,6 @@ import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import _debounce from 'lodash/debounce'
 import {
-  BioUserSchoolInfoEmpty,
   BioUserSchoolInfoStore,
   PastSchool,
   PastSchoolEmpty,
@@ -231,7 +230,7 @@ export default function History() {
   const resetSchool = () => {
     setCountryList(false)
     BioUserSchoolInfoStore.setState({
-      bioUserSchoolForm: BioUserSchoolInfoEmpty,
+      bioUserPastSchoolForm: PastSchoolEmpty,
     })
   }
 
@@ -608,8 +607,8 @@ export default function History() {
   }
 
   const selectLevel = (index: number, item: AcademicLevel) => {
-    setBioUserPastSchoolForm('schoolAcademicLevel', item)
-    setBioUserPastSchoolForm('schoolYear', `${item.maxLevelName} ${index + 1}`)
+    setBioUserPastSchoolForm('schoolLevelName', item.levelName)
+    setBioUserPastSchoolForm('schoolLevel', item.level)
     if (
       !item.levelName.includes('Primary') &&
       !item.levelName.includes('Secondary')
@@ -668,11 +667,8 @@ export default function History() {
   }
 
   const submitData = async (data: FormData) => {
-    updateBioUserSchoolInfo(
-      `${url}${bioUser?._id}?=true`,
-      data,
-      setMessage,
-      () => router.replace(`/home/verification/education/documents`)
+    updateBioUserSchoolInfo(`${url}${bioUser?._id}`, data, setMessage, () =>
+      router.replace(`/home/verification/education/documents`)
     )
   }
 

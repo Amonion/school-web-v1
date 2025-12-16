@@ -197,8 +197,8 @@ interface UsersState {
   bioUserSchoolForm: BioUserSchoolInfo
   bioUserPastSchoolForm: PastSchool
   setBioUserPastSchoolForm: (
-    key: keyof BioUserSchoolInfo,
-    value: BioUserSchoolInfo[keyof BioUserSchoolInfo]
+    key: keyof PastSchool,
+    value: PastSchool[keyof PastSchool]
   ) => void
   setBioUserSchoolInfoForm: (
     key: keyof BioUserSchoolInfo,
@@ -338,7 +338,6 @@ export const BioUserSchoolInfoStore = create<UsersState>((set) => ({
       })
       const data = response?.data
       if (data) {
-        console.log(data)
         set({ pastSchools: data.pastSchools })
       }
     } catch (error: unknown) {
