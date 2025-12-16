@@ -109,13 +109,15 @@ export default function Current() {
   }, [pathname])
 
   useEffect(() => {
-    const arr = bioUserSchoolInfo?.schoolYear.split(' ')
-    if (maxLevels.length > 0 && arr) {
-      const index = maxLevels.findIndex(
-        (item) => item.level + 1 === Number(arr[arr.length - 1])
-      )
-      if (index && index + 1 > 0) {
-        selectMaxLevel(index)
+    if (bioUserSchoolInfo?.hasPastSchool) {
+      const arr = bioUserSchoolInfo?.schoolYear.split(' ')
+      if (maxLevels.length > 0 && arr) {
+        const index = maxLevels.findIndex(
+          (item) => item.level + 1 === Number(arr[arr.length - 1])
+        )
+        if (index && index + 1 > 0) {
+          selectMaxLevel(index)
+        }
       }
     }
   }, [maxLevels.length, bioUserSchoolInfo])
