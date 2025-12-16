@@ -20,7 +20,7 @@ export default function SettingsLayout({
     if (!bioUserSchoolInfo) return
     BioUserSchoolInfoStore.setState({ bioUserSchoolForm: bioUserSchoolInfo })
     getPastSchools(
-      `/biousers-school/${bioUserSchoolInfo.bioUserId}`,
+      `/biousers-school/schools/${bioUserSchoolInfo.bioUserId}`,
       setMessage
     )
   }, [bioUserSchoolInfo])
