@@ -104,25 +104,21 @@ export default function Current() {
           `/places/area/?state=${bioUserSchoolInfo.schoolState}&page_size=350&field=area&sort=area`
         )
       }
-
-      if (bioUserSchoolInfo?.schoolAcademicLevel) {
-        const maxLevels: MaxLevels[] = []
-        for (
-          let i = 0;
-          i < bioUserSchoolInfo?.schoolAcademicLevel?.maxLevel;
-          i++
-        ) {
-          const maxLevel = {
-            level: i,
-            isActive: false,
-          }
-          maxLevels.push(maxLevel)
-        }
-        setMaxLevel(() => [...maxLevels])
-      }
     }
     setFacultyList(false)
   }, [pathname])
+
+  useEffect(() => {
+    const arr = bioUserSchoolInfo?.schoolYear.split(' ')
+    if (maxLevels.length > 0 && arr) {
+      const index = maxLevels.findIndex(
+        (item) => item.level + 1 === Number(arr[arr.length - 1])
+      )
+      if (index && index + 1 > 0) {
+        selectMaxLevel(index)
+      }
+    }
+  }, [maxLevels.length, bioUserSchoolInfo])
 
   useEffect(() => {
     if (bioUserSchoolForm.schoolCountry && bioUserSchoolForm.inSchool) {

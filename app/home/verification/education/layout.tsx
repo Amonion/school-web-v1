@@ -16,6 +16,7 @@ export default function SettingsLayout({
   const { bioUserSchoolInfo, bioUserState } = AuthStore()
   const { setMessage } = MessageStore()
   const { getPastSchools } = BioUserSchoolInfoStore()
+
   useEffect(() => {
     if (!bioUserSchoolInfo) return
     BioUserSchoolInfoStore.setState({ bioUserSchoolForm: bioUserSchoolInfo })
