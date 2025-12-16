@@ -1,13 +1,14 @@
 import { create } from 'zustand'
 import _debounce from 'lodash/debounce'
 import apiRequest from '@/lib/axios'
+import { Place } from './Place'
 
 interface FetchResponse {
   message: string
   count: number
   page_size: number
   results: State[]
-  state: string
+  state: Place
   stateCapital: string
   stateLogo: string
 }
@@ -42,20 +43,19 @@ export const StateEmpty = {
 }
 
 interface StateState {
-  links: { next: string | null; previous: string | null } | null
   count: number
   page_size: number
   states: State[]
   loadingStates: boolean
-  error: string | null
-  successs?: string | null
   selectedStates: State[]
-  searchedItems: State[]
-  isAllCountriesChecked: boolean
+  searchedStates: State[]
+  isAllStatesChecked: boolean
   allStates: boolean
+  isStateForm: boolean
   stateForm: State
   setItemForm: (key: keyof State, value: State[keyof State]) => void
-  resetForm: () => void
+  resetForm: (form: State) => void
+  showStateForm: (state: boolean) => void
   setAllStates: () => void
   getStates: (
     url: string,
@@ -81,31 +81,32 @@ interface StateState {
   updateItem: (
     url: string,
     updatedItem: FormData | Record<string, unknown>,
-    setMessage: (message: string, isError: boolean) => void
+    setMessage: (message: string, isError: boolean) => void,
+    redirect?: () => void
   ) => Promise<void>
   postItem: (
     url: string,
     data: FormData | Record<string, unknown>,
-    setMessage: (message: string, isError: boolean) => void
+    setMessage: (message: string, isError: boolean) => void,
+    redirect?: () => void
   ) => Promise<void>
   toggleCheckedState: (index: number) => void
   toggleActiveState: (index: number) => void
   toggleAllSelectedState: () => void
   reshuffleStates: () => void
-  searchItem: (url: string) => void
+  searchState: (url: string) => void
 }
 
 const StateStore = create<StateState>((set) => ({
-  links: null,
   count: 0,
-  page_size: 0,
+  page_size: 20,
   states: [],
   loadingStates: false,
-  error: null,
   selectedStates: [],
-  searchedItems: [],
-  isAllCountriesChecked: false,
+  searchedStates: [],
+  isAllStatesChecked: false,
   allStates: false,
+  isStateForm: false,
   stateForm: StateEmpty,
   setItemForm: (key, value) =>
     set((state) => ({
@@ -114,10 +115,8 @@ const StateStore = create<StateState>((set) => ({
         [key]: value,
       },
     })),
-  resetForm: () =>
-    set({
-      stateForm: StateEmpty,
-    }),
+  resetForm: (form) => set({ stateForm: form }),
+  showStateForm: (state) => set({ isStateForm: state }),
 
   setProcessedResults: ({ count, page_size, results }: FetchResponse) => {
     if (results) {
@@ -171,32 +170,17 @@ const StateStore = create<StateState>((set) => ({
     }
   },
 
-  getAState: async (
-    url: string,
-    setMessage: (message: string, isError: boolean) => void,
-    isNew?: boolean
-  ) => {
+  getAState: async (url, setMessage) => {
     try {
       const response = await apiRequest<FetchResponse>(url, {
         setLoading: StateStore.getState().setLoading,
       })
       const data = response?.data
       if (data) {
-        if (isNew) {
-          const { state, stateCapital, stateLogo, ...filteredData } = data
-          if (data.state === 'not-ever-postii') {
-            console.log(state, stateCapital, stateLogo)
-          }
-          set({
-            stateForm: { ...StateStore.getState().stateForm, ...filteredData },
-            loadingStates: false,
-          })
-        } else {
-          set({
-            stateForm: { ...StateStore.getState().stateForm, ...data },
-            loadingStates: false,
-          })
-        }
+        set({
+          stateForm: data.state,
+          loadingStates: false,
+        })
       }
     } catch (error: unknown) {
       console.log(error, setMessage)
@@ -214,13 +198,13 @@ const StateStore = create<StateState>((set) => ({
     }))
   },
 
-  searchItem: _debounce(async (url: string) => {
+  searchState: _debounce(async (url: string) => {
     const response = await apiRequest<FetchResponse>(url, {
       setLoading: StateStore.getState().setLoading,
     })
     const results = response?.data.results
     if (results) {
-      set({ searchedItems: results })
+      set({ searchedStates: results })
     }
   }, 1000),
 
@@ -254,38 +238,58 @@ const StateStore = create<StateState>((set) => ({
     }
   },
 
-  updateItem: async (
-    url: string,
-    updatedItem: FormData | Record<string, unknown>,
-    setMessage: (message: string, isError: boolean) => void
-  ) => {
-    set({ loadingStates: true, error: null })
+  updateItem: async (url, updatedItem, setMessage, redirect) => {
+    set({ loadingStates: true })
     const response = await apiRequest<FetchResponse>(url, {
       method: 'PATCH',
       body: updatedItem,
       setMessage,
       setLoading: StateStore.getState().setLoading,
     })
-    if (response?.status !== 404 && response?.data) {
-      StateStore.getState().setProcessedResults(response.data)
+    const data = response?.data
+    if (data) {
+      StateStore.setState((prev) => {
+        return {
+          states: prev.states.map((item) =>
+            item.id === data.state._id
+              ? {
+                  ...item,
+                  state: data.state.state,
+                  stateCapital: data.state.stateCapital,
+                }
+              : item
+          ),
+        }
+      })
     }
+    if (redirect) redirect()
   },
 
-  postItem: async (
-    url: string,
-    updatedItem: FormData | Record<string, unknown>,
-    setMessage: (message: string, isError: boolean) => void
-  ) => {
-    set({ loadingStates: true, error: null })
+  postItem: async (url, updatedItem, setMessage, redirect) => {
+    set({ loadingStates: true })
     const response = await apiRequest<FetchResponse>(url, {
       method: 'POST',
       body: updatedItem,
       setMessage,
       setLoading: StateStore.getState().setLoading,
     })
-    if (response?.status !== 404 && response?.data) {
-      StateStore.getState().setProcessedResults(response.data)
+    const data = response?.data
+    if (data) {
+      StateStore.setState((prev) => {
+        return {
+          states: prev.states.map((item) =>
+            item.id === data.state._id
+              ? {
+                  ...item,
+                  state: data.state.state,
+                  stateCapital: data.state.stateCapital,
+                }
+              : item
+          ),
+        }
+      })
     }
+    if (redirect) redirect()
   },
 
   toggleActiveState: (index: number) => {
@@ -309,7 +313,7 @@ const StateStore = create<StateState>((set) => ({
           : tertiary
       )
 
-      const isAllCountriesChecked = updatedResults.every(
+      const isAllStatesChecked = updatedResults.every(
         (tertiary) => tertiary.isChecked
       )
       const updatedSelectedItems = updatedResults.filter(
@@ -319,27 +323,27 @@ const StateStore = create<StateState>((set) => ({
       return {
         states: updatedResults,
         selectedStates: updatedSelectedItems,
-        isAllCountriesChecked: isAllCountriesChecked,
-        allStates: isAllCountriesChecked,
+        isAllStatesChecked: isAllStatesChecked,
+        allStates: isAllStatesChecked,
       }
     })
   },
 
   toggleAllSelectedState: () => {
     set((state) => {
-      const isAllCountriesChecked =
-        state.states.length === 0 ? false : !state.isAllCountriesChecked
+      const isAllStatesChecked =
+        state.states.length === 0 ? false : !state.isAllStatesChecked
       const updatedResults = state.states.map((place) => ({
         ...place,
-        isChecked: isAllCountriesChecked,
+        isChecked: isAllStatesChecked,
       }))
 
-      const updatedSelectedItems = isAllCountriesChecked ? updatedResults : []
+      const updatedSelectedItems = isAllStatesChecked ? updatedResults : []
 
       return {
         states: updatedResults,
         selectedStates: updatedSelectedItems,
-        isAllCountriesChecked,
+        isAllStatesChecked,
       }
     })
   },

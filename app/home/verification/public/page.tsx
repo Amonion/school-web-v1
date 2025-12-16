@@ -11,7 +11,6 @@ import { AlartStore, MessageStore } from '@/src/zustand/notification/Message'
 import { useTheme } from '@/context/ThemeProvider'
 import { BioUserStore } from '@/src/zustand/user/BioUser'
 import PictureDisplay from '@/components/Home/Media/PictureDisplay'
-import BioEditor from '@/components/Home/BioEditor'
 import apiRequest from '@/lib/axios'
 import { useRouter } from 'next/navigation'
 import CustomBtn from '@/components/CustomBtn'
@@ -23,7 +22,6 @@ export default function SetSocial() {
   const { setMessage } = MessageStore()
   const url = '/biousers/'
   const { theme } = useTheme()
-  const [text, setText] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const { updateMyBioUser, setForm, loading, bioUserForm } = BioUserStore()
   const { setAlert } = AlartStore()
@@ -80,7 +78,6 @@ export default function SetSocial() {
 
   useEffect(() => {
     if (bioUser) {
-      setIntro(String(bioUser.bioUserIntro))
       setForm('bioUserUsername', bioUser.bioUserUsername)
     }
   }, [bioUser])
@@ -122,12 +119,6 @@ export default function SetSocial() {
     }
 
     const inputsToValidate = [
-      {
-        name: 'bioUserIntro',
-        value: text,
-        rules: { blank: false, maxLength: 120 },
-        field: 'Intro',
-      },
       {
         name: 'location',
         value: JSON.stringify(location),
@@ -241,10 +232,6 @@ export default function SetSocial() {
     updateMyBioUser(`${url}${bioUser?._id}`, data, setMessage, () =>
       router.replace(`/home/verification/education`)
     )
-  }
-
-  const setIntro = (content: string) => {
-    setText(content)
   }
 
   const handleUploadClick = () => {
@@ -375,8 +362,6 @@ export default function SetSocial() {
       <div className="mb-5">
         <div className="form-input mb-5">{bioUser?.bioUserDisplayName}</div>
       </div>
-
-      <BioEditor value={text} onChange={(content) => setIntro(content)} />
 
       <CustomBtn
         label="Save Changes"

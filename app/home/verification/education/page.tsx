@@ -25,9 +25,9 @@ interface MaxLevels {
 export default function Current() {
   const {
     bioUserSchoolForm,
+    loading,
     setBioUserSchoolInfoForm,
     updateBioUserSchoolInfo,
-    loading,
   } = BioUserSchoolInfoStore()
   const { toggleActive, getAcademics, academicResults, activeLevel } =
     AcademicStore()
@@ -40,7 +40,6 @@ export default function Current() {
   const { bioUser, bioUserSchoolInfo, bioUserState, user } = AuthStore()
   const { setMessage } = MessageStore()
   const url = '/biousers-school/'
-  const [inSchool, setInSchool] = useState('')
   // const [showInSchool, setShowInSchool] = useState(false)
   const [isDepartmentList, setDepartmentList] = useState(false)
   const [isFacultyList, setFacultyList] = useState(false)
@@ -78,15 +77,7 @@ export default function Current() {
           bioUserSchoolForm: bioUserSchoolInfo,
         })
       }
-      setInSchool(
-        bioUserSchoolInfo?.schoolAcademicLevel?.inSchool ? 'Yes' : 'No'
-      )
-      if (bioUserSchoolInfo?.inSchool) {
-        getAcademics(
-          `/academic-levels/?inSchool=${bioUserSchoolInfo?.inSchool}&country=${bioUserSchoolInfo.schoolCountry}`,
-          setMessage
-        )
-      }
+
       if (
         bioUserSchoolInfo?.schoolAcademicLevel &&
         (bioUserSchoolInfo?.schoolAcademicLevel?.levelName?.includes(
@@ -132,6 +123,12 @@ export default function Current() {
     }
     setFacultyList(false)
   }, [pathname])
+
+  useEffect(() => {
+    if (bioUserSchoolForm.schoolCountry && bioUserSchoolForm.inSchool) {
+      getLevels(bioUserSchoolForm.schoolCountry)
+    }
+  }, [bioUserSchoolForm.inSchool])
 
   useEffect(() => {
     if (bioUserState?.isEducation) {
@@ -385,12 +382,9 @@ export default function Current() {
     setIsGraduatedList(false)
   }
 
-  const getLevels = async (text: string) => {
-    const inSchool = text === 'Yes' ? true : false
-    setInSchool(text)
-    setBioUserSchoolInfoForm('inSchool', inSchool)
+  const getLevels = async (country: string) => {
     getAcademics(
-      `/academic-levels/?inSchool=${inSchool}&country=${bioUserSchoolForm.schoolCountry}`,
+      `/academic-levels/?inSchool=${bioUserSchoolForm.inSchool}&country=${country}`,
       setMessage
     )
   }
@@ -641,21 +635,25 @@ export default function Current() {
 
             <div className="flex justify-center">
               <div
-                onClick={() => getLevels('Yes')}
-                className={`btn mx-1 ${inSchool === 'Yes' ? '' : 'line'}`}
+                onClick={() => setBioUserSchoolInfoForm('inSchool', true)}
+                className={`btn mx-1 ${
+                  bioUserSchoolForm.inSchool ? '' : 'line'
+                }`}
               >
                 Yes I am
               </div>
               <div
-                onClick={() => getLevels('No')}
-                className={`btn mx-1 ${inSchool === 'No' ? '' : 'line'}`}
+                onClick={() => setBioUserSchoolInfoForm('inSchool', false)}
+                className={`btn mx-1 ${
+                  !bioUserSchoolForm.inSchool ? '' : 'line'
+                }`}
               >
                 No I am not
               </div>
             </div>
           </div>
 
-          {inSchool === 'Yes' && (
+          {bioUserSchoolForm.inSchool && (
             <div className="flex flex-col w-full mb-4">
               <div className="flex flex-col relative mb-4">
                 <label className="label flex items-center w-full" htmlFor="">
@@ -781,6 +779,7 @@ export default function Current() {
           )}
 
           {bioUserSchoolForm.schoolArea &&
+            bioUserSchoolForm.inSchool &&
             academicResults.length > 0 &&
             bioUserSchoolForm.schoolArea && (
               <div className="round_box mb-10 flex flex-wrap">
@@ -811,7 +810,7 @@ export default function Current() {
 
           {bioUserSchoolForm?.schoolAcademicLevel?.levelName !== '' &&
             bioUserSchoolForm.schoolArea &&
-            inSchool && (
+            bioUserSchoolForm.inSchool && (
               <div className="relative mb-10">
                 <div className="text-[12px] text-[var(--custom)]">
                   If your school did not appear, type it and click the search
@@ -824,7 +823,7 @@ export default function Current() {
                     onChange={handleSearchSchool}
                     className={`transparent-input flex-1 `}
                     placeholder={`Search ${
-                      inSchool === 'Yes' ? 'current' : 'graduating'
+                      bioUserSchoolForm.inSchool ? 'current' : 'graduating'
                     } school`}
                   />
                   {schoolResults.length === 0 && (
@@ -885,7 +884,7 @@ export default function Current() {
               </div>
             )}
 
-          {bioUserSchoolForm.schoolName && (
+          {bioUserSchoolForm.schoolName && bioUserSchoolForm.inSchool && (
             <div
               className={`grid ${
                 bioUserSchoolForm?.schoolAcademicLevel?.inSchool
@@ -962,7 +961,7 @@ export default function Current() {
             </div>
           )}
 
-          {bioUserSchoolForm.isAdvanced ? (
+          {bioUserSchoolForm.isAdvanced && bioUserSchoolForm.inSchool && (
             <>
               {bioUserSchoolForm.schoolAcademicLevel.levelName !== '' &&
                 bioUserSchoolForm.schoolName !== '' && (
@@ -1059,38 +1058,35 @@ export default function Current() {
                   </>
                 )}
             </>
-          ) : (
-            <></>
           )}
 
-          {((bioUserSchoolForm?.schoolAcademicLevel?.levelName !== '' &&
+          {bioUserSchoolForm?.schoolAcademicLevel?.levelName !== '' &&
             bioUserSchoolForm.schoolName !== '' &&
-            bioUserSchoolForm?.schoolAcademicLevel?.inSchool &&
-            maxLevels.length > 0) ||
-            bioUserSchoolInfo?.schoolAcademicLevel?.inSchool) && (
-            <div className="rounded-[10px] border p-1 border-[var(--border-color)] mb-10 flex flex-wrap">
-              {maxLevels.map((item, index) => (
-                <div
-                  key={index}
-                  className={`radio m-1 ${
-                    item.isActive ||
-                    bioUserSchoolForm.schoolYear.includes(String(index))
-                      ? 'text-[var(--custom)]'
-                      : ''
-                  }`}
-                  onClick={() => selectMaxLevel(index)}
-                >
-                  <div className="radio_circle">
-                    {item.isActive ||
-                      (bioUserSchoolForm.schoolYear.includes(String(index)) && (
-                        <div className="radio_dot"></div>
-                      ))}
+            bioUserSchoolForm.inSchool &&
+            maxLevels.length > 0 && (
+              <div className="rounded-[10px] border p-1 border-[var(--border-color)] mb-10 flex flex-wrap">
+                {maxLevels.map((item, index) => (
+                  <div
+                    key={index}
+                    className={`radio m-1 ${
+                      item.isActive ||
+                      bioUserSchoolForm.schoolYear.includes(String(index))
+                        ? 'text-[var(--custom)]'
+                        : ''
+                    }`}
+                    onClick={() => selectMaxLevel(index)}
+                  >
+                    <div className="radio_circle">
+                      {item.isActive ||
+                        (bioUserSchoolForm.schoolYear.includes(
+                          String(index)
+                        ) && <div className="radio_dot"></div>)}
+                    </div>
+                    {activeLevel.maxLevelName} {item.level + 1}
                   </div>
-                  {activeLevel.maxLevelName} {item.level + 1}
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
 
           {loading ? (
             <div className="btn">
