@@ -395,8 +395,11 @@ export default function Current() {
   }
 
   const submitData = async (data: FormData) => {
-    updateBioUserSchoolInfo(`${url}${bioUser?._id}`, data, setMessage, () =>
-      router.replace(`/home/verification/education/history`)
+    updateBioUserSchoolInfo(
+      `${url}/schools/${bioUser?.bioUserUsername}`,
+      data,
+      setMessage,
+      () => router.replace(`/home/verification/education/history`)
     )
   }
 
