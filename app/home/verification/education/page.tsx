@@ -109,7 +109,7 @@ export default function Current() {
   }, [pathname])
 
   useEffect(() => {
-    if (bioUserSchoolInfo?.inSchool) {
+    if (bioUserSchoolInfo?.inSchool && bioUserSchoolInfo.schoolYear) {
       const arr = bioUserSchoolInfo?.schoolYear.split(' ')
       if (maxLevels.length > 0 && arr) {
         const index = maxLevels.findIndex(
