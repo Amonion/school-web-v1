@@ -678,240 +678,57 @@ export default function History() {
       return
     }
 
-    if (bioUserSchoolForm.hasPastSchool) {
-      const lastSchool =
-        bioUserSchoolForm.pastSchools[bioUserSchoolForm.pastSchools.length - 1]
-      const array1 = [
-        {
-          name: 'schoolContinent',
-          value: lastSchool.schoolContinent,
-          rules: { blank: true, minLength: 3, maxLength: 100 },
-          field: 'continent',
-        },
-        {
-          name: 'bioUSerId',
-          value: String(bioUser?._id),
-          rules: { blank: true, maxLength: 100 },
-          field: 'continent',
-        },
-        {
-          name: 'schoolCountry',
-          value: lastSchool.schoolCountry,
-          rules: { blank: true, minLength: 3, maxLength: 100 },
-          field: 'Country',
-        },
-        {
-          name: 'schoolCountrySymbol',
-          value: lastSchool.schoolCountrySymbol,
-          rules: { blank: true, maxLength: 100 },
-          field: 'Country',
-        },
-        {
-          name: 'schoolCountryFlag',
-          value: lastSchool.schoolCountryFlag,
-          rules: { blank: false, maxLength: 100 },
-          field: 'Country Flag',
-        },
-        {
-          name: 'schoolState',
-          value: lastSchool.schoolState,
-          rules: { blank: true, minLength: 2, maxLength: 100 },
-          field: 'State',
-        },
-        {
-          name: 'schoolArea',
-          value: lastSchool.schoolArea,
-          rules: { blank: true, minLength: 2, maxLength: 100 },
-          field: 'Area',
-        },
-        {
-          name: 'schoolAcademicLevel',
-          value: JSON.stringify(lastSchool.schoolAcademicLevel),
-          rules: { blank: true, minLength: 2, maxLength: 10000 },
-          field: 'Current academic level',
-        },
-
-        {
-          name: 'isAdvanced',
-          value: lastSchool.isAdvanced,
-          rules: { blank: false, maxLength: 1000 },
-          field: 'Is Advanced',
-        },
-        {
-          name: 'admittedAt',
-          value: lastSchool.admittedAt,
-          rules: { blank: true, minLength: 2, maxLength: 1000 },
-          field: 'Entry Date',
-        },
-        {
-          name: 'graduatedAt',
-          value: lastSchool.graduatedAt,
-          rules: {
-            blank: true,
-            minLength: 2,
-            maxLength: 1000,
-          },
-          field: 'Graduated Date',
-        },
-        {
-          name: 'schoolName',
-          value: lastSchool.schoolName.trim(),
-          rules: { blank: true, minLength: 2, maxLength: 1000 },
-          field: 'Current school',
-        },
-        {
-          name: 'schoolLogo',
-          value: lastSchool.schoolLogo,
-          rules: { blank: false, maxLength: 1000 },
-          field: 'Current school logo',
-        },
-        {
-          name: 'schoolId',
-          value: lastSchool.schoolId,
-          rules: { blank: false, maxLength: 100 },
-          field: 'Current school id',
-        },
-
-        {
-          name: 'schoolFaculty',
-          value: lastSchool.schoolFaculty.trim(),
-          rules: { blank: false, maxLength: 1000 },
-          field: 'Current faculty',
-        },
-        {
-          name: 'schoolFacultyId',
-          value: lastSchool.schoolFacultyId.trim(),
-          rules: { blank: false, maxLength: 1000 },
-          field: 'Current faculty id',
-        },
-        {
-          name: 'schoolFacultyUsername',
-          value: lastSchool.schoolFacultyUsername,
-          rules: { blank: false, maxLength: 100 },
-          field: 'Current faculty username',
-        },
-        {
-          name: 'schoolDepartment',
-          value: lastSchool.schoolDepartment.trim(),
-          rules: { blank: false, maxLength: 100 },
-          field: 'Current department',
-        },
-        {
-          name: 'schoolDepartmentId',
-          value: lastSchool.schoolDepartmentId.trim(),
-          rules: { blank: false, maxLength: 100 },
-          field: 'Current department',
-        },
-        {
-          name: 'schoolDepartmentUsername',
-          value: lastSchool.schoolDepartmentUsername,
-          rules: { blank: false, maxLength: 100 },
-          field: 'Current department username',
-        },
-      ]
-
-      const array2 = [
-        {
-          name: 'pastSchools',
-          value: JSON.stringify(bioUserSchoolForm.pastSchools),
-          rules: { blank: true, minLength: 2 },
-          field: 'Past schools',
-        },
-        {
-          name: 'action',
-          value: 'EducationHistory',
-          rules: { blank: true },
-          field: 'History',
-        },
-        {
-          name: 'isEducationHistory',
-          value: true,
-          rules: { blank: true },
-          field: 'History',
-        },
-      ]
-
-      const inputsToValidate = bioUserSchoolInfo?.inSchool
-        ? array2
-        : [...array1, ...array2]
-      const { messages } = validateInputs(inputsToValidate)
-      const getFirstNonEmptyMessage = (
-        messages: Record<string, string>
-      ): string | null => {
-        for (const key in messages) {
-          if (messages[key].trim() !== '') {
-            return messages[key]
-          }
+    const inputsToValidate = [
+      {
+        name: 'pastSchools',
+        value: JSON.stringify(pastSchools),
+        rules: { blank: true, minLength: 2 },
+        field: 'Past schools',
+      },
+      {
+        name: 'hasPastSchool',
+        value: bioUserSchoolForm.hasPastSchool,
+        rules: { blank: true },
+        field: 'History',
+      },
+      {
+        name: 'action',
+        value: 'EducationHistory',
+        rules: { blank: true },
+        field: 'History',
+      },
+      {
+        name: 'isEducationHistory',
+        value: true,
+        rules: { blank: true },
+        field: 'History',
+      },
+    ]
+    const { messages } = validateInputs(inputsToValidate)
+    const getFirstNonEmptyMessage = (
+      messages: Record<string, string>
+    ): string | null => {
+      for (const key in messages) {
+        if (messages[key].trim() !== '') {
+          return messages[key]
         }
-        return null
       }
-
-      const firstNonEmptyMessage = getFirstNonEmptyMessage(messages)
-      if (firstNonEmptyMessage) {
-        setMessage(firstNonEmptyMessage, false)
-        return
-      }
-      e.preventDefault()
-      const data = appendForm(inputsToValidate)
-      setAlert(
-        'Warning',
-        'You will need to contact support to edit this information after verification is approved!',
-        true,
-        () => submitData(data)
-      )
-    } else {
-      const inputsToValidate = [
-        {
-          name: 'hasPastSchool',
-          value: bioUserSchoolForm.hasPastSchool,
-          rules: { blank: false, maxLength: 100 },
-          field: 'Past School',
-        },
-        {
-          name: 'action',
-          value: 'EducationHistory',
-          rules: { blank: true },
-          field: 'History',
-        },
-        {
-          name: 'isEducationHistory',
-          value: true,
-          rules: { blank: false },
-          field: 'History',
-        },
-        {
-          name: 'isEducationDocument',
-          value: true,
-          rules: { blank: true },
-          field: 'History',
-        },
-      ]
-      const { messages } = validateInputs(inputsToValidate)
-      const getFirstNonEmptyMessage = (
-        messages: Record<string, string>
-      ): string | null => {
-        for (const key in messages) {
-          if (messages[key].trim() !== '') {
-            return messages[key]
-          }
-        }
-        return null
-      }
-
-      const firstNonEmptyMessage = getFirstNonEmptyMessage(messages)
-      if (firstNonEmptyMessage) {
-        setMessage(firstNonEmptyMessage, false)
-        return
-      }
-      e.preventDefault()
-      const data = appendForm(inputsToValidate)
-      setAlert(
-        'Warning',
-        'You will need to contact support to edit this information after verification is approved!',
-        true,
-        () => submitData(data)
-      )
+      return null
     }
+
+    const firstNonEmptyMessage = getFirstNonEmptyMessage(messages)
+    if (firstNonEmptyMessage) {
+      setMessage(firstNonEmptyMessage, false)
+      return
+    }
+    e.preventDefault()
+    const data = appendForm(inputsToValidate)
+    setAlert(
+      'Warning',
+      'You will need to contact support to edit this information after verification is approved!',
+      true,
+      () => submitData(data)
+    )
   }
 
   return (
