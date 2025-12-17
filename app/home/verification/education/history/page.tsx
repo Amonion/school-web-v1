@@ -20,6 +20,7 @@ import DepartmentStore, { Department } from '@/src/zustand/school/Department'
 import { validateInputs } from '@/lib/validation'
 import { appendForm } from '@/lib/helpers'
 import { usePathname, useRouter } from 'next/navigation'
+import CustomBtn from '@/components/CustomBtn'
 
 export default function History() {
   const {
@@ -667,12 +668,15 @@ export default function History() {
   }
 
   const submitData = async (data: FormData) => {
-    updateBioUserSchoolInfo(`${url}${bioUser?._id}`, data, setMessage, () =>
-      router.replace(`/home/verification/education/documents`)
+    updateBioUserSchoolInfo(
+      `${url}schools/${bioUser?._id}`,
+      data,
+      setMessage,
+      () => router.replace(`/home/verification/education/documents`)
     )
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async () => {
     if (bioUserState?.isVerified) {
       setMessage('To update these information, please contact support', false)
       return
@@ -721,7 +725,6 @@ export default function History() {
       setMessage(firstNonEmptyMessage, false)
       return
     }
-    e.preventDefault()
     const data = appendForm(inputsToValidate)
     setAlert(
       'Warning',
@@ -808,8 +811,14 @@ export default function History() {
           ))}
 
           <div onClick={handleSubmit} className="btn">
-            Submit Form School Information
+            Submit School Information
           </div>
+
+          <CustomBtn
+            label="Submit Form"
+            loading={loading}
+            onClick={handleSubmit}
+          />
 
           {!isHistoryEdit && (
             <div onClick={() => setHistoryEdit(true)} className="btn">
@@ -1250,7 +1259,7 @@ export default function History() {
               </div>
             )}
 
-          {loading ? (
+          {/* {loading ? (
             <div className="btn">
               <i className="bi bi-opencollective loading  text-md"></i>
               <div>Processing...</div>
@@ -1261,7 +1270,7 @@ export default function History() {
                 Submit Form
               </div>
             )
-          )}
+          )} */}
         </div>
       )}
 
