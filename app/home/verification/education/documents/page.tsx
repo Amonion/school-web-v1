@@ -8,7 +8,8 @@ import { AuthStore } from '@/src/zustand/user/AuthStore'
 import PictureDisplay from '@/components/Home/Media/PictureDisplay'
 
 export default function Document() {
-  const { updateBioUserSchoolInfo, loading } = BioUserSchoolInfoStore()
+  const { updateBioUserSchoolInfo, pastSchools, loading } =
+    BioUserSchoolInfoStore()
   const { bioUser, bioUserSchoolInfo } = AuthStore()
   const { setMessage } = MessageStore()
   const url = '/biousers-school/'
@@ -88,15 +89,15 @@ export default function Document() {
       return
     }
     const data = appendForm(inputsToValidate)
-    updateBioUserSchoolInfo(`${url}${bioUser?._id}`, data, setMessage)
+    updateBioUserSchoolInfo(`${url}schools/${bioUser?._id}`, data, setMessage)
   }
 
   return (
     <>
-      {bioUserSchoolInfo && bioUserSchoolInfo.pastSchools.length > 0 ? (
+      {pastSchools.length > 0 ? (
         <div className="round_box mt-10">
           <div className="grid-2 grid-lay items-end">
-            {bioUserSchoolInfo.pastSchools.map((item, index) => (
+            {pastSchools.map((item, index) => (
               <div key={index} className="flex flex-col items-center h-full">
                 <label
                   className="label text-center mt-auto mb-2 text-sm"
