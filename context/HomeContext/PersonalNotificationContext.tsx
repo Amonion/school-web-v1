@@ -69,20 +69,6 @@ export const PersonalNotificationProvider = ({
 
   useEffect(() => {
     if (!bioUser || !socket) return
-
-    socket.on(`stats_${bioUser.bioUserUsername}`, (data: NotificationData) => {
-      if (data.bioUserState) {
-        AuthStore.getState().setBioUserState(data.bioUserState)
-      }
-    })
-
-    return () => {
-      socket?.off(`stats_${bioUser.bioUserUsername}`)
-    }
-  }, [socket, bioUser])
-
-  useEffect(() => {
-    if (!bioUser || !socket) return
     //////////////PERSONAL NOTIFICATION//////////////
 
     socket.on(

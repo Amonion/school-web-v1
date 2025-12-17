@@ -1,13 +1,14 @@
 'use client'
 import { playPopSound } from '@/lib/sound'
 import useSocket from '@/src/useSocket'
-import { MessageStore } from '@/src/zustand/notification/Message'
 import {
   SocialNotification,
   SocialNotificationStore,
 } from '@/src/zustand/notification/SocialNotification'
 import { AuthStore } from '@/src/zustand/user/AuthStore'
-import { BioUserStore } from '@/src/zustand/user/BioUser'
+import { BioUser } from '@/src/zustand/user/BioUser'
+import { BioUserSchoolInfo } from '@/src/zustand/user/BioUserSchoolInfo'
+import { BioUserState } from '@/src/zustand/user/BioUserState'
 import { createContext, useEffect, useContext, ReactNode, useMemo } from 'react'
 
 const UserContext = createContext<{
@@ -22,20 +23,15 @@ interface UserProviderProps {
 
 interface NotificationData {
   socialNotification: SocialNotification
+  bioUserState: BioUserState
+  bioUser: BioUser
+  bioUserSchoolInfo: BioUserSchoolInfo
   unreadNotifications: number
 }
 
 export const UserProvider = ({ children }: UserProviderProps) => {
   const socket = useSocket()
-  const { getMyBioUser } = BioUserStore()
-  const { setMessage } = MessageStore()
-  const { user } = AuthStore()
-
-  useEffect(() => {
-    if (user && user.bioUserId) {
-      getMyBioUser(`/biousers/${user?.bioUserId}`, setMessage)
-    }
-  }, [user])
+  const { user, bioUser } = AuthStore()
 
   useEffect(() => {
     if (!user || !socket) return
@@ -62,6 +58,27 @@ export const UserProvider = ({ children }: UserProviderProps) => {
       socket?.off(`social_notification_${user.username}`)
     }
   }, [socket, user])
+
+  useEffect(() => {
+    if (!bioUser || !socket) return
+
+    socket.on(`update_state_${bioUser._id}`, (data: NotificationData) => {
+      if (data.bioUserState) {
+        console.log(data.bioUserState)
+        AuthStore.getState().setBioUserState(data.bioUserState)
+      }
+      if (data.bioUser) {
+        AuthStore.getState().setBioUser(data.bioUser)
+      }
+      if (data.bioUserSchoolInfo) {
+        AuthStore.getState().setBioUserSchoolInfo(data.bioUserSchoolInfo)
+      }
+    })
+
+    return () => {
+      socket?.off(`update_state_${bioUser._id}`)
+    }
+  }, [socket, bioUser])
 
   const value = useMemo(() => ({ socket }), [socket])
 

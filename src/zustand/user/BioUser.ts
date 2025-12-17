@@ -32,6 +32,7 @@ export interface FetchUser {
 interface FetchUserResponse {
   count: number
   message: string
+  ip: string
   page_size: number
   results: BioUser[]
   data: BioUser
@@ -60,6 +61,7 @@ interface BioUsersState {
     url: string,
     setMessage: (message: string, isError: boolean) => void
   ) => Promise<void>
+  getUserIp: (url: string) => Promise<void>
   getBioUsers: (
     url: string,
     setMessage: (message: string, isError: boolean) => void
@@ -250,6 +252,18 @@ export const BioUserStore = create<BioUsersState>((set) => ({
       const data = response?.data
       if (data) {
         AuthStore.getInitialState().setBioUser(data.data)
+      }
+    } catch (error: unknown) {
+      if (error) return
+    }
+  },
+
+  getUserIp: async (url: string) => {
+    try {
+      const response = await apiRequest<FetchUserResponse>(url)
+      const data = response?.data
+      if (data) {
+        localStorage.setItem('ip', data.ip)
       }
     } catch (error: unknown) {
       if (error) return

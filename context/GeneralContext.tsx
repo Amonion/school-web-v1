@@ -6,6 +6,7 @@ import SchoolStore from '@/src/zustand/school/School'
 import { AuthStore } from '@/src/zustand/user/AuthStore'
 import OfficeStore from '@/src/zustand/utility/Office'
 import axios from 'axios'
+import { usePathname } from 'next/navigation'
 import { createContext, useEffect, useContext, ReactNode, useMemo } from 'react'
 
 const GeneralContext = createContext<{
@@ -24,6 +25,7 @@ export const GeneralProvider = ({ children }: GeneralProviderProps) => {
   const { user } = AuthStore()
   const { getSchoolNotifications } = SchoolStore()
   const { officeForm } = OfficeStore()
+  const pathname = usePathname()
 
   useEffect(() => {
     initializeSound()
@@ -90,6 +92,13 @@ export const GeneralProvider = ({ children }: GeneralProviderProps) => {
     }
   }, [baseURL, socket])
 
+  useEffect(() => {
+    const ip = localStorage.getItem('ip')
+    if (ip) {
+      updateUserPresence(ip, true)
+    }
+  }, [pathname])
+
   ///////////////GET SCHOOL NOTIFICATIONS///////////////
   useEffect(() => {
     if (!officeForm) return
@@ -103,12 +112,13 @@ export const GeneralProvider = ({ children }: GeneralProviderProps) => {
   const updateUserPresence = async (ip: string, online: boolean) => {
     try {
       const data = {
-        ip: ip,
+        ip,
         username: user?.username,
-        userId: user?._id,
         bioUserId: user?.bioUserId,
-        online: online,
-        visitedAt: new Date(),
+        online,
+        pathname,
+        visitedAt: online ? new Date() : null,
+        leftAt: !online ? new Date() : null,
       }
 
       const formData = {
