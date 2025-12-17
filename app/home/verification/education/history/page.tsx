@@ -474,32 +474,60 @@ export default function History() {
       return
     }
 
-    const inputsToValidate = [
-      {
-        name: 'pastSchools',
-        value: JSON.stringify(pastSchools),
-        rules: { blank: true, minLength: 2 },
-        field: 'Past schools',
-      },
-      {
-        name: 'hasPastSchool',
-        value: bioUserSchoolForm.hasPastSchool,
-        rules: { blank: true },
-        field: 'History',
-      },
-      {
-        name: 'action',
-        value: 'EducationHistory',
-        rules: { blank: true },
-        field: 'History',
-      },
-      {
-        name: 'isEducationHistory',
-        value: true,
-        rules: { blank: true },
-        field: 'History',
-      },
-    ]
+    const inputsToValidate = bioUserSchoolForm.hasPastSchool
+      ? [
+          {
+            name: 'pastSchools',
+            value: JSON.stringify(pastSchools),
+            rules: { blank: true, minLength: 2 },
+            field: 'Past schools',
+          },
+          {
+            name: 'hasPastSchool',
+            value: bioUserSchoolForm.hasPastSchool,
+            rules: { blank: true },
+            field: 'History',
+          },
+          {
+            name: 'action',
+            value: 'EducationHistory',
+            rules: { blank: true },
+            field: 'History',
+          },
+          {
+            name: 'isEducationHistory',
+            value: true,
+            rules: { blank: true },
+            field: 'History',
+          },
+        ]
+      : [
+          {
+            name: 'hasPastSchool',
+            value: bioUserSchoolForm.hasPastSchool,
+            rules: { blank: false },
+            field: 'Past School',
+          },
+          {
+            name: 'action',
+            value: 'EducationHistory',
+            rules: { blank: true },
+            field: 'History',
+          },
+          {
+            name: 'isEducationDocument',
+            value: true,
+            rules: { blank: true },
+            field: 'Document',
+          },
+          {
+            name: 'isEducationHistory',
+            value: true,
+            rules: { blank: true },
+            field: 'History',
+          },
+        ]
+
     const { messages } = validateInputs(inputsToValidate)
     const getFirstNonEmptyMessage = (
       messages: Record<string, string>
@@ -647,418 +675,426 @@ export default function History() {
             </div>
           </div>
 
-          {bioUserSchoolForm.hasPastSchool && (
-            <div className="flex flex-col w-full mb-4">
-              <div className="flex flex-col relative mb-4">
-                <label className="label flex items-center w-full" htmlFor="">
-                  Country of School{' '}
-                </label>
-                <div
-                  onClick={() => {
-                    setCountryList(!isCountryList)
-                    setStateList(false)
-                    setIsAreaList(false)
-                  }}
-                  className="form-input cursor-pointer"
-                >
-                  {bioUserPastSchoolForm.schoolCountry
-                    ? bioUserPastSchoolForm.schoolCountry
-                    : 'Select Country'}
-                  <i className="ml-auto bi bi-caret-down-fill"></i>
-                </div>
-
-                {/* {isCountryList && ( */}
-                <div className={`dropList ${isCountryList ? 'rel' : ''}`}>
-                  {countries.map((item, index) => (
-                    <div
-                      onClick={() => selectCountry(item)}
-                      key={index}
-                      className="input_drop_list"
-                    >
-                      {item.countryFlag && (
-                        <Image
-                          className="mr-3"
-                          src={String(item.countryFlag)}
-                          alt="Captured"
-                          sizes="100vw"
-                          width={0}
-                          height={0}
-                          style={{ width: '60px', maxWidth: '30px' }}
-                        />
-                      )}
-                      {item.country}
-                    </div>
-                  ))}
-                </div>
-                {/* )} */}
-              </div>
-              {bioUserPastSchoolForm.schoolCountry && (
-                <>
-                  <div className="flex flex-col relative mb-4">
-                    <label
-                      className="label flex items-center w-full"
-                      htmlFor=""
-                    >
-                      State of Current/Last School{' '}
-                    </label>
-                    <div
-                      onClick={() => {
-                        setStateList(!isStateList)
-                        setCountryList(false)
-                        setIsAreaList(false)
-                      }}
-                      className="form-input cursor-pointer"
-                    >
-                      {bioUserPastSchoolForm.schoolState
-                        ? bioUserPastSchoolForm.schoolState
-                        : 'Select State'}
-                      <i className="ml-auto bi bi-caret-down-fill"></i>
-                    </div>
-
-                    {/* {isStateList && ( */}
-                    <div className={`dropList ${isStateList ? 'rel' : ''}`}>
-                      {states.map((item, index) => (
-                        <div
-                          onClick={() => selectState(item)}
-                          key={index}
-                          className="input_drop_list"
-                        >
-                          {item.state}
-                        </div>
-                      ))}
-                    </div>
-                    {/* )} */}
+          {bioUserSchoolForm.hasPastSchool ? (
+            <>
+              <div className="flex flex-col w-full mb-4">
+                <div className="flex flex-col relative mb-4">
+                  <label className="label flex items-center w-full" htmlFor="">
+                    Country of School{' '}
+                  </label>
+                  <div
+                    onClick={() => {
+                      setCountryList(!isCountryList)
+                      setStateList(false)
+                      setIsAreaList(false)
+                    }}
+                    className="form-input cursor-pointer"
+                  >
+                    {bioUserPastSchoolForm.schoolCountry
+                      ? bioUserPastSchoolForm.schoolCountry
+                      : 'Select Country'}
+                    <i className="ml-auto bi bi-caret-down-fill"></i>
                   </div>
-                  {bioUserPastSchoolForm.schoolState && (
+
+                  {/* {isCountryList && ( */}
+                  <div className={`dropList ${isCountryList ? 'rel' : ''}`}>
+                    {countries.map((item, index) => (
+                      <div
+                        onClick={() => selectCountry(item)}
+                        key={index}
+                        className="input_drop_list"
+                      >
+                        {item.countryFlag && (
+                          <Image
+                            className="mr-3"
+                            src={String(item.countryFlag)}
+                            alt="Captured"
+                            sizes="100vw"
+                            width={0}
+                            height={0}
+                            style={{ width: '60px', maxWidth: '30px' }}
+                          />
+                        )}
+                        {item.country}
+                      </div>
+                    ))}
+                  </div>
+                  {/* )} */}
+                </div>
+                {bioUserPastSchoolForm.schoolCountry && (
+                  <>
                     <div className="flex flex-col relative mb-4">
                       <label
                         className="label flex items-center w-full"
                         htmlFor=""
                       >
-                        Area of Current/Last School{' '}
+                        State of Current/Last School{' '}
                       </label>
                       <div
                         onClick={() => {
-                          setIsAreaList(!isAreaList)
+                          setStateList(!isStateList)
                           setCountryList(false)
-                          setStateList(false)
+                          setIsAreaList(false)
                         }}
                         className="form-input cursor-pointer"
                       >
-                        {bioUserPastSchoolForm.schoolArea
-                          ? bioUserPastSchoolForm.schoolArea
-                          : 'Select Area'}
+                        {bioUserPastSchoolForm.schoolState
+                          ? bioUserPastSchoolForm.schoolState
+                          : 'Select State'}
                         <i className="ml-auto bi bi-caret-down-fill"></i>
                       </div>
 
-                      {/* {isAreaList && ( */}
-                      <div className={`dropList ${isAreaList ? 'rel' : ''}`}>
-                        {area.map((item, index) => (
+                      {/* {isStateList && ( */}
+                      <div className={`dropList ${isStateList ? 'rel' : ''}`}>
+                        {states.map((item, index) => (
                           <div
-                            onClick={() => selectArea(item)}
+                            onClick={() => selectState(item)}
                             key={index}
                             className="input_drop_list"
                           >
-                            {item.area}
+                            {item.state}
                           </div>
                         ))}
                       </div>
                       {/* )} */}
                     </div>
-                  )}
-                </>
-              )}
-            </div>
-          )}
+                    {bioUserPastSchoolForm.schoolState && (
+                      <div className="flex flex-col relative mb-4">
+                        <label
+                          className="label flex items-center w-full"
+                          htmlFor=""
+                        >
+                          Area of Current/Last School{' '}
+                        </label>
+                        <div
+                          onClick={() => {
+                            setIsAreaList(!isAreaList)
+                            setCountryList(false)
+                            setStateList(false)
+                          }}
+                          className="form-input cursor-pointer"
+                        >
+                          {bioUserPastSchoolForm.schoolArea
+                            ? bioUserPastSchoolForm.schoolArea
+                            : 'Select Area'}
+                          <i className="ml-auto bi bi-caret-down-fill"></i>
+                        </div>
 
-          {bioUserPastSchoolForm.schoolArea !== '' &&
-            academicResults.length > 0 && (
-              <div className="round_box mb-5 flex flex-wrap">
-                {academicResults.map((item, index) => (
-                  <div
-                    key={index}
-                    className={`radio m-1 ${
-                      item.isActive
-                        ? 'text-[var(--custom)]'
-                        : item.levelName ===
-                          bioUserPastSchoolForm.schoolLevelName
-                        ? 'text-[var(--custom)]'
-                        : ''
-                    }`}
-                    onClick={() => selectLevel(index, item)}
-                  >
-                    <div className="radio_circle">
-                      {(item.isActive ||
-                        item.levelName ===
-                          bioUserPastSchoolForm.schoolLevelName) && (
-                        <div className="radio_dot"></div>
-                      )}
-                    </div>
-                    {item.levelName}
-                  </div>
-                ))}
-              </div>
-            )}
-
-          {activeLevel.levelName !== '' && (
-            <div className="relative mb-10">
-              <div className="text-[12px] text-[var(--custom)]">
-                If your school did not appear, type it and click the search icon
-              </div>
-              <div className={`input_wrap ml-auto active`}>
-                <input
-                  type="search"
-                  onChange={handleSearchSchool}
-                  className={`transparent-input flex-1 `}
-                  placeholder={`Search graduating school`}
-                />
-                {schoolResults.length === 0 && (
-                  <i
-                    onClick={setSchool}
-                    className="bi bi-search common-icon cursor-pointer"
-                  ></i>
-                )}
-              </div>
-              {bioUserPastSchoolForm.schoolName && (
-                <div className="flex pb-1 my-2 border-b border-[var(--border-color)] xs:mx-[25px]">
-                  {bioUserPastSchoolForm.schoolLogo && (
-                    <Image
-                      className="mr-5"
-                      src={bioUserPastSchoolForm.schoolLogo}
-                      alt="Captured"
-                      sizes="100vw"
-                      width={0}
-                      height={0}
-                      style={{
-                        width: 'auto',
-                        objectFit: 'contain',
-                        maxHeight: '30px',
-                      }}
-                    />
-                  )}
-                  {bioUserPastSchoolForm.schoolName}
-                </div>
-              )}
-              {/* {isSchoolList && schoolResults.length > 0 && ( */}
-              <div
-                className={`dropList ${
-                  isSchoolList && schoolResults.length > 0 ? 'rel' : ''
-                }`}
-              >
-                {schoolResults.map((item, index) => (
-                  <div
-                    onClick={() => selectSchool(item)}
-                    key={index}
-                    className="input_drop_list"
-                  >
-                    {item.logo && (
-                      <Image
-                        className="mr-5"
-                        src={String(item.logo)}
-                        alt="Captured"
-                        sizes="100vw"
-                        width={0}
-                        height={0}
-                        style={{ width: '30px', height: 'auto' }}
-                      />
+                        {/* {isAreaList && ( */}
+                        <div className={`dropList ${isAreaList ? 'rel' : ''}`}>
+                          {area.map((item, index) => (
+                            <div
+                              onClick={() => selectArea(item)}
+                              key={index}
+                              className="input_drop_list"
+                            >
+                              {item.area}
+                            </div>
+                          ))}
+                        </div>
+                        {/* )} */}
+                      </div>
                     )}
-                    {item.name}
-                  </div>
-                ))}
-              </div>
-              {/* )} */}
-            </div>
-          )}
-
-          {bioUserPastSchoolForm.isAdvanced ? (
-            <>
-              {bioUserPastSchoolForm.schoolLevelName !== '' &&
-                bioUserPastSchoolForm.schoolName !== '' && (
-                  <>
-                    <div className="relative mb-10">
-                      <div className="text-[12px] text-[var(--custom)]">
-                        If your school have faculty, write it.
-                      </div>
-                      <div className={`input_wrap ml-auto active `}>
-                        <input
-                          type="search"
-                          onChange={handleSearchFaculty}
-                          className={`transparent-input flex-1 `}
-                          placeholder="Enter your faculty"
-                        />
-                        {faculties.length === 0 && (
-                          <i
-                            onClick={setFaculty}
-                            className="bi bi-search common-icon cursor-pointer"
-                          ></i>
-                        )}
-                      </div>
-                      {bioUserPastSchoolForm.schoolFaculty && (
-                        <div className="flex pb-1 my-2 border-b border-[var(--border-color)] xs:mx-[25px]">
-                          {bioUserPastSchoolForm.schoolFaculty}
-                        </div>
-                      )}
-                      {/* {isFacultyList && faculties.length > 0 && ( */}
-                      <div
-                        className={`dropList ${
-                          isFacultyList && faculties.length > 0 ? 'rel' : ''
-                        }`}
-                      >
-                        {faculties.map((item, index) => (
-                          <div
-                            onClick={() => selectFaculty(item)}
-                            key={index}
-                            className="input_drop_list"
-                          >
-                            {item.name}
-                          </div>
-                        ))}
-                      </div>
-                      {/* )} */}
-                    </div>
-
-                    <div className="relative mb-10">
-                      <div className="text-[12px] text-[var(--custom)]">
-                        If you have department write it.
-                      </div>
-                      <div className={`input_wrap ml-auto active `}>
-                        <input
-                          type="search"
-                          onChange={handleSearchDepartment}
-                          className={`transparent-input flex-1 `}
-                          placeholder="Search your department"
-                        />
-                        {departments.length === 0 && (
-                          <i
-                            onClick={setDepartment}
-                            className="bi bi-search common-icon cursor-pointer"
-                          ></i>
-                        )}
-                      </div>
-                      {bioUserPastSchoolForm.schoolDepartment && (
-                        <div className="flex pb-1 my-2 border-b border-[var(--border-color)] xs:mx-[25px]">
-                          {bioUserPastSchoolForm.schoolDepartment}
-                        </div>
-                      )}
-                      {/* {isDepartmentList && departments.length > 0 && ( */}
-                      <div
-                        className={`dropList ${
-                          isDepartmentList && departments.length > 0
-                            ? 'rel'
-                            : ''
-                        }`}
-                      >
-                        {departments.map((item, index) => (
-                          <div
-                            onClick={() => selectDepartment(item)}
-                            key={index}
-                            className="input_drop_list"
-                          >
-                            {item.name}
-                          </div>
-                        ))}
-                      </div>
-                      {/* )} */}
-                    </div>
                   </>
                 )}
-            </>
-          ) : (
-            <></>
-          )}
-
-          {bioUserPastSchoolForm.schoolName && (
-            <div className={`grid grid-cols-2 gap-2 mb-10`}>
-              <div className="relative">
-                <label className="label flex items-center w-full" htmlFor="">
-                  Year of Admission
-                </label>
-                <div
-                  onClick={() => {
-                    setIsAdmittedList(!isAdmittedList)
-                  }}
-                  className="form-input cursor-pointer"
-                >
-                  {bioUserPastSchoolForm.admittedAt
-                    ? new Date(bioUserPastSchoolForm.admittedAt).getFullYear()
-                    : 'Select Year'}
-                  <i className="ml-auto bi bi-caret-down-fill"></i>
-                </div>
-                {/* {isAdmittedList && ( */}
-                <div className={`dropList ${isAdmittedList ? 'rel' : ''}`}>
-                  {Array.from(
-                    { length: new Date().getFullYear() - 1900 },
-                    (_, index) => new Date().getFullYear() - index
-                  ).map((year, index) => (
-                    <div
-                      onClick={() => selectAdmissionYear(year)}
-                      key={index}
-                      className="input_drop_list"
-                    >
-                      {year}
-                    </div>
-                  ))}
-                </div>
-                {/* )} */}
               </div>
-              {!bioUserSchoolForm.inSchool && (
-                <div className="relative">
-                  <label className="label flex items-center w-full" htmlFor="">
-                    Year of Graduation
-                  </label>
-                  <div
-                    onClick={() => {
-                      setIsGraduatedList(!isGraduatedList)
-                    }}
-                    className="form-input cursor-pointer"
-                  >
-                    {bioUserPastSchoolForm.graduatedAt
-                      ? new Date(
-                          bioUserPastSchoolForm.graduatedAt
-                        ).getFullYear()
-                      : 'Select Year'}
-                    <i className="ml-auto bi bi-caret-down-fill"></i>
-                  </div>
-                  {/* {isGraduatedList && ( */}
-                  <div className={`dropList ${isGraduatedList ? 'rel' : ''}`}>
-                    {Array.from(
-                      { length: 2025 - 1900 },
-                      (_, index) => new Date().getFullYear() - index
-                    ).map((year, index) => (
+
+              {bioUserPastSchoolForm.schoolArea !== '' &&
+                academicResults.length > 0 && (
+                  <div className="round_box mb-5 flex flex-wrap">
+                    {academicResults.map((item, index) => (
                       <div
-                        onClick={() => selectGraduationYear(year)}
+                        key={index}
+                        className={`radio m-1 ${
+                          item.isActive
+                            ? 'text-[var(--custom)]'
+                            : item.levelName ===
+                              bioUserPastSchoolForm.schoolLevelName
+                            ? 'text-[var(--custom)]'
+                            : ''
+                        }`}
+                        onClick={() => selectLevel(index, item)}
+                      >
+                        <div className="radio_circle">
+                          {(item.isActive ||
+                            item.levelName ===
+                              bioUserPastSchoolForm.schoolLevelName) && (
+                            <div className="radio_dot"></div>
+                          )}
+                        </div>
+                        {item.levelName}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+              {activeLevel.levelName !== '' && (
+                <div className="relative mb-10">
+                  <div className="text-[12px] text-[var(--custom)]">
+                    If your school did not appear, type it and click the search
+                    icon
+                  </div>
+                  <div className={`input_wrap ml-auto active`}>
+                    <input
+                      type="search"
+                      onChange={handleSearchSchool}
+                      className={`transparent-input flex-1 `}
+                      placeholder={`Search graduating school`}
+                    />
+                    {schoolResults.length === 0 && (
+                      <i
+                        onClick={setSchool}
+                        className="bi bi-search common-icon cursor-pointer"
+                      ></i>
+                    )}
+                  </div>
+                  {bioUserPastSchoolForm.schoolName && (
+                    <div className="flex pb-1 my-2 border-b border-[var(--border-color)] xs:mx-[25px]">
+                      {bioUserPastSchoolForm.schoolLogo && (
+                        <Image
+                          className="mr-5"
+                          src={bioUserPastSchoolForm.schoolLogo}
+                          alt="Captured"
+                          sizes="100vw"
+                          width={0}
+                          height={0}
+                          style={{
+                            width: 'auto',
+                            objectFit: 'contain',
+                            maxHeight: '30px',
+                          }}
+                        />
+                      )}
+                      {bioUserPastSchoolForm.schoolName}
+                    </div>
+                  )}
+                  {/* {isSchoolList && schoolResults.length > 0 && ( */}
+                  <div
+                    className={`dropList ${
+                      isSchoolList && schoolResults.length > 0 ? 'rel' : ''
+                    }`}
+                  >
+                    {schoolResults.map((item, index) => (
+                      <div
+                        onClick={() => selectSchool(item)}
                         key={index}
                         className="input_drop_list"
                       >
-                        {year}
+                        {item.logo && (
+                          <Image
+                            className="mr-5"
+                            src={String(item.logo)}
+                            alt="Captured"
+                            sizes="100vw"
+                            width={0}
+                            height={0}
+                            style={{ width: '30px', height: 'auto' }}
+                          />
+                        )}
+                        {item.name}
                       </div>
                     ))}
                   </div>
                   {/* )} */}
                 </div>
               )}
-            </div>
-          )}
 
-          {bioUserPastSchoolForm.admittedAt &&
-            bioUserPastSchoolForm.graduatedAt && (
-              <div onClick={addSchool} className="btn">
-                Add Institution
-              </div>
-            )}
+              {bioUserPastSchoolForm.isAdvanced && (
+                <>
+                  {bioUserPastSchoolForm.schoolLevelName !== '' &&
+                    bioUserPastSchoolForm.schoolName !== '' && (
+                      <>
+                        <div className="relative mb-10">
+                          <div className="text-[12px] text-[var(--custom)]">
+                            If your school have faculty, write it.
+                          </div>
+                          <div className={`input_wrap ml-auto active `}>
+                            <input
+                              type="search"
+                              onChange={handleSearchFaculty}
+                              className={`transparent-input flex-1 `}
+                              placeholder="Enter your faculty"
+                            />
+                            {faculties.length === 0 && (
+                              <i
+                                onClick={setFaculty}
+                                className="bi bi-search common-icon cursor-pointer"
+                              ></i>
+                            )}
+                          </div>
+                          {bioUserPastSchoolForm.schoolFaculty && (
+                            <div className="flex pb-1 my-2 border-b border-[var(--border-color)] xs:mx-[25px]">
+                              {bioUserPastSchoolForm.schoolFaculty}
+                            </div>
+                          )}
+                          {/* {isFacultyList && faculties.length > 0 && ( */}
+                          <div
+                            className={`dropList ${
+                              isFacultyList && faculties.length > 0 ? 'rel' : ''
+                            }`}
+                          >
+                            {faculties.map((item, index) => (
+                              <div
+                                onClick={() => selectFaculty(item)}
+                                key={index}
+                                className="input_drop_list"
+                              >
+                                {item.name}
+                              </div>
+                            ))}
+                          </div>
+                          {/* )} */}
+                        </div>
 
-          {/* {loading ? (
-            <div className="btn">
-              <i className="bi bi-opencollective loading  text-md"></i>
-              <div>Processing...</div>
-            </div>
+                        <div className="relative mb-10">
+                          <div className="text-[12px] text-[var(--custom)]">
+                            If you have department write it.
+                          </div>
+                          <div className={`input_wrap ml-auto active `}>
+                            <input
+                              type="search"
+                              onChange={handleSearchDepartment}
+                              className={`transparent-input flex-1 `}
+                              placeholder="Search your department"
+                            />
+                            {departments.length === 0 && (
+                              <i
+                                onClick={setDepartment}
+                                className="bi bi-search common-icon cursor-pointer"
+                              ></i>
+                            )}
+                          </div>
+                          {bioUserPastSchoolForm.schoolDepartment && (
+                            <div className="flex pb-1 my-2 border-b border-[var(--border-color)] xs:mx-[25px]">
+                              {bioUserPastSchoolForm.schoolDepartment}
+                            </div>
+                          )}
+                          {/* {isDepartmentList && departments.length > 0 && ( */}
+                          <div
+                            className={`dropList ${
+                              isDepartmentList && departments.length > 0
+                                ? 'rel'
+                                : ''
+                            }`}
+                          >
+                            {departments.map((item, index) => (
+                              <div
+                                onClick={() => selectDepartment(item)}
+                                key={index}
+                                className="input_drop_list"
+                              >
+                                {item.name}
+                              </div>
+                            ))}
+                          </div>
+                          {/* )} */}
+                        </div>
+                      </>
+                    )}
+                </>
+              )}
+
+              {bioUserPastSchoolForm.schoolName && (
+                <div className={`grid grid-cols-2 gap-2 mb-10`}>
+                  <div className="relative">
+                    <label
+                      className="label flex items-center w-full"
+                      htmlFor=""
+                    >
+                      Year of Admission
+                    </label>
+                    <div
+                      onClick={() => {
+                        setIsAdmittedList(!isAdmittedList)
+                      }}
+                      className="form-input cursor-pointer"
+                    >
+                      {bioUserPastSchoolForm.admittedAt
+                        ? new Date(
+                            bioUserPastSchoolForm.admittedAt
+                          ).getFullYear()
+                        : 'Select Year'}
+                      <i className="ml-auto bi bi-caret-down-fill"></i>
+                    </div>
+                    {/* {isAdmittedList && ( */}
+                    <div className={`dropList ${isAdmittedList ? 'rel' : ''}`}>
+                      {Array.from(
+                        { length: new Date().getFullYear() - 1900 },
+                        (_, index) => new Date().getFullYear() - index
+                      ).map((year, index) => (
+                        <div
+                          onClick={() => selectAdmissionYear(year)}
+                          key={index}
+                          className="input_drop_list"
+                        >
+                          {year}
+                        </div>
+                      ))}
+                    </div>
+                    {/* )} */}
+                  </div>
+                  {!bioUserSchoolForm.inSchool && (
+                    <div className="relative">
+                      <label
+                        className="label flex items-center w-full"
+                        htmlFor=""
+                      >
+                        Year of Graduation
+                      </label>
+                      <div
+                        onClick={() => {
+                          setIsGraduatedList(!isGraduatedList)
+                        }}
+                        className="form-input cursor-pointer"
+                      >
+                        {bioUserPastSchoolForm.graduatedAt
+                          ? new Date(
+                              bioUserPastSchoolForm.graduatedAt
+                            ).getFullYear()
+                          : 'Select Year'}
+                        <i className="ml-auto bi bi-caret-down-fill"></i>
+                      </div>
+                      {/* {isGraduatedList && ( */}
+                      <div
+                        className={`dropList ${isGraduatedList ? 'rel' : ''}`}
+                      >
+                        {Array.from(
+                          { length: 2025 - 1900 },
+                          (_, index) => new Date().getFullYear() - index
+                        ).map((year, index) => (
+                          <div
+                            onClick={() => selectGraduationYear(year)}
+                            key={index}
+                            className="input_drop_list"
+                          >
+                            {year}
+                          </div>
+                        ))}
+                      </div>
+                      {/* )} */}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {bioUserPastSchoolForm.admittedAt &&
+                bioUserPastSchoolForm.graduatedAt && (
+                  <div onClick={addSchool} className="btn">
+                    Add Institution
+                  </div>
+                )}
+            </>
           ) : (
-            (pastSchools.length > 0 || !bioUserSchoolForm.hasPastSchool) && (
-              <div onClick={handleSubmit} className="btn">
-                Submit Form
-              </div>
-            )
-          )} */}
+            <>
+              {bioUserSchoolForm.hasPastSchool === false && (
+                <CustomBtn
+                  label="Submit Form"
+                  loading={loading}
+                  onClick={handleSubmit}
+                />
+              )}
+            </>
+          )}
         </div>
       )}
 

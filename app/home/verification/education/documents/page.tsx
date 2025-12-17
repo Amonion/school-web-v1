@@ -10,7 +10,7 @@ import PictureDisplay from '@/components/Home/Media/PictureDisplay'
 export default function Document() {
   const { updateBioUserSchoolInfo, pastSchools, loading } =
     BioUserSchoolInfoStore()
-  const { bioUser, bioUserSchoolInfo } = AuthStore()
+  const { bioUser } = AuthStore()
   const { setMessage } = MessageStore()
   const url = '/biousers-school/'
   const uploadCert = (
@@ -41,7 +41,7 @@ export default function Document() {
     const inputsToValidate = [
       {
         name: 'pastSchools',
-        value: JSON.stringify(bioUserSchoolInfo?.pastSchools),
+        value: JSON.stringify(pastSchools),
         rules: { blank: true, maxSize: 10 },
         field: 'Past Schools',
       },

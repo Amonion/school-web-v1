@@ -27,6 +27,7 @@ export default function Current() {
   const {
     bioUserSchoolForm,
     loading,
+    resetForm,
     setBioUserSchoolInfoForm,
     updateBioUserSchoolInfo,
   } = BioUserSchoolInfoStore()
@@ -619,7 +620,10 @@ export default function Current() {
                 Yes I am
               </div>
               <div
-                onClick={() => setBioUserSchoolInfoForm('inSchool', false)}
+                onClick={() => {
+                  resetForm()
+                  setBioUserSchoolInfoForm('inSchool', false)
+                }}
                 className={`btn mx-1 ${
                   !bioUserSchoolForm.inSchool ? '' : 'line'
                 }`}
