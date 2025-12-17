@@ -316,7 +316,7 @@ const ApplicationBottomSheet = () => {
                     <div className="m-1 mb-5">
                       <div className="text-sm">Education Level</div>
                       <div className="selected_item">
-                        {item.schoolAcademicLevel.levelName}
+                        {item.schoolLevelName}
                       </div>
                     </div>
 
