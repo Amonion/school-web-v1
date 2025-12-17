@@ -66,6 +66,10 @@ export default function VerticalNavigation() {
             <i className="bi bi-speedometer2 mr-3"></i>
             Dashboard
           </Link>
+          <Link className="v_nav_items block" href="/team/profile">
+            <i className="bi bi-speedometer2 mr-3"></i>
+            Profile
+          </Link>
 
           {/* {(user?.staffPositions.includes('users') ||
             user?.staffPositions.includes('General')) && (
@@ -75,38 +79,38 @@ export default function VerticalNavigation() {
             </Link>
           )} */}
 
-          {(user?.staffPositions.includes('users') ||
-            user?.staffPositions.includes('General')) && (
-            <div className={`v_nav_items line`}>
-              <div className="flex cursor-pointer items-center py-2">
-                <i className="bi bi-people mr-3"></i>
-                Users
-              </div>
-              <div className="nav_dropdown">
-                <Link className="inner_nav_items" href="/team/users/accounts">
-                  Accounts
-                </Link>
-                <Link className="inner_nav_items" href="/team/users/verified">
-                  Persons
-                </Link>
-                <Link
-                  className="inner_nav_items"
-                  href="/team/users/onverification"
-                >
-                  <div className="flex">
-                    <div className="relative">
-                      {verifyingUsers > 0 && (
-                        <span className="dot_notification -right-2 -top-1">
-                          {verifyingUsers > 9 ? `9+` : verifyingUsers}
-                        </span>
-                      )}
-                      Verifying
-                    </div>
-                  </div>
-                </Link>
-              </div>
+          {/* {(user?.staffPositions.includes('users') ||
+            user?.staffPositions.includes('General')) && ( */}
+          <div className={`v_nav_items line`}>
+            <div className="flex cursor-pointer items-center py-2">
+              <i className="bi bi-people mr-3"></i>
+              Users
             </div>
-          )}
+            <div className="nav_dropdown">
+              <Link className="inner_nav_items" href="/team/users/accounts">
+                Accounts
+              </Link>
+              <Link className="inner_nav_items" href="/team/users/verified">
+                Persons
+              </Link>
+              <Link
+                className="inner_nav_items"
+                href="/team/users/onverification"
+              >
+                <div className="flex">
+                  <div className="relative">
+                    {verifyingUsers > 0 && (
+                      <span className="dot_notification -right-2 -top-1">
+                        {verifyingUsers > 9 ? `9+` : verifyingUsers}
+                      </span>
+                    )}
+                    Verifying
+                  </div>
+                </div>
+              </Link>
+            </div>
+          </div>
+          {/* )} */}
 
           {(user?.staffPositions.includes('schools') ||
             user?.staffPositions.includes('General')) && (
