@@ -463,7 +463,7 @@ const VerificationDetails: React.FC = () => {
                     School Level
                   </label>
                   <div className="form-input">
-                    {bioUserSchoolForm.schoolAcademicLevel.levelName}
+                    {bioUserSchoolForm.schoolLevelName}
                   </div>
                 </div>
               </div>
