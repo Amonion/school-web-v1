@@ -151,7 +151,7 @@ export default function Document() {
     <>
       {docs.length > 0 ? (
         <div className="round_box">
-          <div className="grid-2 grid-lay items-end">
+          <div className="grid-cols-2 grid gap-4 items-end">
             {docs.map((item, index) => (
               <div key={index} className="flex flex-col items-center h-full">
                 <label

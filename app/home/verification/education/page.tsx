@@ -16,6 +16,7 @@ import AreaStore from '@/src/zustand/place/AreaOrigin'
 import { Area } from '@/src/zustand/place/Area'
 import { validateInputs } from '@/lib/validation'
 import { usePathname, useRouter } from 'next/navigation'
+import CustomBtn from '@/components/CustomBtn'
 
 interface MaxLevels {
   level: number
@@ -71,27 +72,7 @@ export default function Current() {
   }, [])
 
   useEffect(() => {
-    if (bioUserSchoolInfo && bioUserSchoolInfo.schoolAcademicLevel) {
-      if (bioUserSchoolInfo.inSchool) {
-        BioUserSchoolInfoStore.setState({
-          bioUserSchoolForm: bioUserSchoolInfo,
-        })
-      }
-
-      if (
-        bioUserSchoolInfo?.schoolAcademicLevel &&
-        (bioUserSchoolInfo?.schoolAcademicLevel?.levelName?.includes(
-          'Primary'
-        ) ||
-          bioUserSchoolInfo?.schoolAcademicLevel?.levelName?.includes(
-            'Secondary'
-          ))
-      ) {
-        setBioUserSchoolInfoForm('isAdvanced', false)
-      } else {
-        setBioUserSchoolInfoForm('isAdvanced', true)
-      }
-
+    if (bioUserSchoolInfo) {
       if (bioUserSchoolInfo.schoolCountry) {
         getStates(
           `/places/state/?country=${bioUserSchoolInfo.schoolCountry}&page_size=350&field=state&sort=state`,
@@ -107,6 +88,26 @@ export default function Current() {
     }
     setFacultyList(false)
   }, [pathname])
+
+  useEffect(() => {
+    if (
+      bioUserSchoolInfo &&
+      (bioUserSchoolInfo?.schoolLevelName?.includes('Primary') ||
+        bioUserSchoolInfo?.schoolLevelName?.includes('Secondary'))
+    ) {
+      setBioUserSchoolInfoForm('isAdvanced', false)
+    } else {
+      setBioUserSchoolInfoForm('isAdvanced', true)
+    }
+  }, [bioUserSchoolForm.schoolLevelName])
+
+  useEffect(() => {
+    if (bioUserSchoolInfo) {
+      BioUserSchoolInfoStore.setState({
+        bioUserSchoolForm: bioUserSchoolInfo,
+      })
+    }
+  }, [bioUserSchoolInfo])
 
   useEffect(() => {
     if (bioUserSchoolInfo?.inSchool && bioUserSchoolInfo.schoolYear) {
@@ -137,18 +138,16 @@ export default function Current() {
   }, [bioUserState])
 
   useEffect(() => {
-    if (academicResults.length > 0) {
+    if (academicResults.length > 0 && bioUserSchoolInfo) {
       const index = academicResults.findIndex(
-        (item) =>
-          item.maxLevelName ===
-          bioUserSchoolInfo?.schoolAcademicLevel.maxLevelName
+        (item) => item.maxLevelName === bioUserSchoolInfo?.schoolGradingName
       )
       if (index && index + 1 > 0) {
         toggleActive(index)
         // selectMaxLevel(index)
       }
     }
-  }, [academicResults.length, pathname])
+  }, [academicResults.length, bioUserSchoolInfo, pathname])
 
   useEffect(() => {
     if (schoolResults.length > 0) {
@@ -284,7 +283,7 @@ export default function Current() {
       maxLevels.push(maxLevel)
     }
     setMaxLevel(() => [...maxLevels])
-    setBioUserSchoolInfoForm('schoolAcademicLevel', item)
+    setBioUserSchoolInfoForm('schoolGradingName', item.maxLevelName)
     setBioUserSchoolInfoForm('schoolYear', `${item.maxLevelName} ${index + 1}`)
     if (
       !item.levelName.includes('Primary') &&
@@ -401,7 +400,7 @@ export default function Current() {
     )
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async () => {
     if (user && user.isVerified) {
       setMessage('To update these information, please contact support', false)
       return
@@ -456,6 +455,12 @@ export default function Current() {
             field: 'Area',
           },
           {
+            name: 'schoolLevelName',
+            value: bioUserSchoolForm.schoolLevelName,
+            rules: { blank: true, minLength: 2, maxLength: 100 },
+            field: 'School level name',
+          },
+          {
             name: 'schoolName',
             value: bioUserSchoolForm.schoolName,
             rules: { blank: true, minLength: 2, maxLength: 100 },
@@ -504,8 +509,8 @@ export default function Current() {
             field: 'Entry Date',
           },
           {
-            name: 'schoolAcademicLevel',
-            value: JSON.stringify(bioUserSchoolForm.schoolAcademicLevel),
+            name: 'schoolLevelName',
+            value: bioUserSchoolForm.schoolLevelName,
             rules: { blank: false, minLength: 2, maxLength: 10000 },
             field: 'School academic level',
           },
@@ -579,7 +584,6 @@ export default function Current() {
         setMessage(firstNonEmptyMessage, false)
         return
       }
-      e.preventDefault()
     }
 
     const data = appendForm(inputArray)
@@ -761,8 +765,7 @@ export default function Current() {
                     className={`radio m-1 ${
                       item.isActive
                         ? 'text-[var(--custom)]'
-                        : item.levelName ===
-                          bioUserSchoolForm?.schoolAcademicLevel?.levelName
+                        : item.levelName === bioUserSchoolForm?.schoolLevelName
                         ? 'text-[var(--custom)]'
                         : ''
                     }`}
@@ -771,8 +774,9 @@ export default function Current() {
                     <div className="radio_circle">
                       {(item.isActive ||
                         item.levelName ===
-                          bioUserSchoolForm?.schoolAcademicLevel
-                            ?.levelName) && <div className="radio_dot"></div>}
+                          bioUserSchoolForm?.schoolLevelName) && (
+                        <div className="radio_dot"></div>
+                      )}
                     </div>
                     {item.levelName}
                   </div>
@@ -780,7 +784,7 @@ export default function Current() {
               </div>
             )}
 
-          {bioUserSchoolForm?.schoolAcademicLevel?.levelName !== '' &&
+          {bioUserSchoolForm?.schoolLevelName !== '' &&
             bioUserSchoolForm.schoolArea &&
             bioUserSchoolForm.inSchool && (
               <div className="relative mb-10">
@@ -859,9 +863,7 @@ export default function Current() {
           {bioUserSchoolForm.schoolName && bioUserSchoolForm.inSchool && (
             <div
               className={`grid ${
-                bioUserSchoolForm?.schoolAcademicLevel?.inSchool
-                  ? ''
-                  : 'grid-cols-2'
+                bioUserSchoolForm?.inSchool ? '' : 'grid-cols-2'
               } gap-2 mb-10`}
             >
               <div className="relative">
@@ -896,7 +898,7 @@ export default function Current() {
                 </div>
                 {/* )} */}
               </div>
-              {!bioUserSchoolForm?.schoolAcademicLevel?.inSchool && (
+              {!bioUserSchoolForm?.inSchool && (
                 <div className="relative">
                   <label className="label flex items-center w-full" htmlFor="">
                     Year of Graduation
@@ -935,7 +937,7 @@ export default function Current() {
 
           {bioUserSchoolForm.isAdvanced && bioUserSchoolForm.inSchool && (
             <>
-              {bioUserSchoolForm.schoolAcademicLevel.levelName !== '' &&
+              {bioUserSchoolForm.schoolLevelName !== '' &&
                 bioUserSchoolForm.schoolName !== '' && (
                   <>
                     <div className="relative mb-10">
@@ -1032,7 +1034,7 @@ export default function Current() {
             </>
           )}
 
-          {bioUserSchoolForm?.schoolAcademicLevel?.levelName !== '' &&
+          {bioUserSchoolForm?.schoolLevelName !== '' &&
             bioUserSchoolForm.schoolName !== '' &&
             bioUserSchoolForm.inSchool &&
             maxLevels.length > 0 && (
@@ -1060,23 +1062,14 @@ export default function Current() {
               </div>
             )}
 
-          {loading ? (
-            <div className="btn">
-              <i className="bi bi-opencollective loading  text-md"></i>
-              <div>Processing...</div>
-            </div>
-          ) : (
-            <>
-              <div onClick={handleSubmit} className="btn">
-                Submit Form
-              </div>
-              <div className="my-2" />
-              {isCurrentEdit && bioUserState?.isEducation && (
-                <div onClick={cancelEdit} className="btn">
-                  Cancel
-                </div>
-              )}
-            </>
+          <CustomBtn
+            label="Submit Form"
+            loading={loading}
+            onClick={handleSubmit}
+          />
+          <div className="my-2" />
+          {isCurrentEdit && bioUserState?.isEducation && (
+            <CustomBtn label="Cancel" loading={false} onClick={cancelEdit} />
           )}
         </div>
       ) : bioUserSchoolInfo?.inSchool ? (
@@ -1095,7 +1088,7 @@ export default function Current() {
           <div className="m-1 mb-5">
             <div className="text-sm">Current Education Level</div>
             <div className="selected_item text-[var(--text-secondary)]">
-              {bioUserSchoolInfo?.schoolAcademicLevel?.levelName}
+              {bioUserSchoolInfo?.schoolLevelName}
             </div>
           </div>
 
@@ -1132,16 +1125,18 @@ export default function Current() {
                 Level of Study in {bioUserSchoolInfo.schoolName}
               </div>
               <div className="selected_item text-[var(--text-secondary)] last:border-b-0">
-                {bioUserSchoolInfo.schoolAcademicLevel.inSchool
+                {bioUserSchoolInfo.inSchool
                   ? bioUserSchoolInfo.schoolYear
                   : 'Graduated'}
               </div>
             </div>
           )}
 
-          <div onClick={setEdit} className="btn">
-            Edit this Information
-          </div>
+          <CustomBtn
+            loading={false}
+            onClick={setEdit}
+            label="Edit Information"
+          />
         </div>
       ) : (
         <div className="round_box mt-10 mb-5">
@@ -1165,9 +1160,11 @@ export default function Current() {
               </div>
             </div>
           </div>
-          <div onClick={setEdit} className="btn">
-            Edit this Information
-          </div>
+          <CustomBtn
+            loading={false}
+            onClick={setEdit}
+            label="Edit Information"
+          />
         </div>
       )}
     </>

@@ -359,9 +359,11 @@ export default function SetSocial() {
         </div>
       )}
 
-      <div className="mb-5">
-        <div className="form-input mb-5">{bioUser?.bioUserDisplayName}</div>
-      </div>
+      {bioUser?.bioUserDisplayName && (
+        <div className="mb-5">
+          <div className="form-input mb-5">{bioUser?.bioUserDisplayName}</div>
+        </div>
+      )}
 
       <CustomBtn
         label="Save Changes"

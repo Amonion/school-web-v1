@@ -64,7 +64,6 @@ export const UserProvider = ({ children }: UserProviderProps) => {
 
     socket.on(`update_state_${bioUser._id}`, (data: NotificationData) => {
       if (data.bioUserState) {
-        console.log(data.bioUserState)
         AuthStore.getState().setBioUserState(data.bioUserState)
       }
       if (data.bioUser) {

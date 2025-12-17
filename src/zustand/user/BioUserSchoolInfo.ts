@@ -1,7 +1,6 @@
 import { create } from 'zustand'
 import _debounce from 'lodash/debounce'
 import apiRequest from '@/lib/axios'
-import { AcademicLevel, AcademicLevelEmpty } from '../school/Academic'
 import { AuthStore } from '../user/AuthStore'
 import { User } from '../user/User'
 import { BioUser } from './BioUser'
@@ -23,7 +22,6 @@ export const BioUserSchoolInfoEmpty = {
   isAdvanced: false,
   isSchoolVerified: false,
   isVerified: false,
-  schoolAcademicLevel: AcademicLevelEmpty,
   schoolArea: '',
   schoolArm: '',
   schoolClass: '',
@@ -38,8 +36,11 @@ export const BioUserSchoolInfoEmpty = {
   schoolFaculty: '',
   schoolFacultyId: '',
   schoolFacultyUsername: '',
+  schoolGradingName: '',
   schoolId: '',
   schoolLogo: '',
+  schoolLevel: 0,
+  schoolLevelName: '',
   schoolName: '',
   schoolPicture: '',
   schoolPlaceId: '',
@@ -68,7 +69,6 @@ export interface BioUserSchoolInfo {
   isSchoolVerified: boolean
   isVerified: boolean
   pastSchools: BioUserSchoolInfo[]
-  schoolAcademicLevel: AcademicLevel
   schoolArea: string
   schoolArm: string
   schoolClass: string
@@ -83,8 +83,11 @@ export interface BioUserSchoolInfo {
   schoolFaculty: string
   schoolFacultyId: string
   schoolFacultyUsername: string
+  schoolGradingName: string
   schoolId: string
   schoolLogo: string
+  schoolLevel: number
+  schoolLevelName: string
   schoolName: string
   schoolPicture: string
   schoolPlaceId: string
