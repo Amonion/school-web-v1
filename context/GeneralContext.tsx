@@ -7,7 +7,14 @@ import { AuthStore } from '@/src/zustand/user/AuthStore'
 import OfficeStore from '@/src/zustand/utility/Office'
 import axios from 'axios'
 import { usePathname } from 'next/navigation'
-import { createContext, useEffect, useContext, ReactNode, useMemo } from 'react'
+import {
+  createContext,
+  useEffect,
+  useContext,
+  ReactNode,
+  useMemo,
+  useState,
+} from 'react'
 
 const GeneralContext = createContext<{
   socket: ReturnType<typeof useSocket> | null
@@ -26,9 +33,12 @@ export const GeneralProvider = ({ children }: GeneralProviderProps) => {
   const { getSchoolNotifications } = SchoolStore()
   const { officeForm } = OfficeStore()
   const pathname = usePathname()
-  const userIp = localStorage.getItem('ip')
+  const [userIp, setUserIp] = useState<string | null>(null)
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setUserIp(localStorage.getItem('ip'))
+    }
     initializeSound()
     const url =
       process.env.NODE_ENV === 'production'
