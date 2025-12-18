@@ -49,7 +49,7 @@ export const SocialNotificationProvider = ({
         )
       }
     }
-  }, [pathname, user, socialNotifications.length])
+  }, [pathname, user?._id, socialNotifications.length])
 
   useEffect(() => {
     if (user) {
@@ -58,7 +58,7 @@ export const SocialNotificationProvider = ({
         setMessage
       )
     }
-  }, [user])
+  }, [user?._id])
 
   useEffect(() => {
     if (!user || !socket) return
@@ -84,7 +84,7 @@ export const SocialNotificationProvider = ({
     return () => {
       socket?.off(`social_notification_${user.username}`)
     }
-  }, [socket, user])
+  }, [socket, user?._id])
 
   const value = useMemo(() => ({ socket }), [socket])
 

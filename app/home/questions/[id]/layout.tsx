@@ -12,7 +12,7 @@ import Spinner from '@/components/LoadingAnimations/Spinner'
 
 const ExamProfile = ({ children }: { children: React.ReactNode }) => {
   const { id } = useParams()
-  const { getItem, exams, formData } = ExamStore()
+  const { getExams, exams, formData } = ExamStore()
   const { setMessage } = MessageStore()
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -22,7 +22,7 @@ const ExamProfile = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     if (exams.length === 0) {
-      getItem(`/competitions/exams/${id}`, setMessage)
+      getExams(`/competitions/exams/${id}`, setMessage)
     } else {
       ExamStore.setState((prev) => {
         const exam = prev.exams.find((item) => item._id === id)

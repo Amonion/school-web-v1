@@ -17,7 +17,7 @@ export const GiveawayProvider = ({ children }: GiveawayProviderProps) => {
     if (user && giveaways.length === 0) {
       getSavedGiveaways(user)
     }
-  }, [user])
+  }, [user?._id])
 
   return (
     <GiveawayContext.Provider value={null}>{children}</GiveawayContext.Provider>

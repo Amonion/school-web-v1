@@ -65,7 +65,7 @@ export const PersonalNotificationProvider = ({
         )
       }
     }
-  }, [pathname, bioUser, personalNotifications])
+  }, [pathname, bioUser?._id, personalNotifications])
 
   useEffect(() => {
     if (!bioUser || !socket) return
@@ -101,7 +101,7 @@ export const PersonalNotificationProvider = ({
     return () => {
       socket?.off(`personal_notification_${bioUser._id}`)
     }
-  }, [socket, bioUser])
+  }, [socket, bioUser?._id])
 
   const value = useMemo(() => ({ socket }), [socket])
 

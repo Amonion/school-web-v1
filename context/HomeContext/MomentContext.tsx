@@ -17,7 +17,7 @@ export const MomentProvider = ({ children }: MomentProviderProps) => {
     if (user) {
       getSavedMoments(user)
     }
-  }, [user])
+  }, [user?._id])
 
   return (
     <MomentContext.Provider value={null}>{children}</MomentContext.Provider>

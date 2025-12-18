@@ -56,7 +56,7 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
     if (friendsResults.length === 0 && user) {
       getSavedFriends(user)
     }
-  }, [user])
+  }, [user?._id])
 
   useEffect(() => {
     if (!socket) return
@@ -113,7 +113,7 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
       socket.off(`updateChatToDelivered${user?.username}`)
       socket.off(`updatePendingChat${connection}`)
     }
-  }, [user, socket])
+  }, [user?._id, socket])
 
   useEffect(() => {
     if (!socket) return

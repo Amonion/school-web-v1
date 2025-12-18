@@ -40,7 +40,7 @@ export const UsersProvider = ({ children }: UsersProviderProps) => {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibility)
     }
-  }, [user])
+  }, [user?._id])
 
   useEffect(() => {
     if (socket && user) {
@@ -48,7 +48,7 @@ export const UsersProvider = ({ children }: UsersProviderProps) => {
         BioUserStateStore.setState({ verifyingUsers: data.verifyingUsers })
       })
     }
-  }, [user, socket])
+  }, [user?._id, socket])
 
   const updateUserPresence = async () => {
     try {

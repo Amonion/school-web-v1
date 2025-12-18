@@ -17,7 +17,7 @@ export const PostProvider = ({ children }: PostProviderProps) => {
     if (user && postResults.length === 0) {
       getSavedPosts(user)
     }
-  }, [user])
+  }, [user?._id])
 
   return <PostContext.Provider value={null}>{children}</PostContext.Provider>
 }

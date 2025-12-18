@@ -218,9 +218,7 @@ const WeekendStore = create<WeekendState>((set) => ({
 
   getGiveaways: async (url: string) => {
     try {
-      const response = await apiRequest<FetchResponse>(url, {
-        setLoading: WeekendStore.getState().setLoading,
-      })
+      const response = await apiRequest<FetchResponse>(url)
       const data = response?.data
       if (data) {
         const storedGiveaway = WeekendStore.getState().giveaways
@@ -235,40 +233,39 @@ const WeekendStore = create<WeekendState>((set) => ({
 
   getWeekends: async (url: string) => {
     try {
-      const response = await apiRequest<FetchResponse>(url, {
-        setLoading: WeekendStore.getState().setLoading,
-      })
+      set({ loading: true })
+      const response = await apiRequest<FetchResponse>(url)
       const data = response?.data
       if (data) {
         WeekendStore.getState().setProcessedResults(data)
       }
     } catch (error: unknown) {
       console.log(error)
+    } finally {
+      set({ loading: false })
     }
   },
 
   getAWeekend: async (url: string) => {
     try {
-      const response = await apiRequest<FetchResponse>(url, {
-        setLoading: WeekendStore.getState().setLoading,
-      })
+      set({ loading: true })
+      const response = await apiRequest<FetchResponse>(url)
       const data = response?.data
       if (data) {
         set({
           weekendForm: data.data,
-          loading: false,
         })
       }
     } catch (error: unknown) {
       console.error(error)
+    } finally {
+      set({ loading: false })
     }
   },
 
   getQueryWeekends: async (url: string) => {
     try {
-      const response = await apiRequest<FetchResponse>(url, {
-        setLoading: WeekendStore.getState().setLoading,
-      })
+      const response = await apiRequest<FetchResponse>(url)
       const data = response?.data
       if (data) {
         set((prev) => {
@@ -313,67 +310,75 @@ const WeekendStore = create<WeekendState>((set) => ({
   }, 1000),
 
   massDelete: async (url, selectedItems, setMessage) => {
-    set({
-      loading: true,
-    })
-    const response = await apiRequest<FetchResponse>(url, {
-      method: 'PATCH',
-      body: selectedItems,
-      setMessage,
-      setLoading: WeekendStore.getState().setLoading,
-    })
-    if (response) {
+    try {
+      set({ loading: true })
+      const response = await apiRequest<FetchResponse>(url, {
+        method: 'PATCH',
+        body: selectedItems,
+        setMessage,
+      })
+      if (response) {
+      }
+    } catch (error) {
+      console.log(error)
+    } finally {
+      set({ loading: true })
     }
   },
 
-  deleteItem: async (
-    url: string,
-    setMessage: (message: string, isError: boolean) => void,
-    setLoading?: (loading: boolean) => void
-  ) => {
-    const response = await apiRequest<FetchResponse>(url, {
-      method: 'DELETE',
-      setMessage,
-      setLoading,
-    })
-    const data = response?.data
-    if (data) {
-      WeekendStore.getState().setProcessedResults(data)
+  deleteItem: async (url, setMessage) => {
+    try {
+      const response = await apiRequest<FetchResponse>(url, {
+        method: 'DELETE',
+        setMessage,
+      })
+      const data = response?.data
+      if (data) {
+        WeekendStore.getState().setProcessedResults(data)
+      }
+    } catch (error) {
+      console.log(error)
+    } finally {
+      set({ loading: false })
     }
   },
 
   updateWeekend: async (url, updatedItem, setMessage, redirect) => {
-    set({ loading: true })
-    const response = await apiRequest<FetchResponse>(url, {
-      method: 'PATCH',
-      body: updatedItem,
-      setMessage,
-      setLoading: WeekendStore.getState().setLoading,
-    })
-    if (response?.data) {
-      set({ loading: false })
-      WeekendStore.getState().setProcessedResults(response.data)
-    } else {
+    try {
+      set({ loading: true })
+      const response = await apiRequest<FetchResponse>(url, {
+        method: 'PATCH',
+        body: updatedItem,
+        setMessage,
+      })
+      if (response?.data) {
+        WeekendStore.getState().setProcessedResults(response.data)
+      }
+      if (redirect) redirect()
+    } catch (error) {
+      console.log(error)
+    } finally {
       set({ loading: false })
     }
-    if (redirect) redirect()
   },
 
   createWeekend: async (url, updatedItem, setMessage, redirect) => {
-    set({ loading: true })
-    const response = await apiRequest<FetchResponse>(url, {
-      method: 'POST',
-      body: updatedItem,
-      setMessage,
-      setLoading: WeekendStore.getState().setLoading,
-    })
-    if (response?.data) {
-      set({ loading: false })
-      WeekendStore.getState().setProcessedResults(response.data)
-    } else {
+    try {
+      set({ loading: true })
+      const response = await apiRequest<FetchResponse>(url, {
+        method: 'POST',
+        body: updatedItem,
+        setMessage,
+      })
+      if (response?.data) {
+        WeekendStore.getState().setProcessedResults(response.data)
+      }
+      if (redirect) redirect()
+    } catch (error) {
+      console.log(error)
+    } finally {
       set({ loading: false })
     }
-    if (redirect) redirect()
   },
 
   toggleActive: (index: number) => {
