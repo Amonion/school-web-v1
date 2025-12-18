@@ -26,7 +26,7 @@ const CreateState: React.FC = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target
-    setItemForm(name as keyof typeof stateForm, value)
+    setItemForm(name as keyof typeof stateForm, value.trim())
   }
 
   const handleSubmit = async (e: React.FormEvent) => {

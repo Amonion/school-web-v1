@@ -27,7 +27,7 @@ const CreateNotificationTemplate: React.FC = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target
-    setForm(name as keyof typeof notificationTemplateForm, value)
+    setForm(name as keyof typeof notificationTemplateForm, value.trim())
   }
 
   const handleSubmit = async (e: React.FormEvent) => {

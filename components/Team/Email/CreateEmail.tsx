@@ -24,7 +24,7 @@ const CreateEmailForm: React.FC = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target
-    setForm(name as keyof typeof emailForm, value)
+    setForm(name as keyof typeof emailForm, value.trim())
   }
 
   const handleFileChange =

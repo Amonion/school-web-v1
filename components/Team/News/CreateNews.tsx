@@ -105,7 +105,7 @@ const CreateNews: React.FC = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target
-    setForm(name as keyof typeof newsForm, value)
+    setForm(name as keyof typeof newsForm, value.trim())
   }
 
   const handleTag = (

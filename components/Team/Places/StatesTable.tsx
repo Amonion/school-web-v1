@@ -20,7 +20,7 @@ const StatesTable: React.FC = () => {
     loadingStates,
     isStateForm,
     toggleAllSelectedState,
-    updateItem,
+    // updateItem,
     searchState,
     showStateForm,
     toggleCheckedState,
@@ -71,9 +71,9 @@ const StatesTable: React.FC = () => {
     }
   }
 
-  const cleanPlaces = () => {
-    updateItem(`/places/clean`, {}, setMessage)
-  }
+  // const cleanPlaces = ()=>{
+  //   updateItem(`/places/clean`, {}, setMessage)
+  // }
   return (
     <>
       <div className="card_body sharp mb-5">
@@ -218,15 +218,12 @@ const StatesTable: React.FC = () => {
             >
               <i className="bi bi-bank"></i>
             </Link>
-            <div onClick={cleanPlaces} className="tableActions">
-              <i className="bi bi-file-earmark-text"></i>
-            </div>
-            {/* <Link
+            <Link
               href={`/team/places/documents/${country}/1`}
               className="tableActions"
             >
               <i className="bi bi-file-earmark-text"></i>
-            </Link> */}
+            </Link>
             <Link
               href={`/team/places/payments/${country}/1`}
               className="tableActions"

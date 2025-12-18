@@ -30,7 +30,7 @@ const CreatePosition: React.FC = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target
-    setPositionForm(name as keyof typeof positionFormData, value)
+    setPositionForm(name as keyof typeof positionFormData, value.trim())
   }
 
   const handleSubmit = async () => {

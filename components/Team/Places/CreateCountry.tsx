@@ -20,7 +20,7 @@ const CreateCountry: React.FC = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target
-    setItemForm(name as keyof typeof country, value)
+    setItemForm(name as keyof typeof country, value.trim())
   }
 
   const handleFileChange =

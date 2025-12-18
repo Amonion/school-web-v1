@@ -111,7 +111,7 @@ const CreateWeekend: React.FC = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target
-    setForm(name as keyof typeof weekendForm, value)
+    setForm(name as keyof typeof weekendForm, value.trim())
   }
 
   const handleSubmit = async (e: React.FormEvent) => {

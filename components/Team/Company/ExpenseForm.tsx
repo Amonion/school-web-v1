@@ -25,7 +25,7 @@ const CreateExpenseForm: React.FC = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target
-    setForm(name as keyof typeof expensesForm, value)
+    setForm(name as keyof typeof expensesForm, value.trim())
   }
 
   const handleFileChange =
