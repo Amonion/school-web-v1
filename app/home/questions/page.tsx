@@ -15,7 +15,7 @@ export default function QuestionList() {
     loading,
     page_size,
     exams,
-    getItems,
+    getExams,
     searchExams,
     clearSearchedExams,
     addMoreSearchItems,
@@ -27,7 +27,7 @@ export default function QuestionList() {
 
   useEffect(() => {
     const findItems = async () => {
-      getItems(getUrl(searchedText, page), setMessage)
+      getExams(getUrl(searchedText, page), setMessage)
     }
     if (exams.length === 0) {
       findItems()
