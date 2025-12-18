@@ -7,15 +7,13 @@ import ThemeToggle from '@/components/Home/Navigation/ThemeToggle'
 import { NavStore } from '@/src/zustand/notification/Navigation'
 import { AuthStore } from '@/src/zustand/user/AuthStore'
 import { BioUserStateStore } from '@/src/zustand/user/BioUserState'
-import StaffStore from '@/src/zustand/app/Staff'
 
 export default function VerticalNavigation() {
   const router = useRouter()
   const pathname = usePathname()
   const { toggleVNav, vNav, clearNav } = NavStore()
-  const { user } = AuthStore()
+  const { user, staff } = AuthStore()
   const { verifyingUsers } = BioUserStateStore()
-  const { myStaffForm } = StaffStore()
 
   const offStates = () => {
     clearNav()
@@ -64,8 +62,8 @@ export default function VerticalNavigation() {
         </div>
 
         <div className="mt-4">
-          {(myStaffForm.position.toLowerCase().includes('users') ||
-            myStaffForm.position.toLowerCase().includes('general')) && (
+          {(staff?.position.toLowerCase().includes('users') ||
+            staff?.position.toLowerCase().includes('general')) && (
             <Link className="v_nav_items block" href="/team">
               <i className="bi bi-speedometer2 mr-3"></i>
               Dashboard
@@ -76,8 +74,8 @@ export default function VerticalNavigation() {
             Profile
           </Link>
 
-          {(myStaffForm.position.toLowerCase().includes('users') ||
-            myStaffForm.position.toLowerCase().includes('general')) && (
+          {(staff?.position.toLowerCase().includes('users') ||
+            staff?.position.toLowerCase().includes('general')) && (
             <div className={`v_nav_items line`}>
               <div className="flex cursor-pointer items-center py-2">
                 <i className="bi bi-people mr-3"></i>
@@ -109,8 +107,8 @@ export default function VerticalNavigation() {
             </div>
           )}
 
-          {(myStaffForm.position.toLowerCase().includes('schools') ||
-            myStaffForm.position.toLowerCase().includes('general')) && (
+          {(staff?.position.toLowerCase().includes('schools') ||
+            staff?.position.toLowerCase().includes('general')) && (
             <div className={`v_nav_items line`}>
               <div className="flex cursor-pointer items-center py-2">
                 <i className="bi bi-bank mr-3"></i>
@@ -127,32 +125,32 @@ export default function VerticalNavigation() {
             </div>
           )}
 
-          {(myStaffForm.position.toLowerCase().includes('places') ||
-            myStaffForm.position.toLowerCase().includes('general')) && (
+          {(staff?.position.toLowerCase().includes('places') ||
+            staff?.position.toLowerCase().includes('general')) && (
             <Link className="v_nav_items block" href="/team/places/1">
               <i className="bi bi-globe-americas mr-3"></i>
               Places
             </Link>
           )}
 
-          {(myStaffForm.position.toLowerCase().includes('policy') ||
-            myStaffForm.position.toLowerCase().includes('general')) && (
+          {(staff?.position.toLowerCase().includes('policy') ||
+            staff?.position.toLowerCase().includes('general')) && (
             <Link className="v_nav_items py-2 block" href="/team/policy">
               <i className="bi bi-globe-americas mr-3"></i>
               Policy
             </Link>
           )}
 
-          {(myStaffForm.position.toLowerCase().includes('news') ||
-            myStaffForm.position.toLowerCase().includes('general')) && (
+          {(staff?.position.toLowerCase().includes('news') ||
+            staff?.position.toLowerCase().includes('general')) && (
             <Link className="v_nav_items py-2 block" href="/team/news">
               <i className="bi bi-newspaper mr-3"></i>
               News
             </Link>
           )}
 
-          {(myStaffForm.position.toLowerCase().includes('competitions') ||
-            myStaffForm.position.toLowerCase().includes('general')) && (
+          {(staff?.position.toLowerCase().includes('competitions') ||
+            staff?.position.toLowerCase().includes('general')) && (
             <div className={`v_nav_items line`}>
               <div className="flex cursor-pointer items-center py-2">
                 <i className="bi bi-trophy mr-3"></i>
@@ -181,8 +179,8 @@ export default function VerticalNavigation() {
             </div>
           )}
 
-          {(myStaffForm.position.toLowerCase().includes('messages') ||
-            myStaffForm.position.toLowerCase().includes('general')) && (
+          {(staff?.position.toLowerCase().includes('messages') ||
+            staff?.position.toLowerCase().includes('general')) && (
             <div className={`v_nav_items line`}>
               <div className="flex cursor-pointer items-center py-2">
                 <i className="bi bi-envelope mr-3"></i>
@@ -205,7 +203,7 @@ export default function VerticalNavigation() {
             </div>
           )}
 
-          {myStaffForm.position.toLowerCase().includes('general') && (
+          {staff?.position.toLowerCase().includes('general') && (
             <div className={`v_nav_items line`}>
               <div className="flex cursor-pointer items-center py-2">
                 <i className="bi bi-diagram-3 mr-3"></i>

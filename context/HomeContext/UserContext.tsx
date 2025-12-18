@@ -1,7 +1,7 @@
 'use client'
 import { playPopSound } from '@/lib/sound'
 import useSocket from '@/src/useSocket'
-import StaffStore, { Staff } from '@/src/zustand/app/Staff'
+import { Staff } from '@/src/zustand/app/Staff'
 import {
   SocialNotification,
   SocialNotificationStore,
@@ -38,11 +38,6 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   const { user, bioUser } = AuthStore()
 
   useEffect(() => {
-    const localStaff = localStorage.getItem('staff')
-    if (localStaff) {
-      StaffStore.setState({ myStaffForm: JSON.parse(localStaff) })
-    }
-
     if (!user || !socket) return
     socket.on(
       `social_notification_${user?.username}`,
@@ -80,8 +75,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
         AuthStore.getState().setUser(data.user)
       }
       if (data.staff) {
-        localStorage.setItem('staff', JSON.stringify(data.staff))
-        StaffStore.setState({ myStaffForm: data.staff })
+        AuthStore.getState().setStaff(data.staff)
       }
       if (data.bioUserSchoolInfo) {
         AuthStore.getState().setBioUserSchoolInfo(data.bioUserSchoolInfo)

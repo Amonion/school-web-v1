@@ -30,7 +30,6 @@ const WeekendsTable: React.FC = () => {
     updateWeekend,
     toggleAllSelected,
     toggleChecked,
-    setLoading,
     toggleActive,
     reshuffleResults,
     searchWeekends,
@@ -66,7 +65,7 @@ const WeekendsTable: React.FC = () => {
     const params = `?page_size=${page_size}&page=${
       page ? page : 1
     }&ordering=${sort}`
-    await deleteItem(`${url}/${id}/${params}`, setMessage, setLoading)
+    await deleteItem(`${url}/${id}/${params}`, setMessage)
   }
 
   const startDelete = (id: string, index: number) => {

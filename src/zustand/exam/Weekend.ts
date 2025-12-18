@@ -118,7 +118,6 @@ interface WeekendState {
     setMessage: (message: string, isError: boolean) => void
   ) => Promise<void>
   setProcessedResults: (data: FetchResponse) => void
-  setLoading?: (loading: boolean) => void
   massDelete: (
     url: string,
     selectedItems: Record<string, unknown>,

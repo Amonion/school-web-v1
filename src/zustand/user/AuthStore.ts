@@ -6,9 +6,11 @@ import { User } from './User'
 import { BioUserSchoolInfo } from './BioUserSchoolInfo'
 import { BioUserSettings } from './BioUserSettings'
 import { Office } from '../utility/Office'
+import { Staff } from '../app/Staff'
 
 interface AuthState {
   bioUser: BioUser | null
+  staff: Staff | null
   bioUserSettings: BioUserSettings | null
   bioUserState: BioUserState | null
   bioUserSchoolInfo: BioUserSchoolInfo | null
@@ -32,6 +34,7 @@ interface AuthState {
     bioUserSettings?: BioUserSettings
   ) => void
   setBioUserState: (bioUserState: BioUserState) => void
+  setStaff: (staff: Staff) => void
   setBioUser: (bioUserState: BioUser) => void
   setBioUserSchoolInfo: (user: BioUserSchoolInfo) => void
   setOfficeState: (office?: Office, userOffices?: Office[]) => void
@@ -43,6 +46,7 @@ export const AuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
       bioUser: null,
+      staff: null,
       bioUserState: null,
       bioUserSettings: null,
       bioUserSchoolInfo: null,
@@ -75,6 +79,9 @@ export const AuthStore = create<AuthState>()(
       },
       setBioUser: (bioUserState) => {
         set({ bioUser: bioUserState })
+      },
+      setStaff: (staff) => {
+        set({ staff: staff })
       },
 
       setBioUserSchoolInfo: (user) => {
@@ -156,6 +163,7 @@ export const AuthStore = create<AuthState>()(
       partialize: (state) => ({
         token: state.token,
         user: state.user,
+        staff: state.staff,
         bioUserState: state.bioUserState,
         bioUserSchoolInfo: state.bioUserSchoolInfo,
         bioUserSettings: state.bioUserSettings,

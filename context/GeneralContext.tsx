@@ -26,6 +26,7 @@ export const GeneralProvider = ({ children }: GeneralProviderProps) => {
   const { getSchoolNotifications } = SchoolStore()
   const { officeForm } = OfficeStore()
   const pathname = usePathname()
+  const userIp = localStorage.getItem('ip')
 
   useEffect(() => {
     initializeSound()
@@ -92,11 +93,10 @@ export const GeneralProvider = ({ children }: GeneralProviderProps) => {
   }, [baseURL, user?._id, socket])
 
   useEffect(() => {
-    const ip = localStorage.getItem('ip')
-    if (ip && user) {
-      updateUserPresence(ip, true)
+    if (userIp && user) {
+      updateUserPresence(userIp, true)
     }
-  }, [pathname, user?._id])
+  }, [pathname, userIp, user?._id])
 
   ///////////////GET SCHOOL NOTIFICATIONS///////////////
   useEffect(() => {
