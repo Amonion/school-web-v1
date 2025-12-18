@@ -71,7 +71,7 @@ export default function EachFriend({ friend }: EachFriendProps) {
         pathname === '/chat'
           ? 'bg-[var(--primary)]'
           : ''
-      } hover:bg-[var(--primary)] px-1 py-2 rounded-[10px] mb-2 flex w-full items-start cursor-pointer`}
+      } hover:bg-[var(--primary)] px-1 py-2 relative rounded-[10px] mb-2 flex w-full items-start cursor-pointer`}
     >
       <div className="rounded-full w-10 h-10 relative overflow-hidden">
         <Image
@@ -114,17 +114,7 @@ export default function EachFriend({ friend }: EachFriendProps) {
               )}
             </div>
           )}
-          {unread > 0 && (
-            <div
-              className={`${
-                unread >= 100
-                  ? 'w-[20px] h-[20px] text-[10px]'
-                  : 'w-[15px] h-[15px] text-[12px]'
-              } flex items-center  text-white absolute right-0 bottom-1 z-30 justify-center rounded-full bg-[var(--custom)]`}
-            >
-              {unread >= 100 ? '99+' : unread}
-            </div>
-          )}
+
           {currentFriend.media && currentFriend.media.length > 0 && (
             <div className="mr-1">
               {currentFriend.media[0].type.includes('image') ? (
@@ -142,6 +132,18 @@ export default function EachFriend({ friend }: EachFriendProps) {
           />
         </div>
       </div>
+
+      {unread > 0 && (
+        <div
+          className={`${
+            unread >= 100
+              ? 'w-[20px] h-[20px] text-[10px]'
+              : 'w-[15px] h-[15px] text-[12px]'
+          } flex items-center  text-white absolute right-0 bottom-1 z-30 justify-center rounded-full bg-[var(--custom)]`}
+        >
+          {unread >= 100 ? '99+' : unread}
+        </div>
+      )}
     </li>
   )
 }

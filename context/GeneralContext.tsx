@@ -37,7 +37,6 @@ export const GeneralProvider = ({ children }: GeneralProviderProps) => {
   }, [])
 
   useEffect(() => {
-    //***********GET AND STORE IP ***********//
     const getIp = async () => {
       try {
         const response = await axios.get(`${baseURL}user-ip`)
@@ -50,14 +49,14 @@ export const GeneralProvider = ({ children }: GeneralProviderProps) => {
       }
     }
 
-    //***********GET AND STORE IP ***********//
     const handleEnter = () => {
       if (baseURL) {
         const retrievedIp = localStorage.getItem('ip')
         if (
           retrievedIp !== null &&
           retrievedIp !== undefined &&
-          retrievedIp !== 'undefined'
+          retrievedIp !== 'undefined' &&
+          user
         ) {
           updateUserPresence(retrievedIp, true)
         } else {
@@ -90,14 +89,14 @@ export const GeneralProvider = ({ children }: GeneralProviderProps) => {
       window.removeEventListener('beforeunload', handleExit)
       document.removeEventListener('visibilitychange', handleExit)
     }
-  }, [baseURL, socket])
+  }, [baseURL, user?._id, socket])
 
   useEffect(() => {
     const ip = localStorage.getItem('ip')
-    if (ip) {
+    if (ip && user) {
       updateUserPresence(ip, true)
     }
-  }, [pathname])
+  }, [pathname, user?._id])
 
   ///////////////GET SCHOOL NOTIFICATIONS///////////////
   useEffect(() => {
@@ -127,7 +126,6 @@ export const GeneralProvider = ({ children }: GeneralProviderProps) => {
         to: 'users',
         action: 'visit',
       }
-
       socket?.emit('message', formData)
     } catch (error) {
       console.error('Error fetching user location:', error)

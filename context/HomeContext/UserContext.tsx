@@ -38,6 +38,11 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   const { user, bioUser } = AuthStore()
 
   useEffect(() => {
+    const localStaff = localStorage.getItem('staff')
+    if (localStaff) {
+      StaffStore.setState({ myStaffForm: JSON.parse(localStaff) })
+    }
+
     if (!user || !socket) return
     socket.on(
       `social_notification_${user?.username}`,
@@ -59,7 +64,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     return () => {
       socket?.off(`social_notification_${user.username}`)
     }
-  }, [socket, user])
+  }, [socket, user?._id])
 
   useEffect(() => {
     if (!bioUser || !socket) return
@@ -75,6 +80,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
         AuthStore.getState().setUser(data.user)
       }
       if (data.staff) {
+        localStorage.setItem('staff', JSON.stringify(data.staff))
         StaffStore.setState({ myStaffForm: data.staff })
       }
       if (data.bioUserSchoolInfo) {
