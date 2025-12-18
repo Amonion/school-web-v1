@@ -68,6 +68,7 @@ interface StaffsState {
   isAllChecked: boolean
   isForm: boolean
   staffForm: Staff
+  myStaffForm: Staff
   setForm: (key: keyof Staff, value: Staff[keyof Staff]) => void
   resetForm: () => void
   fillForm: (f: Staff) => void
@@ -114,6 +115,7 @@ const StaffStore = create<StaffsState>((set) => ({
   isAllChecked: false,
   isForm: false,
   staffForm: StaffEmpty,
+  myStaffForm: StaffEmpty,
   setForm: (key, value) =>
     set((state) => ({
       staffForm: {

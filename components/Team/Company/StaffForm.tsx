@@ -111,13 +111,13 @@ const StaffForm: React.FC = () => {
       {
         name: 'country',
         value: staffForm.country,
-        rules: { blank: true, maxLength: 15 },
+        rules: { blank: false, maxLength: 15 },
         field: 'Country',
       },
       {
         name: 'state',
         value: staffForm.state,
-        rules: { blank: true, maxLength: 15 },
+        rules: { blank: false, maxLength: 15 },
         field: 'State',
       },
       {
@@ -129,7 +129,7 @@ const StaffForm: React.FC = () => {
       {
         name: 'area',
         value: staffForm.area,
-        rules: { blank: true, maxLength: 15 },
+        rules: { blank: false, maxLength: 15 },
         field: 'Area',
       },
       {

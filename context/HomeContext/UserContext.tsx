@@ -1,6 +1,7 @@
 'use client'
 import { playPopSound } from '@/lib/sound'
 import useSocket from '@/src/useSocket'
+import StaffStore, { Staff } from '@/src/zustand/app/Staff'
 import {
   SocialNotification,
   SocialNotificationStore,
@@ -9,6 +10,7 @@ import { AuthStore } from '@/src/zustand/user/AuthStore'
 import { BioUser } from '@/src/zustand/user/BioUser'
 import { BioUserSchoolInfo } from '@/src/zustand/user/BioUserSchoolInfo'
 import { BioUserState } from '@/src/zustand/user/BioUserState'
+import { User } from '@/src/zustand/user/User'
 import { createContext, useEffect, useContext, ReactNode, useMemo } from 'react'
 
 const UserContext = createContext<{
@@ -25,6 +27,8 @@ interface NotificationData {
   socialNotification: SocialNotification
   bioUserState: BioUserState
   bioUser: BioUser
+  user: User
+  staff: Staff
   bioUserSchoolInfo: BioUserSchoolInfo
   unreadNotifications: number
 }
@@ -35,7 +39,6 @@ export const UserProvider = ({ children }: UserProviderProps) => {
 
   useEffect(() => {
     if (!user || !socket) return
-    //////////////PERSONAL NOTIFICATION//////////////
     socket.on(
       `social_notification_${user?.username}`,
       (data: NotificationData) => {
@@ -53,7 +56,6 @@ export const UserProvider = ({ children }: UserProviderProps) => {
       }
     )
 
-    //////////////STATE UPDATE//////////////
     return () => {
       socket?.off(`social_notification_${user.username}`)
     }
@@ -69,6 +71,12 @@ export const UserProvider = ({ children }: UserProviderProps) => {
       if (data.bioUser) {
         AuthStore.getState().setBioUser(data.bioUser)
       }
+      if (data.user) {
+        AuthStore.getState().setUser(data.user)
+      }
+      if (data.staff) {
+        StaffStore.setState({ myStaffForm: data.staff })
+      }
       if (data.bioUserSchoolInfo) {
         AuthStore.getState().setBioUserSchoolInfo(data.bioUserSchoolInfo)
       }
@@ -77,7 +85,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     return () => {
       socket?.off(`update_state_${bioUser._id}`)
     }
-  }, [socket, bioUser])
+  }, [socket, bioUser?._id])
 
   const value = useMemo(() => ({ socket }), [socket])
 

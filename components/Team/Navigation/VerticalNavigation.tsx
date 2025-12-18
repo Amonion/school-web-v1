@@ -7,6 +7,7 @@ import ThemeToggle from '@/components/Home/Navigation/ThemeToggle'
 import { NavStore } from '@/src/zustand/notification/Navigation'
 import { AuthStore } from '@/src/zustand/user/AuthStore'
 import { BioUserStateStore } from '@/src/zustand/user/BioUserState'
+import StaffStore from '@/src/zustand/app/Staff'
 
 export default function VerticalNavigation() {
   const router = useRouter()
@@ -14,6 +15,7 @@ export default function VerticalNavigation() {
   const { toggleVNav, vNav, clearNav } = NavStore()
   const { user } = AuthStore()
   const { verifyingUsers } = BioUserStateStore()
+  const { myStaffForm } = StaffStore()
 
   const offStates = () => {
     clearNav()
@@ -62,58 +64,53 @@ export default function VerticalNavigation() {
         </div>
 
         <div className="mt-4">
-          <Link className="v_nav_items block" href="/team">
-            <i className="bi bi-speedometer2 mr-3"></i>
-            Dashboard
-          </Link>
+          {(myStaffForm.position.toLowerCase().includes('users') ||
+            myStaffForm.position.toLowerCase().includes('general')) && (
+            <Link className="v_nav_items block" href="/team">
+              <i className="bi bi-speedometer2 mr-3"></i>
+              Dashboard
+            </Link>
+          )}
           <Link className="v_nav_items block" href="/team/profile">
             <i className="bi bi-speedometer2 mr-3"></i>
             Profile
           </Link>
 
-          {/* {(user?.staffPositions.includes('users') ||
-            user?.staffPositions.includes('General')) && (
-            <Link className="v_nav_items py-2 block" href="/team/users">
-              <i className="bi bi-people mr-3"></i>
-              Users
-            </Link>
-          )} */}
-
-          {/* {(user?.staffPositions.includes('users') ||
-            user?.staffPositions.includes('General')) && ( */}
-          <div className={`v_nav_items line`}>
-            <div className="flex cursor-pointer items-center py-2">
-              <i className="bi bi-people mr-3"></i>
-              Users
-            </div>
-            <div className="nav_dropdown">
-              <Link className="inner_nav_items" href="/team/users/accounts">
-                Accounts
-              </Link>
-              <Link className="inner_nav_items" href="/team/users/verified">
-                Persons
-              </Link>
-              <Link
-                className="inner_nav_items"
-                href="/team/users/onverification"
-              >
-                <div className="flex">
-                  <div className="relative">
-                    {verifyingUsers > 0 && (
-                      <span className="dot_notification -right-2 -top-1">
-                        {verifyingUsers > 9 ? `9+` : verifyingUsers}
-                      </span>
-                    )}
-                    Verifying
+          {(myStaffForm.position.toLowerCase().includes('users') ||
+            myStaffForm.position.toLowerCase().includes('general')) && (
+            <div className={`v_nav_items line`}>
+              <div className="flex cursor-pointer items-center py-2">
+                <i className="bi bi-people mr-3"></i>
+                Users
+              </div>
+              <div className="nav_dropdown">
+                <Link className="inner_nav_items" href="/team/users/accounts">
+                  Accounts
+                </Link>
+                <Link className="inner_nav_items" href="/team/users/verified">
+                  Persons
+                </Link>
+                <Link
+                  className="inner_nav_items"
+                  href="/team/users/onverification"
+                >
+                  <div className="flex">
+                    <div className="relative">
+                      {verifyingUsers > 0 && (
+                        <span className="dot_notification -right-2 -top-1">
+                          {verifyingUsers > 9 ? `9+` : verifyingUsers}
+                        </span>
+                      )}
+                      Verifying
+                    </div>
                   </div>
-                </div>
-              </Link>
+                </Link>
+              </div>
             </div>
-          </div>
-          {/* )} */}
+          )}
 
-          {(user?.staffPositions.includes('schools') ||
-            user?.staffPositions.includes('General')) && (
+          {(myStaffForm.position.toLowerCase().includes('schools') ||
+            myStaffForm.position.toLowerCase().includes('general')) && (
             <div className={`v_nav_items line`}>
               <div className="flex cursor-pointer items-center py-2">
                 <i className="bi bi-bank mr-3"></i>
@@ -130,98 +127,106 @@ export default function VerticalNavigation() {
             </div>
           )}
 
-          <div className={`v_nav_items line`}>
-            <div className="flex cursor-pointer items-center py-2">
-              <Link className="block" href="/team/places/1">
-                <i className="bi bi-globe-americas mr-3"></i>
-                Places
-              </Link>
-            </div>
-            <div className="nav_dropdown">
-              <Link className="inner_nav_items" href="/team/places/ads">
-                Ads
-              </Link>
-              <Link className="inner_nav_items" href="/team/schools/table">
-                Schools Table
-              </Link>
-            </div>
-          </div>
+          {(myStaffForm.position.toLowerCase().includes('places') ||
+            myStaffForm.position.toLowerCase().includes('general')) && (
+            <Link className="v_nav_items block" href="/team/places/1">
+              <i className="bi bi-globe-americas mr-3"></i>
+              Places
+            </Link>
+          )}
 
-          <Link className="v_nav_items py-2 block" href="/team/policy">
-            <i className="bi bi-globe-americas mr-3"></i>
-            Policy
-          </Link>
+          {(myStaffForm.position.toLowerCase().includes('policy') ||
+            myStaffForm.position.toLowerCase().includes('general')) && (
+            <Link className="v_nav_items py-2 block" href="/team/policy">
+              <i className="bi bi-globe-americas mr-3"></i>
+              Policy
+            </Link>
+          )}
 
-          <Link className="v_nav_items py-2 block" href="/team/news">
-            <i className="bi bi-people mr-3"></i>
-            News
-          </Link>
+          {(myStaffForm.position.toLowerCase().includes('news') ||
+            myStaffForm.position.toLowerCase().includes('general')) && (
+            <Link className="v_nav_items py-2 block" href="/team/news">
+              <i className="bi bi-people mr-3"></i>
+              News
+            </Link>
+          )}
 
-          <div className={`v_nav_items line`}>
-            <div className="flex cursor-pointer items-center py-2">
-              <i className="bi bi-trophy mr-3"></i>
-              Competitions
+          {(myStaffForm.position.toLowerCase().includes('competitions') ||
+            myStaffForm.position.toLowerCase().includes('general')) && (
+            <div className={`v_nav_items line`}>
+              <div className="flex cursor-pointer items-center py-2">
+                <i className="bi bi-trophy mr-3"></i>
+                Competitions
+              </div>
+              <div className="nav_dropdown">
+                <Link
+                  className="inner_nav_items"
+                  href="/team/competitions/weekends"
+                >
+                  Weekends
+                </Link>
+                <Link
+                  className="inner_nav_items"
+                  href="/team/competitions/leagues"
+                >
+                  Leagues
+                </Link>
+                <Link
+                  className="inner_nav_items"
+                  href="/team/competitions/exams"
+                >
+                  Exams
+                </Link>
+              </div>
             </div>
-            <div className="nav_dropdown">
-              <Link
-                className="inner_nav_items"
-                href="/team/competitions/weekends"
-              >
-                Weekends
-              </Link>
-              <Link
-                className="inner_nav_items"
-                href="/team/competitions/leagues"
-              >
-                Leagues
-              </Link>
-              <Link className="inner_nav_items" href="/team/competitions/exams">
-                Exams
-              </Link>
-            </div>
-          </div>
+          )}
 
-          <div className={`v_nav_items line`}>
-            <div className="flex cursor-pointer items-center py-2">
-              <i className="bi bi-envelope mr-3"></i>
-              Messages
+          {(myStaffForm.position.toLowerCase().includes('messages') ||
+            myStaffForm.position.toLowerCase().includes('general')) && (
+            <div className={`v_nav_items line`}>
+              <div className="flex cursor-pointer items-center py-2">
+                <i className="bi bi-envelope mr-3"></i>
+                Messages
+              </div>
+              <div className="nav_dropdown">
+                <Link className="inner_nav_items" href="/team/messages/emails">
+                  Emails
+                </Link>
+                <Link
+                  className="inner_nav_items"
+                  href="/team/messages/notifications"
+                >
+                  Notifications
+                </Link>
+                <Link className="inner_nav_items" href="/team/messages/sms">
+                  SMS
+                </Link>
+              </div>
             </div>
-            <div className="nav_dropdown">
-              <Link className="inner_nav_items" href="/team/messages/emails">
-                Emails
-              </Link>
-              <Link
-                className="inner_nav_items"
-                href="/team/messages/notifications"
-              >
-                Notifications
-              </Link>
-              <Link className="inner_nav_items" href="/team/messages/sms">
-                SMS
-              </Link>
-            </div>
-          </div>
+          )}
 
-          <div className={`v_nav_items line`}>
-            <div className="flex cursor-pointer items-center py-2">
-              <i className="bi bi-diagram-3 mr-3"></i>
-              Company
+          {myStaffForm.position.toLowerCase().includes('general') && (
+            <div className={`v_nav_items line`}>
+              <div className="flex cursor-pointer items-center py-2">
+                <i className="bi bi-diagram-3 mr-3"></i>
+                Company
+              </div>
+              <div className="nav_dropdown">
+                <Link className="inner_nav_items" href="/team/company/staffs">
+                  Staffs
+                </Link>
+                <Link
+                  className="inner_nav_items"
+                  href="/team/company/set-company"
+                >
+                  Set Company
+                </Link>
+                <Link className="inner_nav_items" href="/team/company/expenses">
+                  Expenses
+                </Link>
+              </div>
             </div>
-            <div className="nav_dropdown">
-              <Link className="inner_nav_items" href="/team/company/staffs">
-                Staffs
-              </Link>
-              <Link
-                className="inner_nav_items"
-                href="/team/company/set-company"
-              >
-                Set Company
-              </Link>
-              <Link className="inner_nav_items" href="/team/company/expenses">
-                Expenses
-              </Link>
-            </div>
-          </div>
+          )}
         </div>
         <ThemeToggle />
       </div>

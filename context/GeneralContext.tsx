@@ -114,6 +114,7 @@ export const GeneralProvider = ({ children }: GeneralProviderProps) => {
       const data = {
         ip,
         username: user?.username,
+        status: user?.status,
         bioUserId: user?.bioUserId,
         online,
         pathname,
