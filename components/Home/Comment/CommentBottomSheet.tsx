@@ -68,7 +68,6 @@ const CommentBottomSheet = () => {
           : activeComment.level >= 4
           ? 3
           : activeComment.level,
-      postType: 'comment',
       replyTo: activeComment.displayName,
       user: activeComment.displayName,
       sender: {
@@ -112,7 +111,7 @@ const CommentBottomSheet = () => {
 
     setText('')
     setFiles([])
-    postItem('/posts/comments', formData)
+    postItem('/comments', formData)
   }
 
   const uploadFile = async (e: React.ChangeEvent<HTMLInputElement>) => {

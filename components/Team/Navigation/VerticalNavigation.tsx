@@ -72,7 +72,7 @@ export default function VerticalNavigation() {
             </Link>
           )}
           <Link className="v_nav_items block" href="/team/profile">
-            <i className="bi bi-speedometer2 mr-3"></i>
+            <i className="bi bi-person mr-3"></i>
             Profile
           </Link>
 
@@ -146,7 +146,7 @@ export default function VerticalNavigation() {
           {(myStaffForm.position.toLowerCase().includes('news') ||
             myStaffForm.position.toLowerCase().includes('general')) && (
             <Link className="v_nav_items py-2 block" href="/team/news">
-              <i className="bi bi-people mr-3"></i>
+              <i className="bi bi-newspaper mr-3"></i>
               News
             </Link>
           )}

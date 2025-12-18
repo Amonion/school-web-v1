@@ -11,7 +11,7 @@ interface PostProps {
 
 const PostStat: React.FC<PostProps> = ({ post }) => {
   const { updatePost, loading } = PostStore()
-  const { setShowComment, getComments, setMainPost, comments, showComments } =
+  const { setShowComment, getComments, setMainPost, showComments } =
     CommentStore()
   const { setMessage } = MessageStore()
   const { user } = AuthStore()
@@ -93,11 +93,7 @@ const PostStat: React.FC<PostProps> = ({ post }) => {
 
   const handleShowComments = () => {
     setMainPost(post)
-    if (comments.length === 0) {
-      fetchComments()
-    } else if (comments.length > 0 && comments[0].postId !== post._id) {
-      fetchComments()
-    }
+    fetchComments()
     setShowComment(!showComments)
   }
 

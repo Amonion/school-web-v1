@@ -16,8 +16,15 @@ export interface Exam {
   name: string
   picture: string
   logo: string
+  bioUserUsername: string
   participants: number
+  comments: number
   subjects: string
+  country: string
+  state: string
+  area: string
+  priority: string
+  isPublished: boolean
   randomize: boolean
   simultaneous: boolean
   showResult: boolean
@@ -47,8 +54,15 @@ export const ExamEmpty = {
   name: '',
   picture: '',
   logo: '',
+  country: '',
+  state: '',
+  area: '',
+  bioUserUsername: '',
+  priority: '',
   participants: 0,
+  comments: 0,
   subjects: '',
+  isPublished: false,
   randomize: false,
   simultaneous: false,
   showResult: false,
@@ -73,15 +87,12 @@ interface FetchResponse {
 }
 
 interface ExamState {
-  links: { next: string | null; previous: string | null } | null
   count: number
   attempt: number
   page_size: number
   exams: Exam[]
   searchedExams: Exam[]
   loading: boolean
-  error: string | null
-  successs?: string | null
   selectedItems: Exam[]
   searchResult: Exam[]
   searchedExamResults: Exam[]
@@ -90,11 +101,11 @@ interface ExamState {
   formData: Exam
   setForm: (key: keyof Exam, value: Exam[keyof Exam]) => void
   resetForm: () => void
-  getItems: (
+  getExams: (
     url: string,
     setMessage: (message: string, isError: boolean) => void
   ) => Promise<void>
-  getItem: (
+  getExam: (
     url: string,
     setMessage: (message: string, isError: boolean) => void
   ) => Promise<void>
@@ -102,17 +113,16 @@ interface ExamState {
   setLoading?: (loading: boolean) => void
   massDelete: (
     url: string,
-    selectedItems: Exam[],
+    selectedItems: Record<string, unknown>,
     setMessage: (message: string, isError: boolean) => void
   ) => Promise<void>
-  deleteItem: (
+  deleteExam: (
     url: string,
-    setMessage: (message: string, isError: boolean) => void,
-    setLoading?: (loading: boolean) => void
+    setMessage: (message: string, isError: boolean) => void
   ) => Promise<void>
   updateItem: (
     url: string,
-    updatedItem: FormData,
+    updatedItem: Record<string, unknown>,
     setMessage: (message: string, isError: boolean) => void
   ) => Promise<void>
   postItem: (
@@ -131,7 +141,6 @@ interface ExamState {
 }
 
 const ExamStore = create<ExamState>((set) => ({
-  links: null,
   count: 0,
   attempt: 0,
   page_size: 20,
@@ -139,7 +148,6 @@ const ExamStore = create<ExamState>((set) => ({
   searchedExams: [],
   loading: false,
   hasMoreSearch: true,
-  error: null,
   selectedItems: [],
   searchResult: [],
   searchedExamResults: [],
@@ -184,7 +192,7 @@ const ExamStore = create<ExamState>((set) => ({
     }
   },
 
-  getItems: async (
+  getExams: async (
     url: string,
     setMessage: (message: string, isError: boolean) => void
   ) => {
@@ -206,7 +214,7 @@ const ExamStore = create<ExamState>((set) => ({
     }
   },
 
-  getItem: async (
+  getExam: async (
     url: string,
     setMessage: (message: string, isError: boolean) => void
   ) => {
@@ -292,24 +300,14 @@ const ExamStore = create<ExamState>((set) => ({
       }
     } catch (error: unknown) {
       if (error instanceof AxiosError && error.response?.data?.message) {
-        set({
-          error: error.message || 'Failed to search items',
-          loading: false,
-        })
+        set({ loading: false })
       } else {
-        set({
-          error: 'Failed to search items',
-          loading: false,
-        })
+        set({ loading: false })
       }
     }
   }, 1000),
 
-  massDelete: async (
-    url: string,
-    selectedItems: Exam[],
-    setMessage: (message: string, isError: boolean) => void
-  ) => {
+  massDelete: async (url, selectedItems, setMessage) => {
     set({
       loading: true,
     })
@@ -323,15 +321,10 @@ const ExamStore = create<ExamState>((set) => ({
     }
   },
 
-  deleteItem: async (
-    url: string,
-    setMessage: (message: string, isError: boolean) => void,
-    setLoading?: (loading: boolean) => void
-  ) => {
+  deleteExam: async (url, setMessage) => {
     const response = await apiRequest<FetchResponse>(url, {
       method: 'DELETE',
       setMessage,
-      setLoading,
     })
     const data = response?.data
     if (data) {
@@ -344,7 +337,7 @@ const ExamStore = create<ExamState>((set) => ({
     updatedItem: FormData | Record<string, unknown>,
     setMessage: (message: string, isError: boolean) => void
   ) => {
-    set({ loading: true, error: null })
+    set({ loading: true })
     const response = await apiRequest<FetchResponse>(url, {
       method: 'PATCH',
       body: updatedItem,
@@ -352,10 +345,10 @@ const ExamStore = create<ExamState>((set) => ({
       setLoading: ExamStore.getState().setLoading,
     })
     if (response?.status !== 404 && response?.data) {
-      set({ loading: false, error: null })
+      set({ loading: false })
       ExamStore.getState().setProcessedResults(response.data)
     } else {
-      set({ loading: false, error: null })
+      set({ loading: false })
     }
   },
 
@@ -364,7 +357,7 @@ const ExamStore = create<ExamState>((set) => ({
     updatedItem: FormData | Record<string, unknown>,
     setMessage: (message: string, isError: boolean) => void
   ) => {
-    set({ loading: true, error: null })
+    set({ loading: true })
     const response = await apiRequest<FetchResponse>(url, {
       method: 'POST',
       body: updatedItem,
@@ -372,10 +365,10 @@ const ExamStore = create<ExamState>((set) => ({
       setLoading: ExamStore.getState().setLoading,
     })
     if (response?.status !== 404 && response?.data) {
-      set({ loading: false, error: null })
+      set({ loading: false })
       ExamStore.getState().setProcessedResults(response.data)
     } else {
-      set({ loading: false, error: null })
+      set({ loading: false })
     }
   },
 

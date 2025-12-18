@@ -195,7 +195,7 @@ const EachComment: React.FC<EachCommentProps> = ({
   const toggleLike = (targetId: string, targetLevel: number) => {
     const isMongoId = /^[0-9a-fA-F]{24}$/.test(targetId)
     if (isMongoId) {
-      handleLike(true)
+      updateComment(`/comments/like`, { id: comment._id, userId: user?._id })
       CommentStore.setState((prev) => {
         const toggle = (
           commentsList: typeof prev.comments
@@ -246,7 +246,7 @@ const EachComment: React.FC<EachCommentProps> = ({
   const toggleHate = (targetId: string, targetLevel: number) => {
     const isMongoId = /^[0-9a-fA-F]{24}$/.test(targetId)
     if (isMongoId) {
-      handleLike(false)
+      updateComment(`/comments/hate`, { id: comment._id, userId: user?._id })
       CommentStore.setState((prev) => {
         const toggle = (
           commentsList: typeof prev.comments
@@ -264,7 +264,6 @@ const EachComment: React.FC<EachCommentProps> = ({
               let newLiked = isLiked
               let newLikes = comment.likes ?? 0
 
-              // 👇 If user is toggling hate ON and it was liked, remove like
               if (newHated && isLiked) {
                 newLiked = false
                 newLikes = newLikes - 1
@@ -279,7 +278,6 @@ const EachComment: React.FC<EachCommentProps> = ({
               }
             }
 
-            // recursive toggle for nested replies
             return {
               ...comment,
               comments: toggle(comment.comments),
@@ -321,13 +319,6 @@ const EachComment: React.FC<EachCommentProps> = ({
       return {
         comments: toggle(prev.comments),
       }
-    })
-  }
-
-  const handleLike = async (status: boolean) => {
-    updateComment(`/posts/${status ? 'like' : 'hate'}`, {
-      id: comment._id,
-      userId: user?._id,
     })
   }
 
