@@ -29,7 +29,7 @@ interface Test {
 
 const ExamStart = () => {
   const url = '/competitions/leagues/objectives/'
-  const { getItem, formData } = ExamStore()
+  const { getExam, formData } = ExamStore()
   const { user, bioUser, bioUserState } = AuthStore()
   const { setMessage } = MessageStore()
   const { getObjectives, count, objectiveResults, reshuffleResults } =
@@ -110,8 +110,8 @@ const ExamStart = () => {
   }
 
   const submitData = async () => {
-    const savedItems = localStorage.getItem('questions1')
-    const started = localStorage.getItem('started')
+    const savedItems = localStorage.getExam('questions1')
+    const started = localStorage.getExam('started')
     const startTime = started ? JSON.parse(started) : undefined
     const savedQuestions = savedItems ? JSON.parse(savedItems) : []
 
@@ -166,12 +166,12 @@ const ExamStart = () => {
   }
 
   const selectAnswer = (item: IOption, questionId: string) => {
-    const started = localStorage.getItem('started')
+    const started = localStorage.getExam('started')
     if (!started || started === null || started === 'null') {
       setMessage('Please click the play button to begin your test.', false)
       return
     }
-    const local = localStorage.getItem('questions1')
+    const local = localStorage.getExam('questions1')
     let storedQuestions1 = local ? JSON.parse(local) : []
 
     setQuestion((prevQuestions) => {
@@ -236,7 +236,7 @@ const ExamStart = () => {
   }
 
   const checkDuration = () => {
-    const time = localStorage.getItem('started')
+    const time = localStorage.getExam('started')
     const now = new Date().getTime()
     const remaining = time ? Math.floor((now - Number(time)) / 1000) : null
     if (duration > 0) {
@@ -266,7 +266,7 @@ const ExamStart = () => {
   useEffect(() => {
     const find = async () => {
       if (id && user) {
-        getItem(
+        getExam(
           `/competitions/exams/${id}?bioUserId=${user.bioUserId}`,
           setMessage
         )
@@ -294,7 +294,7 @@ const ExamStart = () => {
 
   useEffect(() => {
     const items = ObjectiveStore.getState().objectiveResults
-    const local = localStorage.getItem('questions1')
+    const local = localStorage.getExam('questions1')
     const localObjArr = local ? JSON.parse(local) : []
 
     const existingIds = new Set(localObjArr.map((item: Objective) => item._id))
