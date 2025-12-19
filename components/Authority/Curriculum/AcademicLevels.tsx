@@ -15,7 +15,7 @@ import CourseStore from '@/src/zustand/school/Courses'
 
 export default function AcademicLevels() {
   const {
-    formData,
+    academicForm,
     selectedItems,
     count,
     page_size,
@@ -45,15 +45,15 @@ export default function AcademicLevels() {
   const url = '/academic-levels/'
 
   useEffect(() => {
-    if (formData._id) {
+    if (academicForm._id) {
       setIsEditing(true)
       setBoxVisibility(true)
       reshuffleResults()
-      if (formData.inSchool) {
+      if (academicForm.inSchool) {
         setInSchool(true)
       }
     }
-  }, [formData])
+  }, [academicForm])
 
   useEffect(() => {
     if (officeForm.username) {
@@ -94,7 +94,7 @@ export default function AcademicLevels() {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target
-    setForm(name as keyof typeof formData, value)
+    setForm(name as keyof typeof academicForm, value)
   }
 
   const handleSubmit = () => {
@@ -107,19 +107,19 @@ export default function AcademicLevels() {
       },
       {
         name: 'country',
-        value: formData.country,
+        value: academicForm.country,
         rules: { blank: true, minLength: 3, maxLength: 1000 },
         field: 'Country field',
       },
       {
         name: 'countryFlag',
-        value: formData.countryFlag,
+        value: academicForm.countryFlag,
         rules: { blank: false },
         field: 'Country Flag field',
       },
       {
         name: 'level',
-        value: formData.level,
+        value: academicForm.level,
         rules: { blank: true, maxLength: 2 },
         field: 'Level field',
       },
@@ -131,49 +131,49 @@ export default function AcademicLevels() {
       },
       {
         name: 'levelName',
-        value: formData.levelName,
+        value: academicForm.levelName,
         rules: { blank: true, minLength: 3, maxLength: 1000 },
         field: 'Level name field',
       },
       {
         name: 'section',
-        value: formData.section,
+        value: academicForm.section,
         rules: { blank: false, maxLength: 1000 },
         field: 'Section name',
       },
       {
         name: 'subsection',
-        value: formData.subsection,
+        value: academicForm.subsection,
         rules: { blank: false, maxLength: 1000 },
         field: 'Subsection name',
       },
       {
         name: 'institution',
-        value: formData.institution,
+        value: academicForm.institution,
         rules: { blank: false, maxLength: 1000 },
         field: 'Institution name',
       },
       {
         name: 'maxLevel',
-        value: formData.maxLevel,
+        value: academicForm.maxLevel,
         rules: { blank: false, maxLength: 1000 },
         field: 'Max Level field',
       },
       {
         name: 'maxLevelName',
-        value: formData.maxLevelName,
+        value: academicForm.maxLevelName,
         rules: { blank: false, maxLength: 1000 },
         field: 'Max level name',
       },
       {
         name: 'certificate',
-        value: formData.certificate,
+        value: academicForm.certificate,
         rules: { blank: false, maxSize: 10 },
         field: 'Certificate file',
       },
       {
         name: 'certificateName',
-        value: formData.certificateName,
+        value: academicForm.certificateName,
         rules: { blank: false, maxLength: 1000 },
         field: 'Certificate name',
       },
@@ -200,7 +200,7 @@ export default function AcademicLevels() {
     const data = appendForm(inputsToValidate)
     if (isEditing) {
       updateItem(
-        `${url}${formData._id}?country=${officeForm.country}&page_size=${page_size}`,
+        `${url}${academicForm._id}?country=${officeForm.country}&page_size=${page_size}`,
         data,
         setMessage,
         () => setBoxVisibility(false)
@@ -387,7 +387,7 @@ export default function AcademicLevels() {
                   <input
                     className="form-input"
                     name="levelName"
-                    value={formData.levelName}
+                    value={academicForm.levelName}
                     onChange={handleInputChange}
                     type="text"
                     placeholder="Enter level name"
@@ -400,7 +400,7 @@ export default function AcademicLevels() {
                   <input
                     className="form-input"
                     name="level"
-                    value={formData.level}
+                    value={academicForm.level}
                     onChange={handleInputChange}
                     type="number"
                     placeholder="Enter level"
@@ -416,7 +416,7 @@ export default function AcademicLevels() {
                       <input
                         className="form-input"
                         name="institution"
-                        value={formData.institution}
+                        value={academicForm.institution}
                         onChange={handleInputChange}
                         type="text"
                         placeholder="Enter institution"
@@ -429,7 +429,7 @@ export default function AcademicLevels() {
                       <input
                         className="form-input"
                         name="maxLevel"
-                        value={formData.maxLevel}
+                        value={academicForm.maxLevel}
                         onChange={handleInputChange}
                         type="number"
                         placeholder="Enter max level"
@@ -442,7 +442,7 @@ export default function AcademicLevels() {
                       <input
                         className="form-input"
                         name="maxLevelName"
-                        value={formData.maxLevelName}
+                        value={academicForm.maxLevelName}
                         onChange={handleInputChange}
                         type="text"
                         placeholder="Enter max level name"
@@ -458,7 +458,7 @@ export default function AcademicLevels() {
                   <input
                     className="form-input"
                     name="certificateName"
-                    value={formData.certificateName}
+                    value={academicForm.certificateName}
                     onChange={handleInputChange}
                     type="text"
                     placeholder="Enter certificate name"
