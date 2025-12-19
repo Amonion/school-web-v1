@@ -1,8 +1,6 @@
 'use client'
 import { appendForm } from '@/lib/helpers'
 import { validateInputs } from '@/lib/validation'
-import { useState } from 'react'
-import Tiptap from '@/components/Team/Editor/TextEditor'
 import { MessageStore } from '@/src/zustand/notification/Message'
 import AcademicStore from '@/src/zustand/school/Academic'
 import { useParams } from 'next/navigation'
@@ -10,8 +8,6 @@ import { useParams } from 'next/navigation'
 const CreateAcademicLevel: React.FC = () => {
   const url = '/academic-levels/'
   const { page, country } = useParams()
-  const [inSchool, setInSchool] = useState(false)
-  const [content, setContent] = useState<string>('')
   const { setMessage } = MessageStore()
   const { academicForm, loading, showForm, setForm, updateItem, postItem } =
     AcademicStore()
@@ -36,12 +32,6 @@ const CreateAcademicLevel: React.FC = () => {
   const handleSubmit = async () => {
     const inputsToValidate = [
       {
-        name: 'description',
-        value: content,
-        rules: { blank: false, maxLength: 10000 },
-        field: 'Description field',
-      },
-      {
         name: 'country',
         value: academicForm.country,
         rules: { blank: true, minLength: 3, maxLength: 1000 },
@@ -61,7 +51,7 @@ const CreateAcademicLevel: React.FC = () => {
       },
       {
         name: 'inSchool',
-        value: inSchool,
+        value: academicForm.inSchool,
         rules: { blank: false },
         field: 'In School ',
       },
@@ -133,9 +123,11 @@ const CreateAcademicLevel: React.FC = () => {
     }
     const data = appendForm(inputsToValidate)
     if (academicForm._id) {
-      updateItem(`${url}${academicForm._id}${params}`, data, setMessage)
+      updateItem(`${url}${academicForm._id}${params}`, data, setMessage, () =>
+        showForm(false)
+      )
     } else {
-      await postItem(`${url}${params}`, data, setMessage)
+      await postItem(`${url}${params}`, data, setMessage, () => showForm(false))
     }
   }
 
@@ -183,7 +175,7 @@ const CreateAcademicLevel: React.FC = () => {
                 />
               </div>
 
-              {inSchool && (
+              {academicForm.inSchool && (
                 <>
                   <div className="flex flex-col">
                     <label className="label" htmlFor="">
@@ -267,12 +259,8 @@ const CreateAcademicLevel: React.FC = () => {
                 />
               </div>
             </div>
-            <Tiptap
-              value={content}
-              onChange={(content) => setContent(content)}
-            />
 
-            <div className="table-action flex flex-wrap">
+            <div className="table-action gap-3 flex flex-wrap">
               {loading ? (
                 <button className="custom_btn">
                   <i className="bi bi-opencollective loading"></i>
@@ -282,15 +270,19 @@ const CreateAcademicLevel: React.FC = () => {
                 <>
                   <div
                     onClick={() => {
-                      setInSchool((e) => !e)
+                      setForm('inSchool', !academicForm.inSchool)
                     }}
                     className="custom_btn line neutral"
                   >
                     <div
-                      className={`checkbox ${inSchool ? 'active' : ''}`}
-                      onClick={() => setInSchool((e) => !e)}
+                      className={`checkbox ${
+                        academicForm.inSchool ? 'active' : ''
+                      }`}
+                      onClick={() =>
+                        setForm('inSchool', !academicForm.inSchool)
+                      }
                     >
-                      {inSchool && (
+                      {academicForm.inSchool && (
                         <i className="bi bi-check text-white text-lg"></i>
                       )}
                     </div>
