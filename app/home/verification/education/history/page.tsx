@@ -7,7 +7,10 @@ import {
   PastSchool,
   PastSchoolEmpty,
 } from '@/src/zustand/user/BioUserSchoolInfo'
-import AcademicStore, { AcademicLevel } from '@/src/zustand/school/Academic'
+import AcademicStore, {
+  AcademicLevel,
+  AcademicLevelEmpty,
+} from '@/src/zustand/school/Academic'
 import { AuthStore } from '@/src/zustand/user/AuthStore'
 import { AlartStore, MessageStore } from '@/src/zustand/notification/Message'
 import CountryStore, { Country } from '@/src/zustand/place/CountryOrigin'
@@ -365,7 +368,7 @@ export default function History() {
       })
     }
 
-    AcademicStore.getState().resetForm()
+    AcademicStore.getState().resetForm(AcademicLevelEmpty)
     resetSchool()
     setIsAdvanced(false)
     setEditIndex(null)
