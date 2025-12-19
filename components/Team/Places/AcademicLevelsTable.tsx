@@ -5,61 +5,56 @@ import { useState, useEffect, useRef } from 'react'
 import { useParams, usePathname } from 'next/navigation'
 import React from 'react'
 import { MessageStore } from '@/src/zustand/notification/Message'
-import CountryStore, {
-  Country,
-  CountryEmpty,
-} from '@/src/zustand/place/CountryOrigin'
 import LinkedPagination from '../LinkedPagination'
 import CreateCountry from './CreateCountry'
+import AcademicStore, {
+  AcademicLevel,
+  AcademicLevelEmpty,
+} from '@/src/zustand/school/Academic'
 
-const Countries: React.FC = () => {
-  const url = '/places/countries'
+const AcademicLevelsTables: React.FC = () => {
+  const url = '/academic-levels'
   const {
-    countries,
-    isAllCountriesChecked,
-    loadingCountries,
+    isAllChecked,
+    selectedItems,
+    searchedLevels,
+    loading,
     count,
-    searchedCountries,
-    selectedCountries,
-    isCountryForm,
-    searchCountry,
-    // toggleActiveCountry,
-    toggleAllSelectedCountry,
-    toggleCheckedCountry,
-    // massDeleteCountries,
-    reshuffleResults,
-    showCountryForm,
+    academicResults,
+    isForm,
+    searchLevel,
+    getAcademics,
+    toggleAllSelected,
+    toggleChecked,
     resetForm,
-    getCountries,
-  } = CountryStore()
+    showForm,
+    reshuffleResults,
+  } = AcademicStore()
   const { page } = useParams()
   const [page_size] = useState(20)
-  const [sort] = useState('country')
+  const [sort] = useState('level')
   const { setMessage } = MessageStore()
   const pathname = usePathname()
   const inputRef = useRef<HTMLInputElement>(null)
+  const params = `?country=&page_size=${
+    page_size ? page_size : 1
+  }&page=${page}&ordering=${sort}`
 
   useEffect(() => {
     reshuffleResults()
   }, [pathname])
 
   useEffect(() => {
-    if (page && Number(page) > 0) {
-      const params = `?country=&page_size=${page_size}&page=${page}&sort=${sort}&field=country`
-      getCountries(`${url}${params}`, setMessage)
-    } else {
-      const params = `?country=&page_size=${page_size}&page=${1}&sort=${sort}&field=country`
-      getCountries(`${url}${params}`, setMessage)
-    }
+    getAcademics(`${url}${params}`, setMessage)
   }, [page])
 
-  const selectCountry = (country: Country) => {
-    resetForm(country)
-    showCountryForm(true)
+  const selectLevel = (a: AcademicLevel) => {
+    resetForm(a)
+    showForm(true)
   }
 
   const DeleteItems = async () => {
-    if (selectedCountries.length === 0) {
+    if (selectedItems.length === 0) {
       setMessage('Please select at least one country to delete', false)
       return
     }
@@ -73,11 +68,11 @@ const Countries: React.FC = () => {
   const handleSearchCountry = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
     if (value.trim().length > 0) {
-      searchCountry(
+      searchLevel(
         `${url}/search?author=${value}&content=${value}&title=${value}&subtitle=${value}&page_size=${page_size}`
       )
     } else {
-      CountryStore.setState({ searchedCountries: [] })
+      AcademicStore.setState({ searchedLevels: [] })
     }
   }
 
@@ -85,7 +80,7 @@ const Countries: React.FC = () => {
     <>
       <div className="card_body sharp mb-5">
         <div className="text-lg text-[var(--text-secondary)]">
-          Table of Countries
+          Table of Levels
         </div>
         <div className="relative mb-2">
           <div className={`input_wrap ml-auto active `}>
@@ -94,27 +89,27 @@ const Countries: React.FC = () => {
               type="search"
               onChange={handleSearchCountry}
               className={`transparent-input flex-1 `}
-              placeholder="Search countries"
+              placeholder="Search levels"
             />
-            {loadingCountries ? (
+            {loading ? (
               <i className="bi bi-opencollective common-icon loading"></i>
             ) : (
               <i className="bi bi-search common-icon cursor-pointer"></i>
             )}
           </div>
 
-          {searchedCountries.length > 0 && (
+          {searchedLevels.length > 0 && (
             <div
               className={`dropdownList ${
-                searchedCountries.length > 0
+                searchedLevels.length > 0
                   ? 'overflow-auto'
                   : 'overflow-hidden h-0'
               }`}
             >
-              {searchedCountries.map((item, index) => (
+              {searchedLevels.map((item, index) => (
                 <div key={index} className="input_drop_list">
                   <Link
-                    href={`/school/students/student/${item.id}`}
+                    href={`/school/students/student/${item._id}`}
                     className="flex-1"
                   >
                     {item.country}
@@ -126,34 +121,31 @@ const Countries: React.FC = () => {
         </div>
       </div>
 
-      {countries.length > 0 ? (
+      {academicResults.length > 0 ? (
         <table>
           <thead className="bg-[var(--primary)]">
             <tr>
               <th>
                 <div className="flex items-center">
                   <div
-                    onClick={toggleAllSelectedCountry}
-                    className={`checkbox ${
-                      isAllCountriesChecked ? 'active' : ''
-                    }`}
+                    onClick={toggleAllSelected}
+                    className={`checkbox ${isAllChecked ? 'active' : ''}`}
                   >
-                    {isAllCountriesChecked && (
+                    {isAllChecked && (
                       <i className="bi bi-check text-white text-lg"></i>
                     )}
                   </div>
                   S/N
                 </div>
               </th>
-              <th>Flag</th>
-              <th>Country</th>
-              <th>Symbol</th>
-              <th>Currency</th>
-              <th>Code</th>
+              <th>Name</th>
+              <th>Certificate</th>
+              <th>Max Level</th>
+              <th>Level</th>
             </tr>
           </thead>
           <tbody>
-            {countries.map((item, index) => (
+            {academicResults.map((item, index) => (
               <tr
                 key={index}
                 className={`${index % 2 === 1 ? 'bg-[var(--primary)]' : ''}`}
@@ -162,7 +154,7 @@ const Countries: React.FC = () => {
                   <div className="flex items-center">
                     <div
                       className={`checkbox ${item.isChecked ? 'active' : ''}`}
-                      onClick={() => toggleCheckedCountry(index)}
+                      onClick={() => toggleChecked(index)}
                     >
                       {item.isChecked && (
                         <i className="bi bi-check text-white text-lg"></i>
@@ -172,39 +164,23 @@ const Countries: React.FC = () => {
                   </div>
                 </td>
                 <td>
-                  <Link href={`/team/places/states/${item.country}/1`}>
-                    {item.countryFlag ? (
-                      <Image
-                        alt={`email of ${item.countryFlag}`}
-                        src={String(item.countryFlag)}
-                        width={0}
-                        sizes="100vw"
-                        height={0}
-                        style={{ width: '40px', height: 'auto' }}
-                      />
-                    ) : (
-                      <span>N/A</span>
-                    )}
-                  </Link>
-                </td>
-                <td>
                   <div
-                    onClick={() => selectCountry(item)}
+                    onClick={() => selectLevel(item)}
                     className="cursor-pointer"
                   >
-                    {item.country}
+                    {item.levelName}
                   </div>
                 </td>
-                <td>{item.countrySymbol}</td>
-                <td>{item.currency}</td>
-                <td>{item.countryCode}</td>
+                <td>{item.certificateName}</td>
+                <td>{item.maxLevelName}</td>
+                <td>{item.level}</td>
               </tr>
             ))}
           </tbody>
         </table>
       ) : (
         <div className="relative flex justify-center">
-          <div className="not_found_text">No Country Found</div>
+          <div className="not_found_text">No Academic Level Found</div>
           <Image
             className="max-w-[300px]"
             alt={`no record`}
@@ -220,10 +196,10 @@ const Countries: React.FC = () => {
       <div className="card_body sharp my-3">
         <div className="flex flex-wrap items-center">
           <div className="grid mr-auto grid-cols-4 gap-2 w-[160px]">
-            <div onClick={toggleAllSelectedCountry} className="tableActions">
+            <div onClick={toggleAllSelected} className="tableActions">
               <i
                 className={`bi bi-check2-all ${
-                  isAllCountriesChecked ? 'text-[var(--custom)]' : ''
+                  isAllChecked ? 'text-[var(--custom)]' : ''
                 }`}
               ></i>
             </div>
@@ -233,7 +209,7 @@ const Countries: React.FC = () => {
             </div>
 
             <div
-              onClick={() => selectCountry(CountryEmpty)}
+              onClick={() => selectLevel(AcademicLevelEmpty)}
               className="tableActions"
             >
               <i className="bi bi-plus-circle"></i>
@@ -245,7 +221,7 @@ const Countries: React.FC = () => {
         </div>
       </div>
 
-      {isCountryForm && <CreateCountry />}
+      {isForm && <CreateCountry />}
 
       <div className="card_body sharp">
         <LinkedPagination url="/team/places" count={count} page_size={20} />
@@ -254,4 +230,4 @@ const Countries: React.FC = () => {
   )
 }
 
-export default Countries
+export default AcademicLevelsTables

@@ -11,6 +11,7 @@ import StateStore from '@/src/zustand/place/StateOrigin'
 import CountryStore from '@/src/zustand/place/CountryOrigin'
 import PictureDisplay from '@/components/Home/Media/PictureDisplay'
 import WeekendStore from '@/src/zustand/exam/Weekend'
+import CustomBtn from '@/components/CustomBtn'
 
 const CreateWeekend: React.FC = () => {
   const url = '/weekends'
@@ -515,10 +516,7 @@ const CreateWeekend: React.FC = () => {
 
         <div className="table-action flex flex-wrap">
           {loading ? (
-            <button className="custom_btn">
-              <i className="bi bi-opencollective loading"></i>
-              Processing...
-            </button>
+            <CustomBtn label="Processing..." loading={false} />
           ) : (
             <>
               <label htmlFor="picture" className="custom_btn mr-3">

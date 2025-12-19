@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import _debounce from 'lodash/debounce'
 import apiRequest from '@/lib/axios'
 
-export interface Document {
+export interface IDocument {
   _id: string
   picture: string | File | null
   name: string
@@ -21,7 +21,7 @@ export const DocumentEmpty = {
   picture: '',
   name: '',
   tempDoc: '',
-  required: 0,
+  required: false,
   description: '',
   country: '',
   countryFlag: '',
@@ -32,24 +32,23 @@ interface FetchResponse {
   message: string
   count: number
   page_size: number
-  results: Document[]
-  data: Document
+  results: IDocument[]
+  data: IDocument
 }
 
 interface DocumentState {
-  links: { next: string | null; previous: string | null } | null
   count: number
   page_size: number
-  documents: Document[]
+  documents: IDocument[]
   loading: boolean
-  error: string | null
-  successs?: string | null
-  selectedItems: Document[]
-  searchedPositions: Document[]
+  selectedItems: IDocument[]
+  searched: IDocument[]
   isAllChecked: boolean
-  formData: Document
-  setForm: (key: keyof Document, value: Document[keyof Document]) => void
-  resetForm: () => void
+  isForm: boolean
+  documentForm: IDocument
+  setForm: (key: keyof IDocument, value: IDocument[keyof IDocument]) => void
+  resetForm: (s: IDocument) => void
+  showForm: (s: boolean) => void
   getDocuments: (
     url: string,
     setMessage: (message: string, isError: boolean) => void
@@ -62,8 +61,7 @@ interface DocumentState {
   setLoading?: (loading: boolean) => void
   massDelete: (
     url: string,
-    refreshUrl: string,
-    selectedItems: Document[],
+    selectedItems: Record<string, unknown>,
     setMessage: (message: string, isError: boolean) => void
   ) => Promise<void>
   deleteItem: (
@@ -71,74 +69,54 @@ interface DocumentState {
     setMessage: (message: string, isError: boolean) => void,
     setLoading?: (loading: boolean) => void
   ) => Promise<void>
-
   updateItem: (
     url: string,
     updatedItem: FormData | Record<string, unknown>,
-    setMessage: (message: string, isError: boolean) => void
+    setMessage: (message: string, isError: boolean) => void,
+    redirect?: () => void
   ) => Promise<void>
   postItem: (
     url: string,
     updatedItem: FormData | Record<string, unknown>,
-    setMessage: (message: string, isError: boolean) => void
+    setMessage: (message: string, isError: boolean) => void,
+    redirect?: () => void
   ) => Promise<void>
   toggleChecked: (index: number) => void
   toggleActive: (index: number) => void
   toggleAllSelected: () => void
   reshuffleResults: () => void
-  searchPosition: (url: string) => void
+  searchDocument: (url: string) => void
 }
 
-const DocumentStore = create<DocumentState>((set, get) => ({
-  links: null,
+const DocumentStore = create<DocumentState>((set) => ({
   count: 0,
   page_size: 0,
   documents: [],
   loading: false,
-  error: null,
   selectedItems: [],
-  searchedPositions: [],
+  searched: [],
   isAllChecked: false,
-  formData: {
-    _id: '',
-    country: '',
-    countryFlag: '',
-    description: '',
-    placeId: '',
-    name: '',
-    tempDoc: '',
-    required: false,
-    picture: null,
-  },
+  isForm: false,
+  documentForm: DocumentEmpty,
   setForm: (key, value) =>
     set((state) => ({
-      formData: {
-        ...state.formData,
+      documentForm: {
+        ...state.documentForm,
         [key]: value,
       },
     })),
-  resetForm: () =>
-    set({
-      formData: {
-        _id: '',
-        country: '',
-        countryFlag: '',
-        description: '',
-        placeId: '',
-        name: '',
-        tempDoc: '',
-        picture: null,
-        required: false,
-      },
-    }),
 
+  resetForm: (DocumentEmpty) => set({ documentForm: DocumentEmpty }),
+  showForm: (loadState: boolean) => {
+    set({ isForm: loadState })
+  },
   setLoading: (loadState: boolean) => {
     set({ loading: loadState })
   },
 
   setProcessedResults: ({ count, page_size, results }: FetchResponse) => {
     if (results) {
-      const updatedResults = results.map((item: Document) => ({
+      const updatedResults = results.map((item: IDocument) => ({
         ...item,
         isChecked: false,
         isActive: false,
@@ -179,10 +157,9 @@ const DocumentStore = create<DocumentState>((set, get) => ({
         setLoading: DocumentStore.getState().setLoading,
       })
       const data = response?.data
-      console.log(data)
       if (data) {
         set({
-          formData: { ...DocumentStore.getState().formData, ...data.data },
+          documentForm: data.data,
           loading: false,
         })
       }
@@ -193,7 +170,7 @@ const DocumentStore = create<DocumentState>((set, get) => ({
 
   reshuffleResults: async () => {
     set((state) => ({
-      documents: state.documents.map((item: Document) => ({
+      documents: state.documents.map((item: IDocument) => ({
         ...item,
         isChecked: false,
         isActive: false,
@@ -201,46 +178,34 @@ const DocumentStore = create<DocumentState>((set, get) => ({
     }))
   },
 
-  searchPosition: _debounce(async (url: string) => {
+  searchDocument: _debounce(async (url: string) => {
     const response = await apiRequest<FetchResponse>(url)
 
     const results = response?.data.results
     if (results) {
-      const updatedResults = results.map((item: Document) => ({
+      const updatedResults = results.map((item: IDocument) => ({
         ...item,
         isChecked: false,
         isActive: false,
       }))
-      set({ searchedPositions: updatedResults })
+      set({ searched: updatedResults })
     }
   }, 1000),
 
-  massDelete: async (
-    url: string,
-    refreshUrl: string,
-    selectedItems: Document[],
-    setMessage: (message: string, isError: boolean) => void
-  ) => {
+  massDelete: async (url, selectedItems, setMessage) => {
     const response = await apiRequest<FetchResponse>(url, {
       method: 'DELETE',
       setMessage,
       body: selectedItems,
     })
     if (response) {
-      const getDocuments = get().getDocuments
-      getDocuments(refreshUrl, setMessage)
     }
   },
 
-  deleteItem: async (
-    url: string,
-    setMessage: (message: string, isError: boolean) => void,
-    setLoading?: (loading: boolean) => void
-  ) => {
+  deleteItem: async (url, setMessage) => {
     const response = await apiRequest<FetchResponse>(url, {
       method: 'DELETE',
       setMessage,
-      setLoading,
     })
     const data = response?.data
 
@@ -249,12 +214,8 @@ const DocumentStore = create<DocumentState>((set, get) => ({
     }
   },
 
-  updateItem: async (
-    url: string,
-    updatedItem: FormData | Record<string, unknown>,
-    setMessage: (message: string, isError: boolean) => void
-  ) => {
-    set({ loading: true, error: null })
+  updateItem: async (url, updatedItem, setMessage, redirect) => {
+    set({ loading: true })
     const response = await apiRequest<FetchResponse>(url, {
       method: 'PATCH',
       body: updatedItem,
@@ -264,14 +225,11 @@ const DocumentStore = create<DocumentState>((set, get) => ({
     if (response?.data) {
       DocumentStore.getState().setProcessedResults(response.data)
     }
+    if (redirect) redirect()
   },
 
-  postItem: async (
-    url: string,
-    updatedItem: FormData | Record<string, unknown>,
-    setMessage: (message: string, isError: boolean) => void
-  ) => {
-    set({ loading: true, error: null })
+  postItem: async (url, updatedItem, setMessage, redirect) => {
+    set({ loading: true })
     const response = await apiRequest<FetchResponse>(url, {
       method: 'POST',
       body: updatedItem,
@@ -281,6 +239,7 @@ const DocumentStore = create<DocumentState>((set, get) => ({
     if (response?.data) {
       DocumentStore.getState().setProcessedResults(response.data)
     }
+    if (redirect) redirect()
   },
 
   toggleActive: (index: number) => {

@@ -90,26 +90,25 @@ interface ActiveLevel {
 }
 
 interface AcademicState {
-  links: { next: string | null; previous: string | null } | null
   count: number
   page_size: number
   academicResults: AcademicLevel[]
   loading: boolean
-  error: string | null
-  successs?: string | null
   selectedItems: AcademicLevel[]
   activeLevel: ActiveLevel
-  searchedPositions: AcademicLevel[]
+  searchedLevels: AcademicLevel[]
   uniqueLevels: AcademicLevel[]
   isAllChecked: boolean
-  formData: AcademicLevel
+  isForm: boolean
+  academicForm: AcademicLevel
   allAcademics: boolean
   setForm: (
     key: keyof AcademicLevel,
     value: AcademicLevel[keyof AcademicLevel]
   ) => void
   setAll: () => void
-  resetForm: () => void
+  resetForm: (s: AcademicLevel) => void
+  showForm: (s: boolean) => void
   getAcademics: (
     url: string,
     setMessage: (message: string, isError: boolean) => void
@@ -148,22 +147,21 @@ interface AcademicState {
   setActiveLevel: (level: ActiveLevel) => void
   toggleAllSelected: () => void
   reshuffleResults: () => void
-  searchPosition: (url: string) => void
+  searchLevel: (url: string) => void
 }
 
 const AcademicStore = create<AcademicState>((set) => ({
-  links: null,
   count: 0,
   page_size: 20,
   academicResults: [],
   loading: false,
-  error: null,
   selectedItems: [],
-  searchedPositions: [],
+  searchedLevels: [],
   uniqueLevels: [],
   isAllChecked: false,
+  isForm: false,
   allAcademics: false,
-  formData: AcademicLevelEmpty,
+  academicForm: AcademicLevelEmpty,
   activeLevel: {
     level: 0,
     levelName: '',
@@ -173,14 +171,18 @@ const AcademicStore = create<AcademicState>((set) => ({
   },
   setForm: (key, value) =>
     set((state) => ({
-      formData: {
-        ...state.formData,
+      academicForm: {
+        ...state.academicForm,
         [key]: value,
       },
     })),
-  resetForm: () =>
+  resetForm: (s) =>
     set({
-      formData: AcademicLevelEmpty,
+      academicForm: s,
+    }),
+  showForm: (s) =>
+    set({
+      isForm: s,
     }),
 
   setAll: () => {
@@ -255,7 +257,7 @@ const AcademicStore = create<AcademicState>((set) => ({
       const data = response?.data
       if (data) {
         set({
-          formData: { ...AcademicStore.getState().formData, ...data },
+          academicForm: data.data,
           loading: false,
         })
       }
@@ -267,7 +269,7 @@ const AcademicStore = create<AcademicState>((set) => ({
 
   reshuffleResults: async () => {
     set((state) => ({
-      activeLevel: state.formData,
+      activeLevel: state.academicForm,
       academicResults: state.academicResults.map((item: AcademicLevel) => ({
         ...item,
         isChecked: false,
@@ -276,7 +278,7 @@ const AcademicStore = create<AcademicState>((set) => ({
     }))
   },
 
-  searchPosition: _debounce(async (url: string) => {
+  searchLevel: _debounce(async (url: string) => {
     const response = await apiRequest<FetchResponse>(url)
 
     const results = response?.data.results
@@ -286,7 +288,7 @@ const AcademicStore = create<AcademicState>((set) => ({
         isChecked: false,
         isActive: false,
       }))
-      set({ searchedPositions: updatedResults })
+      set({ searchedLevels: updatedResults })
     }
   }, 1000),
 
@@ -321,7 +323,7 @@ const AcademicStore = create<AcademicState>((set) => ({
   },
 
   updateItem: async (url, updatedItem, setMessage, runFucntion) => {
-    set({ loading: true, error: null })
+    set({ loading: true })
     const response = await apiRequest<FetchResponse>(url, {
       method: 'PATCH',
       body: updatedItem,
@@ -335,7 +337,7 @@ const AcademicStore = create<AcademicState>((set) => ({
   },
 
   postItem: async (url, updatedItem, setMessage, runFucntion) => {
-    set({ loading: true, error: null })
+    set({ loading: true })
     const response = await apiRequest<FetchResponse>(url, {
       method: 'POST',
       body: updatedItem,
