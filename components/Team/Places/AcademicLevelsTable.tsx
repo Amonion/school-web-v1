@@ -6,11 +6,11 @@ import { useParams, usePathname } from 'next/navigation'
 import React from 'react'
 import { MessageStore } from '@/src/zustand/notification/Message'
 import LinkedPagination from '../LinkedPagination'
-import CreateCountry from './CreateCountry'
 import AcademicStore, {
   AcademicLevel,
   AcademicLevelEmpty,
 } from '@/src/zustand/school/Academic'
+import CreateAcademicLevel from './CreateAcademicLevel'
 
 const AcademicLevelsTables: React.FC = () => {
   const url = '/academic-levels'
@@ -30,15 +30,15 @@ const AcademicLevelsTables: React.FC = () => {
     showForm,
     reshuffleResults,
   } = AcademicStore()
-  const { page } = useParams()
+  const { page, country } = useParams()
   const [page_size] = useState(20)
   const [sort] = useState('level')
   const { setMessage } = MessageStore()
   const pathname = usePathname()
   const inputRef = useRef<HTMLInputElement>(null)
-  const params = `?country=&page_size=${
-    page_size ? page_size : 1
-  }&page=${page}&ordering=${sort}`
+  const params = `?country=${country}&page_size=${page_size}&page=${
+    page ? page : 1
+  }&ordering=${sort}`
 
   useEffect(() => {
     reshuffleResults()
@@ -221,7 +221,7 @@ const AcademicLevelsTables: React.FC = () => {
         </div>
       </div>
 
-      {isForm && <CreateCountry />}
+      {isForm && <CreateAcademicLevel />}
 
       <div className="card_body sharp">
         <LinkedPagination url="/team/places" count={count} page_size={20} />
