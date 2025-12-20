@@ -1,4 +1,5 @@
 'use client'
+import TracePostMediaDisplay from '@/components/Home/Trace/PostResources/TracePostMediaDisplay'
 import { AccountStore } from '@/src/zustand/Trace/Account'
 import { PeopleStore } from '@/src/zustand/Trace/People'
 import { PostStore } from '@/src/zustand/Trace/TracePosts'
@@ -30,9 +31,10 @@ const TraceLayout = ({ children }: { children: React.ReactNode }) => {
   }, [user])
   return (
     <>
-      <div className="flex flex-col items-center w-full overflow-auto">
+      <div className="flex flex-col relative items-center w-full overflow-auto">
         {children}
       </div>
+      <TracePostMediaDisplay />
     </>
   )
 }

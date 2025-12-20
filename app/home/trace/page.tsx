@@ -1,9 +1,9 @@
 'use client'
 import { useEffect, useRef } from 'react'
 import EmptySearch from '@/components/Home/Trace/EmptySearch'
-import PostCard from '@/components/Home/Posts/PostCard'
 import { PostStore } from '@/src/zustand/Trace/TracePosts'
 import SearchedPostCard from '@/components/Home/Posts/SearchedPosts'
+import TracePostCard from '@/components/Home/Trace/PostResources/TracePostCard'
 
 export default function SearchedPostList() {
   const lastCardRef = useRef<HTMLDivElement | null>(null)
@@ -41,7 +41,7 @@ export default function SearchedPostList() {
       {postResults.length === 0 && <EmptySearch />}
 
       {postResults.map((post, index) => (
-        <PostCard
+        <TracePostCard
           post={post}
           key={index}
           lastRef={index === postResults.length - 1 ? lastCardRef : undefined}

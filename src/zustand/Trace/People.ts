@@ -5,8 +5,7 @@ import {
   BioUserSchoolInfo,
   BioUserSchoolInfoEmpty,
 } from '../user/BioUserSchoolInfo'
-import { addRecordsToDB, getRecordsFromDB } from '@/lib/indexDB'
-import { isEqual } from 'lodash'
+import { addRecordsToDB, clearTable, getRecordsFromDB } from '@/lib/indexDB'
 
 interface FetchResponse {
   count: number
@@ -82,40 +81,24 @@ export const PeopleStore = create<PeopleState>((set, get) => ({
       const response = await apiRequest<FetchResponse>(url)
       const data = response?.data
       if (data) {
+        clearTable('people')
         const fetchedPeople = data.results
         const savedPeople = PeopleStore.getState().people
         const first20Fetched = fetchedPeople.slice(0, 20)
-        const missingPeople = first20Fetched.filter(
-          (apiUser: BioUserSchoolInfo) =>
-            !savedPeople.some((local) => local._id === apiUser._id)
-        )
-
-        let updatedSavedPeople = savedPeople
-
-        if (missingPeople.length > 0) {
-          updatedSavedPeople = [...savedPeople, ...missingPeople]
-          set({ people: updatedSavedPeople })
-        }
-
-        if (savedPeople.length > 0) {
-          const toUpsert = fetchedPeople.filter(
-            (apiItem: BioUserSchoolInfo) => {
-              const existing = savedPeople.find(
-                (localItem) => localItem._id === apiItem._id
-              )
-              return !existing || !isEqual(existing, apiItem)
-            }
-          )
-
-          if (toUpsert.length > 0) {
-            await addRecordsToDB<BioUserSchoolInfo>('people', toUpsert)
-          } else {
-            console.log('No new people to upsert.')
-          }
+        const last20Fetched = fetchedPeople.slice(20, 40)
+        if (savedPeople.length === 0) {
+          set({ people: first20Fetched })
         } else {
-          await addRecordsToDB<BioUserSchoolInfo>('people', fetchedPeople)
-          set({ people: fetchedPeople })
+          const mergedPeople = [...savedPeople, ...first20Fetched]
+
+          const uniquePeople = Array.from(
+            new Map(
+              mergedPeople.map((person) => [person.bioUserUsername, person])
+            ).values()
+          )
+          set({ people: uniquePeople })
         }
+        await addRecordsToDB<BioUserSchoolInfo>('people', last20Fetched)
       }
     } catch (error: unknown) {
       console.log(error)

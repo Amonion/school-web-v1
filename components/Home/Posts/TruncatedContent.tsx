@@ -1,6 +1,8 @@
+'use client'
+
 import { Post, PostStore } from '@/src/zustand/post/Post'
 import { useRouter } from 'next/navigation'
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 
 interface Props {
   content: string
@@ -12,33 +14,36 @@ const TruncatedContent: React.FC<Props> = ({ content, post, limit = 300 }) => {
   const [showFull, setShowFull] = useState(false)
   const router = useRouter()
 
-  const plainText = content.replace(/<[^>]+>/g, '')
+  // Remove HTML tags safely
+  const plainText = useMemo(() => content.replace(/<[^>]+>/g, ''), [content])
+
   const isLong = plainText.length > limit
 
-  const toggleContent = () => setShowFull((prev) => !prev)
+  const displayedText =
+    showFull || !isLong ? plainText : plainText.slice(0, limit) + '…'
 
-  const htmlToDisplay =
-    showFull || !isLong ? content : content.substring(0, 2000) + '...'
-
-  const moveToPost = (id: string) => {
+  const moveToPost = () => {
     PostStore.setState({ postForm: post })
-    router.push(`/home/posts/${id}`)
+    router.push(`/home/posts/${post._id}`)
   }
-  return (
-    <div
-      onClick={(e) => {
-        e.stopPropagation()
-      }}
-    >
-      <div
-        onClick={() => moveToPost(post._id)}
-        dangerouslySetInnerHTML={{
-          __html: htmlToDisplay,
-        }}
-      />
 
+  return (
+    <div>
+      {/* Content */}
+      <div onClick={moveToPost} className="cursor-pointer">
+        {displayedText}
+      </div>
+
+      {/* Toggle button */}
       {isLong && (
-        <button onClick={toggleContent} className="text-[var(--custom)]">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation() // 🔥 stops navigation
+            setShowFull((prev) => !prev)
+          }}
+          className="text-[var(--custom)] text-sm mt-1"
+        >
           {showFull ? 'Show less' : 'Show more'}
         </button>
       )}
