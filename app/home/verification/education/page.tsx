@@ -247,7 +247,6 @@ export default function Current() {
     setMaxLevel(() => [...maxLevels])
     setBioUserSchoolInfoForm('schoolGradingName', item.maxLevelName)
     setBioUserSchoolInfoForm('schoolLevelName', item.maxLevelName)
-    setBioUserSchoolInfoForm('schoolYear', `${item.maxLevelName} ${index + 1}`)
     if (
       !item.levelName.includes('Primary') &&
       !item.levelName.includes('Secondary')
@@ -380,7 +379,7 @@ export default function Current() {
           {
             name: 'schoolCountry',
             value: bioUserSchoolForm.schoolCountry,
-            rules: { blank: false, minLength: 3, maxLength: 100 },
+            rules: { blank: true, minLength: 3, maxLength: 100 },
             field: 'Country',
           },
           {
@@ -398,13 +397,13 @@ export default function Current() {
           {
             name: 'schoolState',
             value: bioUserSchoolForm.schoolState,
-            rules: { blank: false, minLength: 2, maxLength: 100 },
+            rules: { blank: true, minLength: 2, maxLength: 100 },
             field: 'State',
           },
           {
             name: 'schoolArea',
             value: bioUserSchoolForm.schoolArea,
-            rules: { blank: false, minLength: 2, maxLength: 100 },
+            rules: { blank: true, minLength: 2, maxLength: 100 },
             field: 'Area',
           },
           {
@@ -422,37 +421,41 @@ export default function Current() {
           {
             name: 'schoolPicture',
             value: bioUserSchoolForm.schoolPicture,
-            rules: { blank: true, minLength: 2, maxLength: 100 },
+            rules: { blank: false, minLength: 2, maxLength: 100 },
             field: 'School picture',
           },
           {
             name: 'schoolLogo',
             value: bioUserSchoolForm.schoolLogo,
-            rules: { blank: true, minLength: 2, maxLength: 100 },
+            rules: { blank: false, minLength: 2, maxLength: 100 },
             field: 'School logo',
           },
           {
             name: 'schoolId',
             value: bioUserSchoolForm.schoolId,
-            rules: { blank: true, minLength: 2, maxLength: 100 },
+            rules: { blank: false, minLength: 2, maxLength: 100 },
             field: 'School id',
           },
           {
             name: 'schoolDepartment',
             value: bioUserSchoolForm.schoolDepartment,
-            rules: { blank: true, minLength: 2, maxLength: 100 },
+            rules: {
+              blank: bioUserSchoolForm.isAdvanced ? true : false,
+              minLength: 2,
+              maxLength: 100,
+            },
             field: 'School department',
           },
           {
             name: 'schoolDepartmentUsername',
             value: bioUserSchoolForm.schoolDepartmentUsername,
-            rules: { blank: true, minLength: 2, maxLength: 100 },
+            rules: { blank: false, minLength: 2, maxLength: 100 },
             field: 'School department username',
           },
           {
             name: 'schoolDepartmentId',
             value: bioUserSchoolForm.schoolDepartmentId,
-            rules: { blank: true, minLength: 2, maxLength: 100 },
+            rules: { blank: false, minLength: 2, maxLength: 100 },
             field: 'School department id',
           },
           {
@@ -953,16 +956,16 @@ export default function Current() {
                   <div
                     key={index}
                     className={`radio m-1 ${
-                      bioUserSchoolForm.schoolYear.includes(String(index))
+                      bioUserSchoolForm.schoolYear.includes(String(index + 1))
                         ? 'text-[var(--custom)]'
                         : ''
                     }`}
                     onClick={() => selectMaxLevel(item.level + 1)}
                   >
                     <div className="radio_circle">
-                      {bioUserSchoolForm.schoolYear.includes(String(index)) && (
-                        <div className="radio_dot"></div>
-                      )}
+                      {bioUserSchoolForm.schoolYear.includes(
+                        String(index + 1)
+                      ) && <div className="radio_dot"></div>}
                     </div>
                     {activeLevel.maxLevelName} {item.level + 1}
                   </div>
