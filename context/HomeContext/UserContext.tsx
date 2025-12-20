@@ -2,6 +2,7 @@
 import { playPopSound } from '@/lib/sound'
 import useSocket from '@/src/useSocket'
 import { Staff } from '@/src/zustand/app/Staff'
+import { MessageStore } from '@/src/zustand/notification/Message'
 import {
   SocialNotification,
   SocialNotificationStore,
@@ -10,7 +11,7 @@ import { AuthStore } from '@/src/zustand/user/AuthStore'
 import { BioUser } from '@/src/zustand/user/BioUser'
 import { BioUserSchoolInfo } from '@/src/zustand/user/BioUserSchoolInfo'
 import { BioUserState } from '@/src/zustand/user/BioUserState'
-import { User } from '@/src/zustand/user/User'
+import { User, UserStore } from '@/src/zustand/user/User'
 import { createContext, useEffect, useContext, ReactNode, useMemo } from 'react'
 
 const UserContext = createContext<{
@@ -36,6 +37,8 @@ interface NotificationData {
 export const UserProvider = ({ children }: UserProviderProps) => {
   const socket = useSocket()
   const { user, bioUser } = AuthStore()
+  const { getUserDetails } = UserStore()
+  const { setMessage } = MessageStore()
 
   useEffect(() => {
     if (!user || !socket) return
@@ -68,17 +71,9 @@ export const UserProvider = ({ children }: UserProviderProps) => {
       if (data.bioUserState) {
         AuthStore.getState().setBioUserState(data.bioUserState)
       }
-      if (data.bioUser) {
-        AuthStore.getState().setBioUser(data.bioUser)
-      }
-      if (data.user) {
-        AuthStore.getState().setUser(data.user)
-      }
+
       if (data.staff) {
         AuthStore.getState().setStaff(data.staff)
-      }
-      if (data.bioUserSchoolInfo) {
-        AuthStore.getState().setBioUserSchoolInfo(data.bioUserSchoolInfo)
       }
     })
 
@@ -86,6 +81,11 @@ export const UserProvider = ({ children }: UserProviderProps) => {
       socket?.off(`update_state_${bioUser._id}`)
     }
   }, [socket, bioUser?._id])
+
+  useEffect(() => {
+    if (!user) return
+    getUserDetails(`/users/details/${user.bioUserId}`, setMessage)
+  }, [user?._id])
 
   const value = useMemo(() => ({ socket }), [socket])
 

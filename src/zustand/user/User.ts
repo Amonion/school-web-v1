@@ -2,6 +2,10 @@ import { create } from 'zustand'
 import _debounce from 'lodash/debounce'
 import apiRequest from '@/lib/axios'
 import { AuthStore } from './AuthStore'
+import { Staff } from '../app/Staff'
+import { BioUser } from './BioUser'
+import { BioUserState } from './BioUserState'
+import { BioUserSchoolInfo } from './BioUserSchoolInfo'
 
 interface FetchUser {
   count: number
@@ -19,6 +23,11 @@ interface FetchUserResponse {
   page_size: number
   results: User[]
   data: User
+  user: User
+  staff: Staff
+  bioUser: BioUser
+  bioUserState: BioUserState
+  bioUserSchoolInfo: BioUserSchoolInfo
 }
 
 interface UserState {
@@ -67,6 +76,10 @@ interface UserState {
   updateUser: (
     url: string,
     updatedItem: FormData | Record<string, unknown>,
+    setMessage: (message: string, isError: boolean) => void
+  ) => Promise<void>
+  getUserDetails: (
+    url: string,
     setMessage: (message: string, isError: boolean) => void
   ) => Promise<void>
   updateUsers: (
@@ -165,6 +178,7 @@ export const UserStore = create<UserState>((set) => ({
       if (error) return
     }
   },
+
   getMyUser: async (
     url: string,
     setMessage: (message: string, isError: boolean) => void
@@ -191,6 +205,32 @@ export const UserStore = create<UserState>((set) => ({
       const data = response?.data
       if (data) {
         UserStore.getState().setProcessedResults(data)
+      }
+    } catch (error: unknown) {
+      console.log(error)
+    }
+  },
+
+  getUserDetails: async (
+    url: string,
+    setMessage: (message: string, isError: boolean) => void
+  ) => {
+    try {
+      const response = await apiRequest<FetchUserResponse>(url, { setMessage })
+      const data = response?.data
+      if (data) {
+        if (data.bioUser) {
+          AuthStore.getState().setBioUser(data.bioUser)
+        }
+        // if (data.user) {
+        //   AuthStore.getState().setUser(data.user)
+        // }
+        if (data.staff) {
+          AuthStore.getState().setStaff(data.staff)
+        }
+        if (data.bioUserSchoolInfo) {
+          AuthStore.getState().setBioUserSchoolInfo(data.bioUserSchoolInfo)
+        }
       }
     } catch (error: unknown) {
       console.log(error)

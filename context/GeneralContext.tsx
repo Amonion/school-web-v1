@@ -2,19 +2,11 @@
 import { initializeSound } from '@/lib/sound'
 import useSocket from '@/src/useSocket'
 import { MessageStore } from '@/src/zustand/notification/Message'
-import SchoolStore from '@/src/zustand/school/School'
 import { AuthStore } from '@/src/zustand/user/AuthStore'
-import OfficeStore from '@/src/zustand/utility/Office'
+import { User } from '@/src/zustand/user/User'
 import axios from 'axios'
 import { usePathname } from 'next/navigation'
-import {
-  createContext,
-  useEffect,
-  useContext,
-  ReactNode,
-  useMemo,
-  useState,
-} from 'react'
+import { createContext, useEffect, useContext, ReactNode, useMemo } from 'react'
 
 const GeneralContext = createContext<{
   socket: ReturnType<typeof useSocket> | null
@@ -28,17 +20,29 @@ interface GeneralProviderProps {
 
 export const GeneralProvider = ({ children }: GeneralProviderProps) => {
   const socket = useSocket()
-  const { setIp, setBaseUrl, setMessage, baseURL } = MessageStore()
+  const { setIp, setBaseUrl, baseURL } = MessageStore()
   const { user } = AuthStore()
-  const { getSchoolNotifications } = SchoolStore()
-  const { officeForm } = OfficeStore()
   const pathname = usePathname()
-  const [userIp, setUserIp] = useState<string | null>(null)
+
+  const fetchIp = async () => {
+    try {
+      const response = await axios.get(`${baseURL}user-ip`)
+      const { ip } = response.data
+      setIp(ip)
+      localStorage.setItem('ip', ip)
+    } catch (error) {
+      console.error('Error fetching user location:', error)
+    }
+  }
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setUserIp(localStorage.getItem('ip'))
+    const savedIP = localStorage.getItem('ip')
+    if (savedIP) {
+      setIp(savedIP)
+    } else {
+      fetchIp()
     }
+
     initializeSound()
     const url =
       process.env.NODE_ENV === 'production'
@@ -48,18 +52,6 @@ export const GeneralProvider = ({ children }: GeneralProviderProps) => {
   }, [])
 
   useEffect(() => {
-    const getIp = async () => {
-      try {
-        const response = await axios.get(`${baseURL}user-ip`)
-        const { ip } = response.data
-        setIp(ip)
-        localStorage.setItem('ip', ip)
-        updateUserPresence(ip, true)
-      } catch (error) {
-        console.error('Error fetching user location:', error)
-      }
-    }
-
     const handleEnter = () => {
       if (baseURL) {
         const retrievedIp = localStorage.getItem('ip')
@@ -69,9 +61,9 @@ export const GeneralProvider = ({ children }: GeneralProviderProps) => {
           retrievedIp !== 'undefined' &&
           user
         ) {
-          updateUserPresence(retrievedIp, true)
+          updateUserPresence(retrievedIp, user, true)
         } else {
-          getIp()
+          fetchIp()
         }
       }
     }
@@ -81,9 +73,10 @@ export const GeneralProvider = ({ children }: GeneralProviderProps) => {
       if (
         retrievedIp !== null &&
         retrievedIp !== undefined &&
-        retrievedIp !== 'undefined'
+        retrievedIp !== 'undefined' &&
+        user
       ) {
-        updateUserPresence(retrievedIp, false)
+        updateUserPresence(retrievedIp, user, false)
       }
     }
 
@@ -102,29 +95,13 @@ export const GeneralProvider = ({ children }: GeneralProviderProps) => {
     }
   }, [baseURL, user?._id, socket])
 
-  useEffect(() => {
-    if (userIp && user) {
-      updateUserPresence(userIp, true)
-    }
-  }, [pathname, userIp, user?._id])
-
-  ///////////////GET SCHOOL NOTIFICATIONS///////////////
-  useEffect(() => {
-    if (!officeForm) return
-    if (!officeForm.username) return
-    getSchoolNotifications(
-      `/schools/notifications/?username=${officeForm.username}`,
-      setMessage
-    )
-  }, [officeForm])
-
-  const updateUserPresence = async (ip: string, online: boolean) => {
+  const updateUserPresence = async (ip: string, u: User, online: boolean) => {
     try {
       const data = {
         ip,
-        username: user?.username,
-        status: user?.status,
-        bioUserId: user?.bioUserId,
+        username: u.username,
+        status: u.status,
+        bioUserId: u.bioUserId,
         online,
         pathname,
         visitedAt: online ? new Date() : null,

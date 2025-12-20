@@ -32,13 +32,13 @@ export default function UserBio() {
     } else {
       setIsBioEdit(true)
     }
-  }, [bioUserState])
+  }, [bioUserState?.bioUserId])
 
   useEffect(() => {
     if (isBioEdit && bioUser) {
       setBioUser(bioUser)
     }
-  }, [isBioEdit, bioUser])
+  }, [isBioEdit, bioUser?._id])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value

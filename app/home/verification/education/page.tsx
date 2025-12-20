@@ -2,14 +2,12 @@
 import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
 import { appendForm } from '@/lib/helpers'
-import _debounce from 'lodash/debounce'
 import AcademicStore, { AcademicLevel } from '@/src/zustand/school/Academic'
 import { AuthStore } from '@/src/zustand/user/AuthStore'
 import { AlartStore, MessageStore } from '@/src/zustand/notification/Message'
 import { BioUserSchoolInfoStore } from '@/src/zustand/user/BioUserSchoolInfo'
 import SchoolStore, { School } from '@/src/zustand/school/School'
 import DepartmentStore, { Department } from '@/src/zustand/school/Department'
-import FacultyStore, { Faculty } from '@/src/zustand/school/Faculty'
 import CountryStore, { Country } from '@/src/zustand/place/CountryOrigin'
 import StateStore, { State } from '@/src/zustand/place/StateOrigin'
 import AreaStore from '@/src/zustand/place/AreaOrigin'
@@ -37,17 +35,13 @@ export default function Current() {
   const { states, getStates } = StateStore()
   const { area, getArea } = AreaStore()
   const { schoolResults, getSchools } = SchoolStore()
-  const { faculties, getFaculties } = FacultyStore()
   const { departments, getDepartments } = DepartmentStore()
   const { bioUser, bioUserSchoolInfo, bioUserState, user } = AuthStore()
   const { setMessage } = MessageStore()
   const url = '/biousers-school/'
-  // const [showInSchool, setShowInSchool] = useState(false)
   const [isDepartmentList, setDepartmentList] = useState(false)
-  const [isFacultyList, setFacultyList] = useState(false)
   const [isNew, setIsNew] = useState(false)
   const [isCurrentEdit, setCurrentEdit] = useState(true)
-  const [facultyName, setFacultyName] = useState('')
   const [isCountryList, setCountryList] = useState(false)
   const [isSchoolList, setSchoolList] = useState(false)
   const [maxLevels, setMaxLevel] = useState<MaxLevels[]>([])
@@ -87,7 +81,6 @@ export default function Current() {
         )
       }
     }
-    setFacultyList(false)
   }, [pathname])
 
   useEffect(() => {
@@ -164,61 +157,39 @@ export default function Current() {
     setCurrentEdit(false)
   }
 
-  const handleSearchDepartment = _debounce(
-    async (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value
-      if (!value) {
-        setDepartmentList(false)
-        return
-      }
-      setDepartmentList(true)
-      setDepartmentName(value)
+  const handleSearchDepartment = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const value = e.target.value
+    if (!value) {
+      setDepartmentList(false)
+      return
+    }
+    setDepartmentList(true)
+    setDepartmentName(value)
 
-      getDepartments(
-        `/departments/?name=${value}&schoolId=${bioUserSchoolForm.schoolId}`,
-        setMessage
-      )
-    },
-    1000
-  )
+    getDepartments(
+      `/departments/?name=${value}&schoolId=${bioUserSchoolForm.schoolId}`,
+      setMessage
+    )
+  }
 
-  const handleSearchFaculty = _debounce(
-    async (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value
-      if (!value) {
-        setFacultyList(false)
-        return
-      }
-      setFacultyList(true)
-      setFacultyName(value)
-      getFaculties(
-        `/faculties/?name=${value}&school=${bioUserSchoolForm.schoolName}`,
-        setMessage
-      )
-    },
-    1000
-  )
-
-  const handleSearchSchool = _debounce(
-    async (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value
-      if (!value) {
-        setSchoolList(false)
-        return
-      }
-      setSchoolName(value)
-      setSchoolList(true)
-      getSchools(
-        `/schools/?name=${value}&state=${bioUserSchoolForm.schoolState}`,
-        setMessage
-      )
-    },
-    1000
-  )
+  const handleSearchSchool = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    if (!value) {
+      setSchoolList(false)
+      return
+    }
+    setSchoolName(value)
+    setSchoolList(true)
+    getSchools(
+      `/schools/?name=${value}&state=${bioUserSchoolForm.schoolState}`,
+      setMessage
+    )
+  }
 
   const schoolNameChange = () => {
     setBioUserSchoolInfoForm('schoolFaculty', '')
-    setFacultyList(false)
     setBioUserSchoolInfoForm('schoolDepartment', '')
     setDepartmentList(false)
   }
@@ -235,7 +206,6 @@ export default function Current() {
       `/academic-levels/?inSchool=${bioUserSchoolForm.inSchool}&country=${country}`,
       setMessage
     )
-    setFacultyList(false)
   }
 
   const schoolStateChange = (state: string) => {
@@ -257,15 +227,6 @@ export default function Current() {
     setSchoolList(false)
   }
 
-  const setFaculty = () => {
-    setIsNew(true)
-    setBioUserSchoolInfoForm('schoolFaculty', facultyName)
-    setFacultyList(false)
-    if (inputRef.current) {
-      inputRef.current.value = ''
-    }
-  }
-
   const setDepartment = () => {
     setIsNew(true)
     setBioUserSchoolInfoForm('schoolDepartment', departmentName)
@@ -285,6 +246,7 @@ export default function Current() {
     }
     setMaxLevel(() => [...maxLevels])
     setBioUserSchoolInfoForm('schoolGradingName', item.maxLevelName)
+    setBioUserSchoolInfoForm('schoolLevelName', item.maxLevelName)
     setBioUserSchoolInfoForm('schoolYear', `${item.maxLevelName} ${index + 1}`)
     if (
       !item.levelName.includes('Primary') &&
@@ -307,7 +269,7 @@ export default function Current() {
 
     setBioUserSchoolInfoForm(
       'schoolYear',
-      `${activeLevel.maxLevelName} ${index + 1}`
+      `${activeLevel.maxLevelName} ${index}`
     )
   }
 
@@ -345,16 +307,6 @@ export default function Current() {
     if (school.name !== bioUserSchoolForm.schoolName) {
       schoolNameChange()
     }
-    if (inputRef.current) {
-      inputRef.current.value = ''
-    }
-  }
-
-  const selectFaculty = async (faculty: Faculty) => {
-    setBioUserSchoolInfoForm('schoolFacultyId', faculty._id)
-    setBioUserSchoolInfoForm('schoolFaculty', faculty.name)
-    setBioUserSchoolInfoForm('schoolFacultyUsername', faculty.username)
-    setFacultyList(false)
     if (inputRef.current) {
       inputRef.current.value = ''
     }
@@ -510,10 +462,10 @@ export default function Current() {
             field: 'Entry Date',
           },
           {
-            name: 'schoolLevelName',
-            value: bioUserSchoolForm.schoolLevelName,
+            name: 'schoolLevel',
+            value: bioUserSchoolForm.schoolLevel,
             rules: { blank: false, minLength: 2, maxLength: 10000 },
-            field: 'School academic level',
+            field: 'School level',
           },
           {
             name: 'action',
@@ -885,7 +837,6 @@ export default function Current() {
                     : 'Select Year'}
                   <i className="ml-auto bi bi-caret-down-fill"></i>
                 </div>
-                {/* {isAdmittedList && ( */}
                 <div className={`dropList ${isAdmittedList ? 'rel' : ''}`}>
                   {Array.from(
                     { length: new Date().getFullYear() - 1900 },
@@ -900,7 +851,6 @@ export default function Current() {
                     </div>
                   ))}
                 </div>
-                {/* )} */}
               </div>
               {!bioUserSchoolForm?.inSchool && (
                 <div className="relative">
@@ -944,50 +894,6 @@ export default function Current() {
               {bioUserSchoolForm.schoolLevelName !== '' &&
                 bioUserSchoolForm.schoolName !== '' && (
                   <>
-                    <div className="relative mb-10">
-                      <div className="text-[12px] text-[var(--custom)]">
-                        If your school have faculty, write it and click the
-                        search icon if it did not appear.
-                      </div>
-                      <div className={`input_wrap ml-auto active `}>
-                        <input
-                          ref={inputRef}
-                          type="search"
-                          onChange={handleSearchFaculty}
-                          className={`transparent-input flex-1 `}
-                          placeholder="Enter your faculty"
-                        />
-                        {faculties.length === 0 && (
-                          <i
-                            onClick={setFaculty}
-                            className="bi bi-search common-icon cursor-pointer"
-                          ></i>
-                        )}
-                      </div>
-                      {bioUserSchoolForm.schoolFaculty && (
-                        <div className="flex pb-1 my-2 border-b border-[var(--border-color)] xs:mx-[25px]">
-                          {bioUserSchoolForm.schoolFaculty}
-                        </div>
-                      )}
-                      {/* {isFacultyList && faculties.length > 0 && ( */}
-                      <div
-                        className={`dropList ${
-                          isFacultyList && faculties.length > 0 ? 'rel' : ''
-                        }`}
-                      >
-                        {faculties.map((item, index) => (
-                          <div
-                            onClick={() => selectFaculty(item)}
-                            key={index}
-                            className="input_drop_list"
-                          >
-                            {item.name}
-                          </div>
-                        ))}
-                      </div>
-                      {/* )} */}
-                    </div>
-
                     <div className="relative mb-10">
                       <div className="text-[12px] text-[var(--custom)]">
                         If you have department write it and click the search
@@ -1047,18 +953,16 @@ export default function Current() {
                   <div
                     key={index}
                     className={`radio m-1 ${
-                      item.isActive ||
                       bioUserSchoolForm.schoolYear.includes(String(index))
                         ? 'text-[var(--custom)]'
                         : ''
                     }`}
-                    onClick={() => selectMaxLevel(index)}
+                    onClick={() => selectMaxLevel(item.level + 1)}
                   >
                     <div className="radio_circle">
-                      {item.isActive ||
-                        (bioUserSchoolForm.schoolYear.includes(
-                          String(index)
-                        ) && <div className="radio_dot"></div>)}
+                      {bioUserSchoolForm.schoolYear.includes(String(index)) && (
+                        <div className="radio_dot"></div>
+                      )}
                     </div>
                     {activeLevel.maxLevelName} {item.level + 1}
                   </div>
