@@ -303,9 +303,6 @@ export default function Current() {
     setBioUserSchoolInfoForm('schoolLogo', String(school.logo))
     setSchoolList(false)
     setIsNew(false)
-    if (school.name !== bioUserSchoolForm.schoolName) {
-      schoolNameChange()
-    }
     if (inputRef.current) {
       inputRef.current.value = ''
     }
@@ -948,6 +945,7 @@ export default function Current() {
           )}
 
           {bioUserSchoolForm?.schoolLevelName !== '' &&
+            bioUserSchoolForm.schoolYear &&
             bioUserSchoolForm.schoolName !== '' &&
             bioUserSchoolForm.inSchool &&
             maxLevels.length > 0 && (
