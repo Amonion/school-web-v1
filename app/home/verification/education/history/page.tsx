@@ -18,7 +18,6 @@ import StateStore, { State } from '@/src/zustand/place/StateOrigin'
 import AreaStore from '@/src/zustand/place/AreaOrigin'
 import { Area } from '@/src/zustand/place/Area'
 import SchoolStore, { School } from '@/src/zustand/school/School'
-import FacultyStore, { Faculty } from '@/src/zustand/school/Faculty'
 import DepartmentStore, { Department } from '@/src/zustand/school/Department'
 import { validateInputs } from '@/lib/validation'
 import { appendForm } from '@/lib/helpers'
@@ -44,20 +43,17 @@ export default function History() {
   const [isEditingSchool, setEditingSchool] = useState(false)
   // const [isAdvanced, setIsAdvanced] = useState(false)
   const [isDepartmentList, setDepartmentList] = useState(false)
-  const [isFacultyList, setFacultyList] = useState(false)
   const { schoolResults, getSchools } = SchoolStore()
   const { countries, getCountries } = CountryStore()
   const { states, getStates } = StateStore()
   const { area, getArea } = AreaStore()
   const [isAdvanced, setIsAdvanced] = useState(false)
-  const { faculties, getFaculties } = FacultyStore()
   const { departments, getDepartments } = DepartmentStore()
   const [isCountryList, setCountryList] = useState(false)
   const [isStateList, setStateList] = useState(false)
   const [isAreaList, setIsAreaList] = useState(false)
   const [isSchoolList, setSchoolList] = useState(false)
   const [schoolName, setSchoolName] = useState('')
-  const [facultyName, setFacultyName] = useState('')
   const [departmentName, setDepartmentName] = useState('')
   const [isAdmittedList, setIsAdmittedList] = useState(false)
   const [isGraduatedList, setIsGraduatedList] = useState(false)
@@ -100,7 +96,6 @@ export default function History() {
 
   const schoolNameChange = () => {
     setBioUserPastSchoolForm('schoolFaculty', '')
-    setFacultyList(false)
     setBioUserPastSchoolForm('schoolDepartment', '')
     setDepartmentList(false)
   }
@@ -117,7 +112,6 @@ export default function History() {
       `/academic-levels/?inSchool=false&country=${country}`,
       setMessage
     )
-    setFacultyList(false)
   }
 
   const schoolStateChange = (state: string) => {
@@ -159,10 +153,6 @@ export default function History() {
     }
   }
 
-  const setFaculty = () => {
-    setBioUserPastSchoolForm('schoolFaculty', facultyName)
-  }
-
   const setDepartment = () => {
     setBioUserPastSchoolForm('schoolDepartment', departmentName)
   }
@@ -190,23 +180,6 @@ export default function History() {
       setSchoolList(true)
       getSchools(
         `/schools/?name=${value}&state=${bioUserPastSchoolForm.schoolState}`,
-        setMessage
-      )
-    },
-    1000
-  )
-
-  const handleSearchFaculty = _debounce(
-    async (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value
-      if (!value) {
-        setFacultyList(false)
-        return
-      }
-      setFacultyList(true)
-      setFacultyName(value)
-      getFaculties(
-        `/faculties/?name=${value}&school=${bioUserPastSchoolForm.schoolName}`,
         setMessage
       )
     },
@@ -414,13 +387,6 @@ export default function History() {
       setBioUserPastSchoolForm('isAdvanced', false)
     }
     toggleActive(index)
-  }
-
-  const selectFaculty = async (faculty: Faculty) => {
-    setBioUserPastSchoolForm('schoolFacultyId', faculty._id)
-    setBioUserPastSchoolForm('schoolFaculty', faculty.name)
-    setBioUserPastSchoolForm('schoolFacultyUsername', faculty.username)
-    setFacultyList(false)
   }
 
   const selectDepartment = async (department: Department) => {
@@ -909,48 +875,6 @@ export default function History() {
                       <>
                         <div className="relative mb-10">
                           <div className="text-[12px] text-[var(--custom)]">
-                            If your school have faculty, write it.
-                          </div>
-                          <div className={`input_wrap ml-auto active `}>
-                            <input
-                              type="search"
-                              onChange={handleSearchFaculty}
-                              className={`transparent-input flex-1 `}
-                              placeholder="Enter your faculty"
-                            />
-                            {faculties.length === 0 && (
-                              <i
-                                onClick={setFaculty}
-                                className="bi bi-search common-icon cursor-pointer"
-                              ></i>
-                            )}
-                          </div>
-                          {bioUserPastSchoolForm.schoolFaculty && (
-                            <div className="flex pb-1 my-2 border-b border-[var(--border-color)] xs:mx-[25px]">
-                              {bioUserPastSchoolForm.schoolFaculty}
-                            </div>
-                          )}
-                          {/* {isFacultyList && faculties.length > 0 && ( */}
-                          <div
-                            className={`dropList ${
-                              isFacultyList && faculties.length > 0 ? 'rel' : ''
-                            }`}
-                          >
-                            {faculties.map((item, index) => (
-                              <div
-                                onClick={() => selectFaculty(item)}
-                                key={index}
-                                className="input_drop_list"
-                              >
-                                {item.name}
-                              </div>
-                            ))}
-                          </div>
-                          {/* )} */}
-                        </div>
-
-                        <div className="relative mb-10">
-                          <div className="text-[12px] text-[var(--custom)]">
                             If you have department write it.
                           </div>
                           <div className={`input_wrap ml-auto active `}>
@@ -1036,47 +960,43 @@ export default function History() {
                     </div>
                     {/* )} */}
                   </div>
-                  {!bioUserSchoolForm.inSchool && (
-                    <div className="relative">
-                      <label
-                        className="label flex items-center w-full"
-                        htmlFor=""
-                      >
-                        Year of Graduation
-                      </label>
-                      <div
-                        onClick={() => {
-                          setIsGraduatedList(!isGraduatedList)
-                        }}
-                        className="form-input cursor-pointer"
-                      >
-                        {bioUserPastSchoolForm.graduatedAt
-                          ? new Date(
-                              bioUserPastSchoolForm.graduatedAt
-                            ).getFullYear()
-                          : 'Select Year'}
-                        <i className="ml-auto bi bi-caret-down-fill"></i>
-                      </div>
-                      {/* {isGraduatedList && ( */}
-                      <div
-                        className={`dropList ${isGraduatedList ? 'rel' : ''}`}
-                      >
-                        {Array.from(
-                          { length: 2025 - 1900 },
-                          (_, index) => new Date().getFullYear() - index
-                        ).map((year, index) => (
-                          <div
-                            onClick={() => selectGraduationYear(year)}
-                            key={index}
-                            className="input_drop_list"
-                          >
-                            {year}
-                          </div>
-                        ))}
-                      </div>
-                      {/* )} */}
+                  <div className="relative">
+                    <label
+                      className="label flex items-center w-full"
+                      htmlFor=""
+                    >
+                      Year of Graduation
+                    </label>
+                    <div
+                      onClick={() => {
+                        setIsGraduatedList(!isGraduatedList)
+                      }}
+                      className="form-input cursor-pointer"
+                    >
+                      {bioUserPastSchoolForm.graduatedAt
+                        ? new Date(
+                            bioUserPastSchoolForm.graduatedAt
+                          ).getFullYear()
+                        : 'Select Year'}
+                      <i className="ml-auto bi bi-caret-down-fill"></i>
                     </div>
-                  )}
+                    {/* {isGraduatedList && ( */}
+                    <div className={`dropList ${isGraduatedList ? 'rel' : ''}`}>
+                      {Array.from(
+                        { length: 2025 - 1900 },
+                        (_, index) => new Date().getFullYear() - index
+                      ).map((year, index) => (
+                        <div
+                          onClick={() => selectGraduationYear(year)}
+                          key={index}
+                          className="input_drop_list"
+                        >
+                          {year}
+                        </div>
+                      ))}
+                    </div>
+                    {/* )} */}
+                  </div>
                 </div>
               )}
 

@@ -24,16 +24,12 @@ export default function RootLayout({
         <Header />
         <div className="max-w-[1000px] w-full my-auto sm:pb-5">
           <div className="bg-[var(--white)] sm:rounded-[10px] min-h-[100vh] sm:min-h-[500px] sm:flex sm:mx-3 overflow-hidden">
-            <div className="sm:w-1/2 relative sm:min-h-[500px] sm:h-full h-[250px] sm:block bg-[var(--custom-color)]">
-              <Image
-                src="/images/auth.png"
-                alt="Media"
-                width={0}
-                height={0}
-                sizes="100vw"
-                className="w-full h-full object-cover absolute left-0 top-0"
-              />
-            </div>
+            <div
+              className="sm:w-1/2 relative bg-cover bg-center bg-no-repeat sm:min-h-[500px] sm:h-full h-[250px] sm:block bg-[var(--custom-color)]"
+              style={{
+                backgroundImage: `url('/images/auth.png')`,
+              }}
+            ></div>
             <div className="w-full sm:hidden flex justify-center -mt-5 z-20 relative">
               <div className="rounded-full bg-[var(--primary)] p-1 min-w-[60px] w-[60px] h-[60px] flex justify-center items-center">
                 <Image
