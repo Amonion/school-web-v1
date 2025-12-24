@@ -32,7 +32,7 @@ const ExamsTable: React.FC = () => {
     searchedExams,
     loading,
     searchExams,
-    getExams,
+    getExamTable,
     massDelete,
     deleteExam,
     toggleAllSelected,
@@ -58,7 +58,7 @@ const ExamsTable: React.FC = () => {
 
   useEffect(() => {
     reshuffleResults()
-    getExams(`${url}${params}`, setMessage)
+    getExamTable(`${url}${params}`)
   }, [page])
 
   const DeleteItems = async () => {

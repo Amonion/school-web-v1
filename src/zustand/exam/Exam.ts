@@ -268,6 +268,18 @@ const ExamStore = create<ExamState>((set) => ({
     }
   },
 
+  getExamTable: async (url) => {
+    try {
+      const response = await apiRequest<FetchResponse>(url)
+      const data = response?.data
+      if (data) {
+        ExamStore.getState().setProcessedResults(data)
+      }
+    } catch (error: unknown) {
+      console.error('Failed to fetch staff:', error)
+    }
+  },
+
   getMoreSavedExams: async () => {
     try {
       set({ loading: true })

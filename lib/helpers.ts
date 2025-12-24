@@ -544,7 +544,9 @@ export const formatRelativeDate = (dateInput: Date | string): string => {
   }
 }
 
-export const formatTimeTo12Hour = (dateInput: Date | null | number): string => {
+export const formatTimeTo12Hour = (
+  dateInput: Date | null | number | string
+): string => {
   if (dateInput) {
     const date = new Date(dateInput)
     let hours = date.getHours()
