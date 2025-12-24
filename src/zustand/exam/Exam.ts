@@ -127,6 +127,7 @@ interface ExamState {
   resetForm: () => void
   getSavedExams: () => Promise<void>
   getExams: (url: string) => Promise<void>
+  getExamTable: (url: string) => Promise<void>
   getExam: (
     url: string,
     setMessage: (message: string, isError: boolean) => void
