@@ -2,7 +2,7 @@ import { ChatContent } from '@/src/zustand/chat/Chat'
 import { openDB } from 'idb'
 
 const DB_NAME = 'chatDB'
-const DB_VERSION = 9
+const DB_VERSION = 10
 const MESSAGES_STORE = 'messages'
 const FRIENDS_STORE = 'friends'
 const MOMENTS_STORE = 'moments'
@@ -12,6 +12,7 @@ const TRACE_POSTS_STORE = 'trace_posts'
 const PEOPLE_STORE = 'people'
 const ACCOUNT_STORE = 'accounts'
 const GIVEAWAY_STORE = 'giveaway'
+const EXAM_STORE = 'exams'
 
 export const initDB = async () => {
   return openDB(DB_NAME, DB_VERSION, {
@@ -92,6 +93,12 @@ export const initDB = async () => {
           keyPath: '_id',
         })
         store.createIndex('username', 'username')
+        store.createIndex('createdAt', 'createdAt')
+      }
+      if (!db.objectStoreNames.contains(EXAM_STORE)) {
+        const store = db.createObjectStore(EXAM_STORE, {
+          keyPath: '_id',
+        })
         store.createIndex('createdAt', 'createdAt')
       }
     },
@@ -210,7 +217,7 @@ export const clearTable = async (tableName: string): Promise<void> => {
   await db.clear(tableName)
 }
 
-export const getRecordsFromDB = async <T>(
+export const getRecordsFromDB = async <T extends { createdAt: string }>(
   table: string,
   limit: number,
   page: number
@@ -219,10 +226,15 @@ export const getRecordsFromDB = async <T>(
 
   const allItems = await db.getAll(table)
 
+  // 🔥 SORT FIRST
+  const sorted = allItems.sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  )
+
   const start = (page - 1) * limit
   const end = start + limit
 
-  return allItems.slice(start, end) as T[]
+  return sorted.slice(start, end)
 }
 
 export const addRecordsToDB = async <T extends { _id: string }>(

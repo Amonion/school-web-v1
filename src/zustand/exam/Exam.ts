@@ -1,7 +1,29 @@
 import { create } from 'zustand'
 import apiRequest from '@/lib/axios'
 import _debounce from 'lodash/debounce'
-import axios, { AxiosError } from 'axios'
+import { AxiosError } from 'axios'
+import { addRecordsToDB, clearTable, initDB } from '@/lib/indexDB'
+
+export const getExamsFromDB = async <T>(
+  table: string,
+  limit: number,
+  page: number
+): Promise<T[]> => {
+  const db = await initDB()
+
+  const allItems = await db.getAll(table)
+
+  // 🔥 sort internally (assume createdAt exists)
+  const sorted = allItems.sort(
+    (a: Exam, b: Exam) =>
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  )
+
+  const start = (page - 1) * limit
+  const end = start + limit
+
+  return sorted.slice(start, end) as T[]
+}
 
 export interface Exam {
   _id: string
@@ -31,7 +53,7 @@ export interface Exam {
   isEditable?: boolean
   eligibility: boolean
   publishedAt: Date | null | number
-  createdAt: Date | null | number
+  createdAt: Date | number | string
   duration: number
   questions: number
   questionsPerPage: number
@@ -68,7 +90,7 @@ export const ExamEmpty = {
   showResult: false,
   eligibility: false,
   publishedAt: null,
-  createdAt: null,
+  createdAt: '',
   duration: 0,
   questions: 0,
   questionsPerPage: 0,
@@ -89,6 +111,7 @@ interface FetchResponse {
 interface ExamState {
   count: number
   attempt: number
+  currentPage: number
   page_size: number
   exams: Exam[]
   searchedExams: Exam[]
@@ -97,14 +120,13 @@ interface ExamState {
   searchResult: Exam[]
   searchedExamResults: Exam[]
   hasMoreSearch: boolean
+  hasMore: boolean
   isAllChecked: boolean
-  formData: Exam
+  examForm: Exam
   setForm: (key: keyof Exam, value: Exam[keyof Exam]) => void
   resetForm: () => void
-  getExams: (
-    url: string,
-    setMessage: (message: string, isError: boolean) => void
-  ) => Promise<void>
+  getSavedExams: () => Promise<void>
+  getExams: (url: string) => Promise<void>
   getExam: (
     url: string,
     setMessage: (message: string, isError: boolean) => void
@@ -137,32 +159,36 @@ interface ExamState {
   clearSearchedExams: () => void
   searchExams: (url: string) => void
   addMoreSearchItems: (url: string) => void
+  getMoreExams: (url: string) => void
+  getMoreSavedExams: () => void
   getQueryExams: (url: string) => void
 }
 
 const ExamStore = create<ExamState>((set) => ({
   count: 0,
   attempt: 0,
+  currentPage: 1,
   page_size: 20,
   exams: [],
   searchedExams: [],
   loading: false,
   hasMoreSearch: true,
+  hasMore: true,
   selectedItems: [],
   searchResult: [],
   searchedExamResults: [],
   isAllChecked: false,
-  formData: ExamEmpty,
+  examForm: ExamEmpty,
   setForm: (key, value) =>
     set((state) => ({
-      formData: {
-        ...state.formData,
+      examForm: {
+        ...state.examForm,
         [key]: value,
       },
     })),
   resetForm: () =>
     set({
-      formData: ExamEmpty,
+      examForm: ExamEmpty,
     }),
 
   setLoading: (loadState: boolean) => {
@@ -192,25 +218,98 @@ const ExamStore = create<ExamState>((set) => ({
     }
   },
 
-  getExams: async (
-    url: string,
-    setMessage: (message: string, isError: boolean) => void
-  ) => {
+  getSavedExams: async () => {
     try {
-      const response = await apiRequest<FetchResponse>(url, {
-        setLoading: ExamStore.getState().setLoading,
-      })
+      const response = await getExamsFromDB<Exam>('exams', 20, 1)
+      if (response) {
+        ExamStore.setState({ exams: response })
+      }
+      ExamStore.getState().getExams(
+        `/competitions/exams/?page_size=40&page=1&ordering=-createdAt`
+      )
+    } catch (error: unknown) {
+      console.error('Failed to fetch staff:', error)
+    }
+  },
+
+  getExams: async (url) => {
+    try {
+      const response = await apiRequest<FetchResponse>(url)
       const data = response?.data
       if (data) {
-        ExamStore.getState().setProcessedResults(data)
+        set({ currentPage: 2 })
+        clearTable('exams')
+        const fetchedExams = data.results
+        const savedExams = ExamStore.getState().exams
+        const first20 = fetchedExams.slice(0, 20)
+        const next20 = fetchedExams.slice(20, 40)
+
+        if (savedExams.length > 0) {
+          set((prev) => {
+            return {
+              exams:
+                prev.exams.length >= 20
+                  ? [...prev.exams]
+                  : [...prev.exams, ...next20],
+            }
+          })
+        } else {
+          set({ exams: first20 })
+        }
+        set((prev) => {
+          return {
+            hasMore: fetchedExams.length >= prev.page_size,
+          }
+        })
+        addRecordsToDB('exams', fetchedExams)
       }
     } catch (error: unknown) {
-      if (axios.isAxiosError(error) && error.response?.data?.message) {
-        setMessage(error.response.data.message, false)
-      } else {
-        console.error('Failed to fetch staff:', error)
-        setMessage('An unexpected error occurred.', false)
+      console.error('Failed to fetch staff:', error)
+    }
+  },
+
+  getMoreSavedExams: async () => {
+    try {
+      set({ loading: true })
+      const page = ExamStore.getState().currentPage
+      const page_size = ExamStore.getState().page_size
+      const response = await getExamsFromDB<Exam>('exams', 20, page)
+      if (response) {
+        set((prev) => {
+          const existingIds = new Set(prev.exams.map((e) => e._id))
+          const filtered = response.filter((e) => !existingIds.has(e._id))
+          return {
+            exams: [...prev.exams, ...filtered],
+          }
+        })
       }
+      ExamStore.getState().getMoreExams(
+        `/competitions/exams/?page_size=${page_size}&page=${
+          page + 1
+        }&ordering=-createdAt`
+      )
+    } catch (error: unknown) {
+      console.error('Failed to fetch staff:', error)
+    } finally {
+      set({ loading: false })
+    }
+  },
+
+  getMoreExams: async (url) => {
+    try {
+      const response = await apiRequest<FetchResponse>(url)
+      const data = response?.data
+      if (data) {
+        addRecordsToDB('exams', data.results)
+      }
+      set((prev) => {
+        return {
+          currentPage: prev.currentPage + 1,
+          hasMore: data.results.length >= prev.page_size,
+        }
+      })
+    } catch (error: unknown) {
+      console.error('Failed to fetch staff:', error)
     }
   },
 
@@ -225,7 +324,7 @@ const ExamStore = create<ExamState>((set) => ({
       const data = response?.data
       if (data) {
         set({
-          formData: { ...ExamStore.getState().formData, ...data.exam },
+          examForm: data.data,
           loading: false,
           attempt: data.attempt ? data.attempt : 0,
         })

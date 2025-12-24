@@ -30,6 +30,7 @@ import { TraceProvider } from '@/context/HomeContext/TraceContext'
 import { ChatProvider } from '@/context/HomeContext/ChatContext'
 import { GeneralProvider } from '@/context/GeneralContext'
 import { GiveawayProvider } from '@/context/GiveawayContext'
+import { QuestionProvider } from '@/context/HomeContext/QuestionContext'
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -185,11 +186,13 @@ export default function RootLayout({
                     <PersonalNotificationProvider>
                       <MomentProvider>
                         <GiveawayProvider>
-                          <ChatProvider>
-                            <ThemeProvider>
-                              {isMounted && children}
-                            </ThemeProvider>
-                          </ChatProvider>
+                          <QuestionProvider>
+                            <ChatProvider>
+                              <ThemeProvider>
+                                {isMounted && children}
+                              </ThemeProvider>
+                            </ChatProvider>
+                          </QuestionProvider>
                         </GiveawayProvider>
                       </MomentProvider>
                     </PersonalNotificationProvider>
