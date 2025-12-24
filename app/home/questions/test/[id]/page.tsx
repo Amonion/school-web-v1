@@ -19,6 +19,8 @@ import Pagination from '@/components/Team/Pagination'
 import { UserExam } from '@/src/zustand/exam/UserExam'
 import apiRequest from '@/lib/axios'
 import { BioUserState } from '@/src/zustand/user/BioUserState'
+import FirstExamMessage from '@/components/Home/Exam/FirstExamMessage'
+import QuestionObjective from '@/components/Home/Exam/QuestionsObjectives'
 
 interface Test {
   bioUserState: BioUserState
@@ -29,7 +31,7 @@ interface Test {
 
 const ExamStart = () => {
   const url = '/competitions/leagues/objectives/'
-  const { getExam, formData } = ExamStore()
+  const { getExam, examForm } = ExamStore()
   const { user, bioUser, bioUserState } = AuthStore()
   const { setMessage } = MessageStore()
   const { getObjectives, count, objectiveResults, reshuffleResults } =
@@ -51,11 +53,10 @@ const ExamStart = () => {
   const [sort] = useState('createdAt')
   const [questions, setQuestion] = useState<Objective[]>([])
   const [lastResults, setLastResults] = useState<Objective[]>([])
-  const optionsLabel = ['A', 'B', 'C', 'D', 'E', 'F']
 
   const nextSection = async (size: number) => {
     getObjectives(
-      `${url}?paperId=${formData._id}&ordering=${sort}&page=${currentPage}&page_size=${size}`,
+      `${url}?paperId=${examForm._id}&ordering=${sort}&page=${currentPage}&page_size=${size}`,
       setMessage
     )
 
@@ -103,7 +104,7 @@ const ExamStart = () => {
     } else {
       localStorage.removeItem('questions')
       localStorage.setItem('started', JSON.stringify(new Date().getTime()))
-      setDuration(formData.duration * 60)
+      setDuration(examForm.duration * 60)
       setIsActive(true)
       setIsInteracting(true)
     }
@@ -121,7 +122,7 @@ const ExamStart = () => {
       form.append('bioUserId', bioUser._id)
       form.append('bioUserPicture', bioUser.bioUserPicture)
       form.append('bioUserDisplayName', bioUser.bioUserDisplayName)
-      form.append('instruction', formData.instruction)
+      form.append('instruction', examForm.instruction)
       form.append('started', startTime)
       form.append('ended', String(new Date().getTime()))
       form.append('paperId', String(id))
@@ -278,13 +279,13 @@ const ExamStart = () => {
 
   ////////////////// SET PAPER //////////////////
   useEffect(() => {
-    if (formData.questionsPerPage > 0 && user) {
-      setPageSize(formData.questionsPerPage)
-      setDuration(formData.duration * 60)
-      setTimeLeft(formData.duration * 60)
-      nextSection(formData.questionsPerPage)
+    if (examForm.questionsPerPage > 0 && user) {
+      setPageSize(examForm.questionsPerPage)
+      setDuration(examForm.duration * 60)
+      setTimeLeft(examForm.duration * 60)
+      nextSection(examForm.questionsPerPage)
     }
-  }, [formData._id, user])
+  }, [examForm._id, user])
 
   ////////////////// PAGINATE PAPER //////////////////
   useEffect(() => {
@@ -366,35 +367,7 @@ const ExamStart = () => {
   return (
     <>
       {bioUserState?.examAttempts === 0 && !isActive && !isLastResults ? (
-        <div className="flex-1 px-3 pt-5 pb-[55px] text-[var(--text-primary)]">
-          <div
-            className={`items-center pb-1 mb-5 relative border-b border-b-border dark:border-b-dark-border`}
-          >
-            <div className="text-[var(--text-secondary)] text-center text-xl mb-2">
-              Important Notice Before You Begin
-            </div>
-            <div className="leading-[20px] text-center">
-              Please read the online-test policy carefully before you begin this
-              exercise, if you are comfortable you can click the play button at
-              the bottom left to start. Else, simply exit this page.
-            </div>
-          </div>
-          <div className="sm:bg-[var(--primary)] sm:p-3">
-            <div className="text-justify sm:text-lg">
-              In our effort to create a simple and academic platform where exam
-              canditiates can test/practice with available past questions, we
-              record every exercise performed by users, whether casual or
-              formal. We do this simply to improve user experience, therefore we
-              hope you are prepared for this test before you start. Once you
-              begin and decides to end by any means, your progress will be
-              scored as though you have completed the exercise.{' '}
-              <div className="text-[var(--custom)]">
-                Above all, feel free to prepare for as many exams as available
-                on this platform, thanks.
-              </div>
-            </div>
-          </div>
-        </div>
+        <FirstExamMessage />
       ) : (
         <div className="min-h-[85vh] relative py-5 px-2 sm:px-0">
           {exam && (
@@ -402,31 +375,31 @@ const ExamStart = () => {
               className={`paper_head relative ${exam.attempts > 0 ? 'b' : ''}`}
             >
               <div className="text-[var(--textSecondary)] sm:text-lg">
-                {formData.title}
+                {examForm.title}
               </div>
-              <div className="paper_subtitle">{formData.subtitle}</div>
-              <div className=" mb-2">{formData.instruction}</div>
+              <div className="paper_subtitle">{examForm.subtitle}</div>
+              <div className=" mb-2">{examForm.instruction}</div>
 
               <div className="flex w-full justify-center flex-wrap">
                 <div className="paper_info ">
                   {' '}
                   <i className="bi bi-hourglass-split text-sm block mr-[5px]"></i>
-                  {formData.duration}min
+                  {examForm.duration}min
                 </div>
-                {formData.type && (
+                {examForm.type && (
                   <div className="paper_info">
                     <i className="bi bi-file-earmark text-sm block mr-[5px]"></i>
-                    {truncateStringNormal(formData.type, 3)}
+                    {truncateStringNormal(examForm.type, 3)}
                   </div>
                 )}
 
                 <div className="paper_info ">
                   <i className="bi bi-clock text-sm block mr-[5px]"></i>
-                  {formatTimeTo12Hour(formData.publishedAt)}{' '}
+                  {formatTimeTo12Hour(examForm.publishedAt)}{' '}
                 </div>
                 <div className="paper_info ">
                   <i className="bi bi-calendar-check text-sm block mr-[5px]"></i>
-                  {formatDateToDDMMYY(formData.publishedAt)}
+                  {formatDateToDDMMYY(examForm.publishedAt)}
                 </div>
               </div>
 
@@ -448,102 +421,29 @@ const ExamStart = () => {
             <ExamResult exam={exam} setDisplayResult={setDisplayResult} />
           )}
 
-          {isLastResults
+          {isLastResults && page_size
             ? lastResults.map((question, index) => (
-                <div key={index} className="questions">
-                  <div
-                    className={`each_question rounded-[5px] p-[2px] ${
-                      question.isClicked ? 'clicked' : ''
-                    }`}
-                  >
-                    {page_size && (
-                      <div className="question_num sm">
-                        {(Number(currentPage) - 1) * page_size + index + 1}
-                      </div>
-                    )}
-                    <div className="question_bd flex-grow">
-                      <div className="question text-[var(--text-secondary)]">
-                        <div
-                          dangerouslySetInnerHTML={{
-                            __html: question.question,
-                          }}
-                        ></div>
-                      </div>
-                      {question.options.map((item, int) => (
-                        <div
-                          onClick={() => selectAnswer(item, question._id)}
-                          key={int}
-                          className={`each_option ${
-                            isLastResults && item.isSelected
-                              ? 'text-[var(--success)]'
-                              : item.isClicked
-                              ? 'text-[var(--custom)]'
-                              : ''
-                          } `}
-                        >
-                          {isLastResults && item.isSelected && (
-                            <i className="bi bi-check-circle absolute top-0 left-[-20px]"></i>
-                          )}
-                          {isLastResults &&
-                            item.isClicked &&
-                            !item.isSelected && (
-                              <i className="bi bi-x-circle absolute top-0 left-[-20px]"></i>
-                            )}
-                          <div className="option_num">{optionsLabel[int]})</div>
-                          <div className="option_num">{item.value}</div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+                <QuestionObjective
+                  key={index}
+                  question={question}
+                  page_size={page_size}
+                  currentPage={currentPage}
+                  index={index}
+                  isLastResults={true}
+                  selectAnswer={selectAnswer}
+                />
               ))
-            : questions.map((question, index) => (
-                <div key={index} className="questions ">
-                  <div
-                    className={`each_question rounded-[5px] p-[2px] ${
-                      question.isClicked ? 'clicked' : ''
-                    }`}
-                  >
-                    {page_size && (
-                      <div className="question_num sm">
-                        {(Number(currentPage) - 1) * page_size + index + 1}
-                      </div>
-                    )}
-                    <div className="question_bd flex-grow">
-                      <div className="question text-[var(--text-secondary)] font-medium">
-                        <div
-                          dangerouslySetInnerHTML={{
-                            __html: question.question,
-                          }}
-                        ></div>
-                      </div>
-                      {question.options.map((item, int) => (
-                        <div
-                          onClick={() => selectAnswer(item, question._id)}
-                          key={int}
-                          className={`each_option ${
-                            isLastResults && item.isSelected
-                              ? 'text-[var(--success)]'
-                              : item.isClicked
-                              ? 'text-[var(--custom)]'
-                              : ''
-                          } `}
-                        >
-                          {isLastResults && item.isSelected && (
-                            <i className="bi bi-check-circle absolute top-0 left-[-20px]"></i>
-                          )}
-                          {isLastResults &&
-                            item.isClicked &&
-                            !item.isSelected && (
-                              <i className="bi bi-x-circle absolute top-0 left-[-20px]"></i>
-                            )}
-                          <div className="option_num">{optionsLabel[int]})</div>
-                          <div className="option_num">{item.value}</div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+            : page_size &&
+              questions.map((question, index) => (
+                <QuestionObjective
+                  key={index}
+                  question={question}
+                  page_size={page_size}
+                  currentPage={currentPage}
+                  index={index}
+                  isLastResults={true}
+                  selectAnswer={selectAnswer}
+                />
               ))}
 
           <div className="flex items-center sm:mb-[100px] mb-[150px]">
@@ -559,7 +459,7 @@ const ExamStart = () => {
           </div>
         </div>
       )}
-      {formData.duration > 0 && (
+      {examForm.duration > 0 && (
         <CountdownTimer
           durationInSeconds={duration}
           isActive={isActive}

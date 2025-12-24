@@ -12,7 +12,7 @@ import Spinner from '@/components/LoadingAnimations/Spinner'
 
 const ExamProfile = ({ children }: { children: React.ReactNode }) => {
   const { id } = useParams()
-  const { getExams, exams, formData } = ExamStore()
+  const { getExam, exams, examForm } = ExamStore()
   const { setMessage } = MessageStore()
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -22,19 +22,19 @@ const ExamProfile = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     if (exams.length === 0) {
-      getExams(`/competitions/exams/${id}`, setMessage)
+      getExam(`/competitions/exams/${id}`, setMessage)
     } else {
       ExamStore.setState((prev) => {
         const exam = prev.exams.find((item) => item._id === id)
         return {
-          formData: exam,
+          examForm: exam,
         }
       })
     }
   }, [id])
 
   const startPaper = () => {
-    if (formData.questions === 0) {
+    if (examForm.questions === 0) {
       setMessage('There is 0 questions in this paper, please try again.', false)
       return
     }
@@ -59,15 +59,15 @@ const ExamProfile = ({ children }: { children: React.ReactNode }) => {
       <div className="w-full bg-[var(--white)] mb-1 overflow-hidden">
         <div className=" w-full overflow-hidden relative h-[200px] xs:h-[250px]  bg-[var(--white)]">
           <div className=" flex absolute w-full h-full items-start justify-start p-3 bg-gradient-to-b from-black/50 to-transparent"></div>
-          {formData.picture ? (
+          {examForm.picture ? (
             <Image
-              src={String(formData.picture)}
+              src={String(examForm.picture)}
               loading="lazy"
               sizes="100vw"
               className="w-full h-full object-cover"
               width={100}
               height={100}
-              alt={formData.name}
+              alt={examForm.name}
             />
           ) : (
             <Image
@@ -81,7 +81,7 @@ const ExamProfile = ({ children }: { children: React.ReactNode }) => {
               className="w-full h-full object-cover"
               width={100}
               height={100}
-              alt={formData.name}
+              alt={examForm.name}
             />
           )}
         </div>
@@ -89,15 +89,15 @@ const ExamProfile = ({ children }: { children: React.ReactNode }) => {
           <div className="flex flex-wrap mb-3">
             <div className="relative w-[74px] flex items-center justify-center min:w-[70px] h-[74px] mr-5 mt-[-35px] rounded-full border-2 border-[var(--custom-color)]">
               <div className="bg-[var(--white-gray)] flex w-[70px] h-[70px] border-2 border-white rounded-full overflow-hidden relative">
-                {formData?.logo ? (
+                {examForm?.logo ? (
                   <Image
-                    src={String(formData.logo)}
+                    src={String(examForm.logo)}
                     loading="lazy"
                     sizes="100vw"
                     className="w-full h-full object-cover"
                     width={100}
                     height={100}
-                    alt={formData.name}
+                    alt={examForm.name}
                   />
                 ) : (
                   <Image
@@ -115,8 +115,8 @@ const ExamProfile = ({ children }: { children: React.ReactNode }) => {
 
             <div className="pr-3 flex items-start sm:items-center w-full sm:w-auto sm:flex-1">
               <div className="flex flex-wrap items-center mr-auto">
-                <div className="account_name mr-2">{formData.title}</div>
-                <div className="post_username">@{formData.name}</div>
+                <div className="account_name mr-2">{examForm.title}</div>
+                <div className="post_username">@{examForm.name}</div>
               </div>
               {/* <div className="flex items-center ">
             <div className="mr-2">@IMSU</div>
@@ -128,7 +128,7 @@ const ExamProfile = ({ children }: { children: React.ReactNode }) => {
           <div className="flex items-center mb-3 flex-wrap">
             <div className="flex items-center mr-5">
               <i className="bi bi-calendar-check text-[var(--text-secondary)] mr-1"></i>
-              {formatDate(String(formData.publishedAt))}
+              {formatDate(String(examForm.publishedAt))}
             </div>
             <Link
               href={`/home/questions/${id}/details`}
@@ -145,9 +145,9 @@ const ExamProfile = ({ children }: { children: React.ReactNode }) => {
               Start
             </div>
           </div>
-          {formData.instruction && (
+          {examForm.instruction && (
             <div className="relative mb-3 w-full">
-              <div className="intro_input">{formData.instruction}</div>
+              <div className="intro_input">{examForm.instruction}</div>
             </div>
           )}
 
@@ -159,7 +159,7 @@ const ExamProfile = ({ children }: { children: React.ReactNode }) => {
               } profile_tab`}
             >
               <div className="text-[var(--text-title-color)] mb-1">
-                {formatCount(formData.participants)}{' '}
+                {formatCount(examForm.participants)}{' '}
               </div>
               <div className="text">Users</div>
             </Link>

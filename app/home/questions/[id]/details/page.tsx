@@ -8,7 +8,7 @@ import ExamStore from '@/src/zustand/exam/Exam'
 
 const ExamDetails = () => {
   const { setMessage } = MessageStore()
-  const { formData } = ExamStore()
+  const { examForm } = ExamStore()
   const { getExams } = UserExamStore()
   const { id } = useParams()
   const [currentPage] = useState(1)
@@ -39,7 +39,7 @@ const ExamDetails = () => {
             Name:
           </div>
           <div className="bg-[var(--secondary)] p-2 text-[var(--text-primary)] rounded-[10px]">
-            {formData.name}
+            {examForm.name}
           </div>
         </div>
         <div className="flex-1 mb-3">
@@ -47,7 +47,7 @@ const ExamDetails = () => {
             Title:
           </div>
           <div className="bg-[var(--secondary)] p-2 text-[var(--text-primary)] rounded-[10px]">
-            {formData.title}
+            {examForm.title}
           </div>
         </div>
         <div className="flex-1 mb-3">
@@ -55,7 +55,7 @@ const ExamDetails = () => {
             Subtitle:
           </div>
           <div className="bg-[var(--secondary)] p-2 text-[var(--text-primary)] rounded-[10px]">
-            {formData.subtitle}
+            {examForm.subtitle}
           </div>
         </div>
         <div className="flex-1 mb-3">
@@ -63,7 +63,7 @@ const ExamDetails = () => {
             Subject:
           </div>
           <div className="bg-[var(--secondary)] p-2 text-[var(--text-primary)] rounded-[10px]">
-            {formData.subjects}
+            {examForm.subjects}
           </div>
         </div>
         <div className="flex-1 mb-3">
@@ -71,7 +71,7 @@ const ExamDetails = () => {
             Type:
           </div>
           <div className="bg-[var(--secondary)] p-2 text-[var(--text-primary)] rounded-[10px]">
-            {formData.type}
+            {examForm.type}
           </div>
         </div>
         <div className="flex-1 mb-3">
@@ -79,7 +79,7 @@ const ExamDetails = () => {
             Instruction:
           </div>
           <div className="bg-[var(--secondary)] p-2 text-[var(--text-primary)] rounded-[10px]">
-            {formData.instruction}
+            {examForm.instruction}
           </div>
         </div>
         <div className="flex-1 mb-3">
@@ -87,7 +87,7 @@ const ExamDetails = () => {
             Participants:
           </div>
           <div className="bg-[var(--secondary)] p-2 text-[var(--text-primary)] rounded-[10px]">
-            {formData.participants}
+            {examForm.participants}
           </div>
         </div>
         <div className="flex-1 mb-3">
@@ -95,7 +95,7 @@ const ExamDetails = () => {
             Duration:
           </div>
           <div className="bg-[var(--secondary)] p-2 text-[var(--text-primary)] rounded-[10px]">
-            {formData.duration}
+            {examForm.duration}
           </div>
         </div>
         <div className="flex-1 mb-3">
@@ -103,7 +103,7 @@ const ExamDetails = () => {
             Questions:
           </div>
           <div className="bg-[var(--secondary)] p-2 text-[var(--text-primary)] rounded-[10px]">
-            {formData.questions}
+            {examForm.questions}
           </div>
         </div>
         <div className="flex-1 mb-3">
@@ -111,7 +111,7 @@ const ExamDetails = () => {
             Questions Per Page:
           </div>
           <div className="bg-[var(--secondary)] p-2 text-[var(--text-primary)] rounded-[10px]">
-            {formData.questionsPerPage}
+            {examForm.questionsPerPage}
           </div>
         </div>
         <div className="flex-1 mb-3">
@@ -119,7 +119,7 @@ const ExamDetails = () => {
             Options Per Questions:
           </div>
           <div className="bg-[var(--secondary)] p-2 text-[var(--text-primary)] rounded-[10px]">
-            {formData.optionsPerQuestion}
+            {examForm.optionsPerQuestion}
           </div>
         </div>
         <div className="flex-1 mb-3">
@@ -127,7 +127,7 @@ const ExamDetails = () => {
             Published At:
           </div>
           <div className="bg-[var(--secondary)] p-2 text-[var(--text-primary)] rounded-[10px]">
-            {formatDate(String(formData.publishedAt))}
+            {formatDate(String(examForm.publishedAt))}
           </div>
         </div>
       </div>
