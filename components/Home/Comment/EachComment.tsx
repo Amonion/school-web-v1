@@ -7,6 +7,7 @@ import apiRequest from '@/lib/axios'
 import { AuthStore } from '@/src/zustand/user/AuthStore'
 import CommentStore, { Comment } from '@/src/zustand/post/Comment'
 import MediaDisplay from '../Media/MediaDisplay'
+import SubCommentPart from './SubCommentPart'
 
 interface FetchCommentResponse {
   count: number
@@ -24,12 +25,12 @@ interface EachCommentProps {
 
 const EachComment: React.FC<EachCommentProps> = ({
   comment,
-  onHeightChange,
   isLast,
   hasMoreComments,
 }) => {
   const { user } = AuthStore()
-  const { setActiveComment, updateComment, showComments } = CommentStore()
+  const { setActiveComment, updateComment, comments, showComments } =
+    CommentStore()
   const [pageSize] = useState(20)
   const [currentPage, setCurrentPage] = useState(1)
   const [hasMore, setHasMore] = useState(false)
@@ -127,12 +128,6 @@ const EachComment: React.FC<EachCommentProps> = ({
   }, [moreComments])
 
   useEffect(() => {
-    if (commentRef.current && onHeightChange) {
-      onHeightChange(comment._id, commentRef.current.offsetHeight)
-    }
-  }, [onHeightChange, showComments, comment._id])
-
-  useEffect(() => {
     if (commentRef.current) {
       setParentHeight(commentRef.current.offsetHeight)
     }
@@ -141,6 +136,7 @@ const EachComment: React.FC<EachCommentProps> = ({
     comment.comments,
     comment._id,
     showComments,
+    comments,
     fetchedComments.length,
   ])
 
@@ -149,9 +145,9 @@ const EachComment: React.FC<EachCommentProps> = ({
       setCurrentPage(1)
       setLoading(true)
       const response = await apiRequest<FetchCommentResponse>(
-        `/posts/comments/?replyToId=${comment._id}&level=${
-          comment.level + 1
-        }&myId=${user?._id}&page_size=${pageSize}&page=1&ordering=${sort}`
+        `/comments/?replyToId=${comment._id}&level=${comment.level + 1}&myId=${
+          user?._id
+        }&page_size=${pageSize}&page=1&ordering=${sort}`
       )
 
       const data = response?.data?.results
@@ -172,9 +168,7 @@ const EachComment: React.FC<EachCommentProps> = ({
     try {
       setLoading(true)
       const response = await apiRequest<FetchCommentResponse>(
-        `/posts/comments/?postId=${comment._id}&level=${
-          comment.level + 1
-        }&myId=${
+        `/comments/?postId=${comment._id}&level=${comment.level + 1}&myId=${
           user?._id
         }&page_size=${pageSize}&page=${currentPage}&ordering=${sort}`
       )
@@ -190,6 +184,13 @@ const EachComment: React.FC<EachCommentProps> = ({
     } finally {
       setLoading(false)
     }
+  }
+
+  const makeComments = () => {
+    setActiveComment({
+      ...comment,
+      level: comment.level + 1,
+    })
   }
 
   const toggleLike = (targetId: string, targetLevel: number) => {
@@ -336,9 +337,9 @@ const EachComment: React.FC<EachCommentProps> = ({
                 <div
                   style={{
                     height:
-                      parentHeight -
-                      lastHeight -
-                      (comment.level === 1 ? 45 : 30),
+                      comment.level === 1
+                        ? parentHeight - lastHeight - 160
+                        : parentHeight - lastHeight - 30,
                     top: comment.level === 1 ? 40 : 28,
                     left: comment.level === 1 ? 20 : 16,
                   }}
@@ -380,16 +381,16 @@ const EachComment: React.FC<EachCommentProps> = ({
             <div className="flex-1">
               <Link
                 href={`/home/profile/${comment.username}`}
-                className="flex items-center mb-1"
+                className="flex items-center mb-[1px]"
               >
-                <div className={`text-[var(--text-secondary)] mr-2`}>
+                <div className={`font-semibold text-sm mr-2`}>
                   {comment.displayName}
                 </div>
                 <div className="ml-auto text-[12px]">
                   {formatRelativeDate(String(comment.createdAt))}
                 </div>
               </Link>
-              <div className="flex-1 mb-1 text-[16px]">
+              <div className="flex-1 mb-1 text-[12px]">
                 <div
                   onClick={() => toggleIsActive(comment._id, comment.level)}
                   className={`p-1 mb-1 cursor-pointer text-sm sm:text-base ${
@@ -418,14 +419,14 @@ const EachComment: React.FC<EachCommentProps> = ({
                 >
                   {comment.liked ? (
                     <ThumbsUp
-                      size={14}
+                      size={12}
                       fill="currentColor"
                       stroke="currentColor"
                       className="text-[var(--text-primary)] mr-1"
                     />
                   ) : (
                     <ThumbsUp
-                      size={14}
+                      size={12}
                       className="text-[var(--text-primary)] mr-1"
                     />
                   )}
@@ -438,38 +439,46 @@ const EachComment: React.FC<EachCommentProps> = ({
                 >
                   {comment.hated ? (
                     <ThumbsDown
-                      size={14}
+                      size={12}
                       fill="currentColor"
                       stroke="currentColor"
                       className="text-[var(--text-primary)] -mb-[6px] mr-1"
                     />
                   ) : (
                     <ThumbsDown
-                      size={14}
+                      size={12}
                       className="text-[var(--text-primary)] -mb-[6px] mr-1"
                     />
                   )}
                   {formatCount(comment.hates)}
                 </div>
                 <i
-                  onClick={() => {
-                    setActiveComment({
-                      ...comment,
-                      level: comment.level + 1,
-                    })
-                  }}
-                  className={`${
-                    comment.level > 1 ? 'text-sm' : ''
-                  } bi bi-arrow-90deg-left cursor-pointer`}
+                  onClick={makeComments}
+                  className={`text-[12px] bi bi-arrow-90deg-left cursor-pointer`}
                 ></i>
-                {user?.username === comment.username && (
+                {/* {user?.username === comment.username && (
                   <div className="relative ml-auto">
                     <i className="bi bi-three-dots-vertical cursor-pointer"></i>
                   </div>
-                )}
+                )} */}
               </div>
+              <SubCommentPart
+                comment={comment}
+                fetchedComments={fetchedComments}
+                comments={comment.comments}
+                parentHeight={parentHeight}
+                lastHeight={lastHeight}
+                hasMore={hasMore}
+                loading={loading}
+                toggleIsActive={toggleIsActive}
+                setLastHeight={setLastHeight}
+                fetchComments={fetchComments}
+                fetchMoreComments={fetchMoreComments}
+                isLast={isLast}
+                hasMoreComments={hasMoreComments}
+              />
 
-              {comment.comments.map((item, index) => (
+              {/* {comment.comments.map((item, index) => (
                 <EachComment
                   onHeightChange={(id, height) => {
                     if (comment.comments.length - 1 === index) {
@@ -481,7 +490,7 @@ const EachComment: React.FC<EachCommentProps> = ({
                 />
               ))}
 
-              {comment.replies > 0 && comment.comments.length === 0 && (
+              {comment.replies > 0 && fetchedComments.length === 0 && (
                 <div className="relative">
                   <div
                     style={{
@@ -530,7 +539,7 @@ const EachComment: React.FC<EachCommentProps> = ({
                 >
                   {`${loading ? 'Loading Comments' : 'More Comments.'}`}
                 </div>
-              )}
+              )} */}
             </div>
           </div>
         )}

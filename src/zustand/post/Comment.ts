@@ -91,6 +91,7 @@ interface CommentState {
   progress: number
   mediaHeight: string
   commentResults: Comment[]
+  tempReplies: Comment[]
   comments: Comment[]
   activeComment: Comment
   tempComment: Comment
@@ -113,6 +114,7 @@ interface CommentState {
   setIsMobile: (status: boolean) => void
   resetForm: () => void
   getComments: (url: string) => Promise<void>
+  getTempReplies: (url: string) => Promise<void>
   getAComment: (
     url: string,
     setMessage: (message: string, isError: boolean) => void
@@ -179,6 +181,7 @@ const CommentStore = create<CommentState>((set) => ({
   activeComment: CommentEmpty,
   postedComment: CommentEmpty,
   tempComment: CommentEmpty,
+  tempReplies: [],
   setForm: (key, value) =>
     set((state) => ({
       commentForm: {
@@ -269,6 +272,20 @@ const CommentStore = create<CommentState>((set) => ({
     }
   },
 
+  getTempReplies: async (url: string) => {
+    try {
+      const response = await apiRequest<FetchCommentResponse>(url, {
+        setLoading: CommentStore.getState().setLoading,
+      })
+      const data = response?.data
+      if (data) {
+        CommentStore.setState({ tempReplies: data.results })
+      }
+    } catch (error: unknown) {
+      console.log(error)
+    }
+  },
+
   setProcessedResults: ({
     count,
     page_size,
@@ -329,7 +346,7 @@ const CommentStore = create<CommentState>((set) => ({
       })
       const data = response?.data
       if (data) {
-        set({ postedComment: data.data })
+        set({ postedComment: data.data, tempComment: CommentEmpty })
       }
     } catch (error) {
       console.log(error)

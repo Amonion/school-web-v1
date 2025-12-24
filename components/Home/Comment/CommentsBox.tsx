@@ -22,6 +22,7 @@ export default function CommentBox() {
   const { user } = AuthStore()
 
   useEffect(() => {
+    if (!mainPost) return
     if (mainPost._id !== tempComment.postId) return
 
     CommentStore.setState((prev) => {
@@ -75,6 +76,7 @@ export default function CommentBox() {
   }, [tempComment])
 
   useEffect(() => {
+    if (!postedComment) return
     if (!postedComment._id || !postedComment.uniqueId) return
 
     if (postedComment.level === 1) {

@@ -186,7 +186,6 @@ const ChatEditor: React.FC<MyEditorProps> = ({
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Enter' && submitComment) {
         event.preventDefault() // stop newline if you want
-        console.log('Key entered')
         submitComment()
       }
     }

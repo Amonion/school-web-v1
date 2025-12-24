@@ -41,6 +41,21 @@ const CommentBottomSheet = () => {
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
+  useEffect(() => {
+    if (!showComments) return
+    window.history.pushState({ commentSheet: true }, '')
+
+    const handlePopState = () => {
+      setShowComment(false)
+    }
+
+    window.addEventListener('popstate', handlePopState)
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState)
+    }
+  }, [showComments, setShowComment])
+
   const submitComment = async () => {
     if (!user) return
     if (files.length === 0 && text.length === 0) {
@@ -102,6 +117,7 @@ const CommentBottomSheet = () => {
           ? activeComment._id
           : mainPost._id,
       content: text,
+      isVerified: user.isVerified,
       replyTo: activeComment.displayName,
       user: activeComment.displayName,
       commentMedia: files.length > 0 ? files[0].src : '',
