@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useRef } from 'react'
 import ExamStore from '@/src/zustand/exam/Exam'
-// import QuestionCard from '@/components/Home/Exam/QuestionResources/QuestionCard'
+import QuestionCard from '@/components/Home/Exam/QuestionResources/QuestionCard'
 
 export default function QuestionList() {
   const { hasMore, loading, exams, getMoreSavedExams } = ExamStore()
@@ -32,7 +32,7 @@ export default function QuestionList() {
         </div>
       )}
 
-      {/* {exams.map((item, index) => {
+      {exams.map((item, index) => {
         const isLast = index === exams.length - 1
         return (
           <QuestionCard
@@ -41,7 +41,7 @@ export default function QuestionList() {
             ref={isLast ? lastCardRef : null}
           />
         )
-      })} */}
+      })}
     </div>
   )
 }
