@@ -15,7 +15,7 @@ export const BioUserSchoolInfoEmpty = {
   bioUserPicture: '',
   bioUserUsername: '',
   bioUserId: '',
-  createdAt: new Date(),
+  createdAt: '',
   graduatedAt: null,
   hasPastSchool: null,
   inSchool: false,
@@ -61,7 +61,7 @@ export interface BioUserSchoolInfo {
   bioUserPicture: string
   bioUserUsername: string
   bioUserId: string
-  createdAt: Date
+  createdAt: string
   graduatedAt: Date | null
   hasPastSchool: boolean | null
   inSchool: boolean

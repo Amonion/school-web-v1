@@ -103,7 +103,7 @@ export const UserEmpty = {
   _id: '',
   bioUserId: '',
   comments: 0,
-  createdAt: new Date(),
+  createdAt: '',
   displayName: '',
   email: '',
   exams: 0,
@@ -459,7 +459,7 @@ export interface User {
   _id: string
   bioUserId: string
   comments: number
-  createdAt: Date
+  createdAt: string
   displayName: string
   email: string
   exams: number

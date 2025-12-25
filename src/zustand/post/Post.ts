@@ -74,7 +74,7 @@ export interface Post {
   views: number
   likes: number
   reposts: number
-  createdAt: Date | null | string
+  createdAt: string
   message: string
   followed: boolean
   muted: boolean
