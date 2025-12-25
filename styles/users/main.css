@@ -206,6 +206,10 @@ ol li{
   @apply flex items-center cursor-pointer mr-5 last:mr-0 mb-2;
 }
 
+.exam_bottom {
+  @apply fixed z-30 w-full sm:pb-[20px] sm:bottom-0 bottom-[60px] left-0
+}
+
 .follow_btn {
   @apply rounded-[25px] text-xs cursor-pointer border border-[var(--border)] py-[2px] px-3 text-[var(--text-primary)];
 }

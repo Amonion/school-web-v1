@@ -6,6 +6,7 @@ interface FetchResponse {
   count: number
   page_size: number
   results: UserExam[]
+  exam: UserExam
 }
 
 export interface UserExam {
@@ -29,8 +30,8 @@ export interface UserExam {
   attemptedQuestions: number
   totalAnswered: number
   totalCorrectAnswer: number
+  isActive: boolean
   isChecked?: boolean
-  isActive?: boolean
 }
 
 export const UserExamEmpty = {
@@ -54,6 +55,7 @@ export const UserExamEmpty = {
   attemptedQuestions: 0,
   totalAnswered: 0,
   totalCorrectAnswer: 0,
+  isActive: false,
 }
 
 interface UserExamState {
@@ -61,14 +63,18 @@ interface UserExamState {
   page_size: number
   userExamResults: UserExam[]
   loading: boolean
+  isActive: boolean
   isAllChecked: boolean
   userExamForm: UserExam
+  duration: number
   setForm: (key: keyof UserExam, value: UserExam[keyof UserExam]) => void
   resetForm: () => void
+
   getExams: (
     url: string,
     setMessage: (message: string, isError: boolean) => void
   ) => Promise<void>
+  getUserExam: (url: string) => Promise<void>
   fetchQuestions: (url: string) => Promise<void>
   setProcessedResults: (data: FetchResponse) => void
   deleteItem: (
@@ -76,14 +82,14 @@ interface UserExamState {
     setMessage: (message: string, isError: boolean) => void,
     setLoading?: (loading: boolean) => void
   ) => Promise<void>
-  updateItem: (
+  updateUserExam: (
     url: string,
-    updatedItem: FormData,
+    updatedItem: FormData | Record<string, unknown>,
     setMessage: (message: string, isError: boolean) => void
   ) => Promise<void>
-  postItem: (
+  createUserExam: (
     url: string,
-    updatedItem: FormData,
+    updatedItem: FormData | Record<string, unknown>,
     setMessage: (message: string, isError: boolean) => void
   ) => Promise<void>
   toggleChecked: (index: number) => void
@@ -96,8 +102,10 @@ const UserExamStore = create<UserExamState>((set) => ({
   links: null,
   count: 0,
   page_size: 0,
+  duration: 0,
   userExamResults: [],
   loading: false,
+  isActive: false,
   isAllChecked: false,
   userExamForm: UserExamEmpty,
   setForm: (key, value) =>
@@ -126,6 +134,22 @@ const UserExamStore = create<UserExamState>((set) => ({
         page_size,
         userExamResults: updatedResults,
       })
+    }
+  },
+
+  getUserExam: async (url) => {
+    try {
+      const response = await apiRequest<FetchResponse>(url)
+      const data = response?.data
+      if (data.exam) {
+        set({
+          userExamForm: data.exam,
+          duration: data.exam.started,
+          isActive: data.exam.isActive,
+        })
+      }
+    } catch (error: unknown) {
+      console.error('Failed to fetch staff:', error)
     }
   },
 
@@ -178,36 +202,36 @@ const UserExamStore = create<UserExamState>((set) => ({
     }
   },
 
-  updateItem: async (url, updatedItem, setMessage) => {
-    set({ loading: true })
+  updateUserExam: async (url, updatedItem) => {
     const response = await apiRequest<FetchResponse>(url, {
       method: 'PATCH',
       body: updatedItem,
-      setMessage,
     })
-    if (response?.status !== 404 && response?.data) {
-      set({ loading: false })
-      UserExamStore.getState().setProcessedResults(response.data)
+    const data = response.data
+    if (data.exam) {
+      set({
+        userExamForm: data.exam,
+        isActive: data.exam.isActive,
+        duration: Number(data.exam.duration),
+      })
     } else {
       set({ loading: false })
     }
   },
 
-  postItem: async (
-    url: string,
-    updatedItem: FormData | Record<string, unknown>,
-    setMessage: (message: string, isError: boolean) => void
-  ) => {
-    set({ loading: true })
+  createUserExam: async (url, updatedItem) => {
     const response = await apiRequest<FetchResponse>(url, {
       method: 'POST',
       body: updatedItem,
-      setMessage,
     })
 
     const data = response?.data
-    if (data) {
-      UserExamStore.getState().setProcessedResults(data)
+    if (data.exam) {
+      set({
+        userExamForm: data.exam,
+        isActive: data.exam.isActive,
+        duration: Number(data.exam.duration * 60),
+      })
     }
   },
 

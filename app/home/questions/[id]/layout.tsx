@@ -9,10 +9,12 @@ import { useTheme } from '@/context/ThemeProvider'
 import { AuthStore } from '@/src/zustand/user/AuthStore'
 import ExamStore from '@/src/zustand/exam/Exam'
 import Spinner from '@/components/LoadingAnimations/Spinner'
+import ObjectiveStore from '@/src/zustand/exam/Objective'
 
 const ExamProfile = ({ children }: { children: React.ReactNode }) => {
   const { id } = useParams()
   const { getExam, exams, examForm } = ExamStore()
+  const { getObjectives } = ObjectiveStore()
   const { setMessage } = MessageStore()
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -31,6 +33,10 @@ const ExamProfile = ({ children }: { children: React.ReactNode }) => {
         }
       })
     }
+
+    getObjectives(
+      `/competitions/leagues/objectives/?page_size=${100}&ordering=createdAt`
+    )
   }, [id])
 
   const startPaper = () => {
@@ -50,7 +56,7 @@ const ExamProfile = ({ children }: { children: React.ReactNode }) => {
       return
     } else {
       setLoading(true)
-      router.push(`/home/questions/test/${id}`)
+      router.push(`/home/questions/exam/${id}/1`)
     }
   }
 

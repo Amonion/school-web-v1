@@ -1,7 +1,33 @@
 import { create } from 'zustand'
 import apiRequest from '@/lib/axios'
 import _debounce from 'lodash/debounce'
-import axios, { AxiosError } from 'axios'
+import { AxiosError } from 'axios'
+import { addRecordsToDB, clearTable, initDB } from '@/lib/indexDB'
+
+export const getQuestionsFromDB = async <T>(
+  table: string,
+  limit: number,
+  page: number
+): Promise<T[]> => {
+  const db = await initDB()
+
+  const allItems = await db.getAll(table)
+
+  const sorted = allItems.sort(
+    (a: Objective, b: Objective) =>
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  )
+
+  const start = (page - 1) * limit
+  const end = start + limit
+
+  return sorted.slice(start, end) as T[]
+}
+export const getAllQuestionsFromDB = async <T>(): Promise<T[]> => {
+  const db = await initDB()
+  const allItems = await db.getAll('questions')
+  return allItems as T[]
+}
 
 interface FetchResponse {
   message: string
@@ -24,6 +50,7 @@ export interface Objective {
   isSelected: boolean
   paperId: string
   question: string
+  createdAt: string
   options: IOption[]
   isChecked?: boolean
   isActive?: boolean
@@ -35,6 +62,7 @@ export const ObjectiveEmpty = {
   isSelected: false,
   paperId: '',
   question: '',
+  createdAt: '',
   options: [],
 }
 
@@ -42,20 +70,22 @@ interface ObjectiveState {
   links: { next: string | null; previous: string | null } | null
   count: number
   page_size: number
+  answeredQuestions: number
   currentPage: number
   objectiveResults: Objective[]
   loading: boolean
   selectedItems: Objective[]
+  questions: Objective[]
+  lastQuestions: Objective[]
   searchResult: Objective[]
   searchedResults: Objective[]
   isAllChecked: boolean
   objectiveForm: Objective
   setForm: (key: keyof Objective, value: Objective[keyof Objective]) => void
   resetForm: () => void
-  getObjectives: (
-    url: string,
-    setMessage: (message: string, isError: boolean) => void
-  ) => Promise<void>
+  getObjectives: (url: string) => Promise<void>
+  getQuestions: (page_size: number, limit: number) => Promise<void>
+  getLastQuestions: (page_size: number, limit: number) => Promise<void>
   fetchQuestions: (url: string) => Promise<void>
   setProcessedResults: (data: FetchResponse) => void
   setLoading?: (loading: boolean) => void
@@ -86,14 +116,18 @@ interface ObjectiveState {
   toggleAllSelected: () => void
   reshuffleResults: () => void
   searchItem: (url: string) => void
+  selectAnswer: (item: IOption, id: string) => Promise<void>
 }
 
-const ObjectiveStore = create<ObjectiveState>((set, get) => ({
+const ObjectiveStore = create<ObjectiveState>((set) => ({
   links: null,
   count: 0,
+  answeredQuestions: 0,
   page_size: 10,
   currentPage: 1,
   objectiveResults: [],
+  questions: [],
+  lastQuestions: [],
   loading: false,
   selectedItems: [],
   searchResult: [],
@@ -115,8 +149,34 @@ const ObjectiveStore = create<ObjectiveState>((set, get) => ({
   setCurrentPage: (page: number) => {
     set({ currentPage: page })
   },
+
   setLoading: (loadState: boolean) => {
     set({ loading: loadState })
+  },
+
+  selectAnswer: async (item, id) => {
+    set((prev) => {
+      const updatedQuestions = prev.questions.map((question) =>
+        question._id === id
+          ? {
+              ...question,
+              isClicked: true,
+              options: question.options.map((option) => ({
+                ...option,
+                isClicked: option.index === item.index,
+              })),
+            }
+          : question
+      )
+      addRecordsToDB('questions', updatedQuestions)
+      return {
+        questions: updatedQuestions,
+      }
+    })
+
+    const totalQuestions = await getAllQuestionsFromDB<Objective>()
+    const answeredQuestions = totalQuestions.filter((item) => item.isClicked)
+    set({ answeredQuestions: answeredQuestions.length })
   },
 
   setProcessedResults: ({ count, page_size, results }: FetchResponse) => {
@@ -136,25 +196,46 @@ const ObjectiveStore = create<ObjectiveState>((set, get) => ({
     }
   },
 
-  getObjectives: async (
-    url: string,
-    setMessage: (message: string, isError: boolean) => void
-  ) => {
+  getObjectives: async (url) => {
     try {
-      const response = await apiRequest<FetchResponse>(url, {
-        setLoading: ObjectiveStore.getState().setLoading,
-      })
+      const response = await apiRequest<FetchResponse>(url)
       const data = response?.data
       if (data) {
-        ObjectiveStore.getState().setProcessedResults(data)
+        clearTable('questions')
+        addRecordsToDB('questions', data.results)
       }
     } catch (error: unknown) {
-      if (axios.isAxiosError(error) && error.response?.data?.message) {
-        setMessage(error.response.data.message, false)
-      } else {
-        console.error('Failed to fetch staff:', error)
-        setMessage('An unexpected error occurred.', false)
+      console.error('Failed to fetch staff:', error)
+    }
+  },
+
+  getQuestions: async (page_size, limit) => {
+    try {
+      const response = await getQuestionsFromDB<Objective>(
+        'questions',
+        page_size,
+        limit
+      )
+      if (response) {
+        ObjectiveStore.setState({ questions: response })
       }
+    } catch (error: unknown) {
+      console.error('Failed to fetch staff:', error)
+    }
+  },
+
+  getLastQuestions: async (page_size, limit) => {
+    try {
+      const response = await getQuestionsFromDB<Objective>(
+        'last_questions',
+        page_size,
+        limit
+      )
+      if (response) {
+        ObjectiveStore.setState({ lastQuestions: response })
+      }
+    } catch (error: unknown) {
+      console.error('Failed to fetch staff:', error)
     }
   },
 
@@ -218,8 +299,6 @@ const ObjectiveStore = create<ObjectiveState>((set, get) => ({
       setMessage,
     })
     if (response) {
-      const getObjectives = get().getObjectives
-      getObjectives(refreshUrl, setMessage)
     }
   },
 

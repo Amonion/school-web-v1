@@ -12,7 +12,7 @@ export default function VerticalNavigation() {
 
   const pathname = usePathname()
   const { toggleVNav, vNav, clearNav } = NavStore()
-  const { user } = AuthStore()
+  const { user, bioUserState } = AuthStore()
 
   useEffect(() => {
     clearNav()
@@ -92,7 +92,7 @@ export default function VerticalNavigation() {
             <div className="flex cursor-pointer items-center py-2">
               <i className="bi bi-shield-check mr-3"></i>
               Verification
-              {user?.isVerified ? (
+              {bioUserState?.isVerified ? (
                 <i className="bi bi-patch-check text-[var(--success)] ml-auto"></i>
               ) : (
                 <i className="bi bi-question-circle text-red-600 ml-auto"></i>

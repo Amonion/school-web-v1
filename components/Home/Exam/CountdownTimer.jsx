@@ -3,7 +3,6 @@ const CountdownTimer = ({
   isActive,
   isLastResults,
   setDisplayResult,
-  isInteracting,
   startCountdown,
   isLoading,
   submit,
@@ -19,7 +18,7 @@ const CountdownTimer = ({
   const seconds = timeLeft % 60
 
   return (
-    <div className="fixed z-30 w-full sm:pb-[20px] sm:bottom-0 bottom-[60px] left-0">
+    <div className="exam_bottom">
       <div className="custom_container">
         <div className="flex w-full justify-between">
           <div className="w-[300px] hidden sm:block"></div>
@@ -82,18 +81,12 @@ const CountdownTimer = ({
                     <i className="bi bi-send"></i>
                   </div>
                 )}
-                {!isLastResults && (
+                {!isLastResults && !isActive && (
                   <div
                     onClick={startCountdown}
-                    className={`test_circle transition-transform duration-500 ${
-                      isInteracting ? 'opacity-100' : 'opacity-0 hidden'
-                    }`}
+                    className={`test_circle transition-transform duration-500`}
                   >
-                    {isActive ? (
-                      <i className="bi bi-stop-fill"></i>
-                    ) : (
-                      <i className="bi bi-play-fill"></i>
-                    )}
+                    <i className="bi bi-play-fill"></i>
                   </div>
                 )}
               </div>

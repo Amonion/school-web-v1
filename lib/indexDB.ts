@@ -2,7 +2,7 @@ import { ChatContent } from '@/src/zustand/chat/Chat'
 import { openDB } from 'idb'
 
 const DB_NAME = 'chatDB'
-const DB_VERSION = 10
+const DB_VERSION = 12
 const MESSAGES_STORE = 'messages'
 const FRIENDS_STORE = 'friends'
 const MOMENTS_STORE = 'moments'
@@ -13,6 +13,8 @@ const PEOPLE_STORE = 'people'
 const ACCOUNT_STORE = 'accounts'
 const GIVEAWAY_STORE = 'giveaway'
 const EXAM_STORE = 'exams'
+const QUESTION_STORE = 'questions'
+const Last_QUESTION_STORE = 'last_questions'
 
 export const initDB = async () => {
   return openDB(DB_NAME, DB_VERSION, {
@@ -97,6 +99,18 @@ export const initDB = async () => {
       }
       if (!db.objectStoreNames.contains(EXAM_STORE)) {
         const store = db.createObjectStore(EXAM_STORE, {
+          keyPath: '_id',
+        })
+        store.createIndex('createdAt', 'createdAt')
+      }
+      if (!db.objectStoreNames.contains(QUESTION_STORE)) {
+        const store = db.createObjectStore(QUESTION_STORE, {
+          keyPath: '_id',
+        })
+        store.createIndex('createdAt', 'createdAt')
+      }
+      if (!db.objectStoreNames.contains(Last_QUESTION_STORE)) {
+        const store = db.createObjectStore(Last_QUESTION_STORE, {
           keyPath: '_id',
         })
         store.createIndex('createdAt', 'createdAt')
@@ -237,17 +251,36 @@ export const getRecordsFromDB = async <T extends { createdAt: string }>(
   return sorted.slice(start, end)
 }
 
+// export const addRecordsToDB = async <T extends { _id: string }>(
+//   table: string,
+//   items: T[]
+// ): Promise<void> => {
+//   const db = await initDB()
+//   const existingItems: T[] = await db.getAll(table)
+
+//   const existingIds = new Set(existingItems.map((i) => i._id))
+//   const newItems = items.filter((item) => !existingIds.has(item._id))
+
+//   for (const item of newItems) {
+//     await db.put(table, item)
+//   }
+// }
+
 export const addRecordsToDB = async <T extends { _id: string }>(
   table: string,
   items: T[]
-): Promise<void> => {
+) => {
   const db = await initDB()
   const existingItems: T[] = await db.getAll(table)
 
-  const existingIds = new Set(existingItems.map((i) => i._id))
-  const newItems = items.filter((item) => !existingIds.has(item._id))
+  const existingMap = new Map(existingItems.map((i) => [i._id, i]))
 
-  for (const item of newItems) {
+  for (const item of items) {
+    const prev = existingMap.get(item._id)
+
+    // Skip writing if unchanged
+    if (prev && JSON.stringify(prev) === JSON.stringify(item)) continue
+
     await db.put(table, item)
   }
 }

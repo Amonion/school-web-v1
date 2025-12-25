@@ -115,6 +115,7 @@ interface ExamState {
   page_size: number
   exams: Exam[]
   searchedExams: Exam[]
+  isFirstTime: boolean
   loading: boolean
   selectedItems: Exam[]
   searchResult: Exam[]
@@ -133,6 +134,7 @@ interface ExamState {
     setMessage: (message: string, isError: boolean) => void
   ) => Promise<void>
   setProcessedResults: (data: FetchResponse) => void
+  setIsFirstTime: (loading: boolean) => void
   setLoading?: (loading: boolean) => void
   massDelete: (
     url: string,
@@ -175,6 +177,7 @@ const ExamStore = create<ExamState>((set) => ({
   loading: false,
   hasMoreSearch: true,
   hasMore: true,
+  isFirstTime: false,
   selectedItems: [],
   searchResult: [],
   searchedExamResults: [],
@@ -194,6 +197,9 @@ const ExamStore = create<ExamState>((set) => ({
 
   setLoading: (loadState: boolean) => {
     set({ loading: loadState })
+  },
+  setIsFirstTime: (loadState: boolean) => {
+    set({ isFirstTime: loadState })
   },
 
   clearSearchedExams: () => {
@@ -337,7 +343,7 @@ const ExamStore = create<ExamState>((set) => ({
       const data = response?.data
       if (data) {
         set({
-          examForm: data.data,
+          examForm: data.exam,
           loading: false,
           attempt: data.attempt ? data.attempt : 0,
         })

@@ -1,5 +1,12 @@
 'use client'
-import { IOption, Objective } from '@/src/zustand/exam/Objective'
+import useSocket from '@/src/useSocket'
+import ObjectiveStore, {
+  IOption,
+  Objective,
+} from '@/src/zustand/exam/Objective'
+import UserExamStore from '@/src/zustand/exam/UserExam'
+import { MessageStore } from '@/src/zustand/notification/Message'
+import { AuthStore } from '@/src/zustand/user/AuthStore'
 
 interface QuestionObjectiveProps {
   question: Objective
@@ -7,7 +14,6 @@ interface QuestionObjectiveProps {
   currentPage: number
   index: number
   isLastResults: boolean
-  selectAnswer: (option: IOption, id: string) => void
 }
 
 const QuestionObjective: React.FC<QuestionObjectiveProps> = ({
@@ -16,9 +22,33 @@ const QuestionObjective: React.FC<QuestionObjectiveProps> = ({
   currentPage,
   index,
   isLastResults,
-  selectAnswer,
 }) => {
+  const { bioUser } = AuthStore()
+  const { selectAnswer } = ObjectiveStore()
+  const { setMessage } = MessageStore()
+  const { isActive } = UserExamStore()
   const optionsLabel = ['A', 'B', 'C', 'D', 'E', 'F']
+  const socket = useSocket()
+
+  const chooseAnswer = (option: IOption, questionId: string) => {
+    if (isLastResults) {
+      return
+    }
+    if (!isActive) {
+      setMessage('Please click the play button to begin your test.', false)
+      return
+    }
+    selectAnswer(option, questionId)
+
+    if (socket && bioUser) {
+      socket.emit(`message`, {
+        to: 'test',
+        option,
+        questionId,
+        bioUserId: bioUser._id,
+      })
+    }
+  }
 
   return (
     <div className="questions">
@@ -42,7 +72,7 @@ const QuestionObjective: React.FC<QuestionObjectiveProps> = ({
           </div>
           {question.options.map((item, int) => (
             <div
-              onClick={() => selectAnswer(item, question._id)}
+              onClick={() => chooseAnswer(item, question._id)}
               key={int}
               className={`each_option ${
                 isLastResults && item.isSelected
