@@ -20,7 +20,7 @@ const ExamProfile = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(false)
   const { theme } = useTheme()
   const pathname = usePathname()
-  const { bioUserState } = AuthStore()
+  const { bioUserState, bioUser } = AuthStore()
 
   useEffect(() => {
     if (exams.length === 0) {
@@ -34,10 +34,14 @@ const ExamProfile = ({ children }: { children: React.ReactNode }) => {
       })
     }
 
-    getObjectives(
-      `/competitions/leagues/objectives/?page_size=${100}&ordering=createdAt`
-    )
-  }, [id])
+    if (bioUser?._id) {
+      getObjectives(
+        `/competitions/leagues/objectives/?page_size=${100}&ordering=createdAt&paperId=${id}&bioUserId=${
+          bioUser?._id
+        }`
+      )
+    }
+  }, [id, bioUser])
 
   const startPaper = () => {
     if (examForm.questions === 0) {

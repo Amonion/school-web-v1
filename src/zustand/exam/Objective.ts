@@ -15,7 +15,7 @@ export const getQuestionsFromDB = async <T>(
 
   const sorted = allItems.sort(
     (a: Objective, b: Objective) =>
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
   )
 
   const start = (page - 1) * limit
@@ -23,6 +23,7 @@ export const getQuestionsFromDB = async <T>(
 
   return sorted.slice(start, end) as T[]
 }
+
 export const getAllQuestionsFromDB = async <T>(): Promise<T[]> => {
   const db = await initDB()
   const allItems = await db.getAll('questions')
@@ -34,6 +35,7 @@ interface FetchResponse {
   count: number
   page_size: number
   results: Objective[]
+  lastQuestions: Objective[]
 }
 
 export interface IOption {
@@ -83,6 +85,7 @@ interface ObjectiveState {
   objectiveForm: Objective
   setForm: (key: keyof Objective, value: Objective[keyof Objective]) => void
   resetForm: () => void
+  fetchLastObjectives: (url: string) => Promise<void>
   getObjectives: (url: string) => Promise<void>
   getQuestions: (page_size: number, limit: number) => Promise<void>
   getLastQuestions: (page_size: number, limit: number) => Promise<void>
@@ -202,7 +205,9 @@ const ObjectiveStore = create<ObjectiveState>((set) => ({
       const data = response?.data
       if (data) {
         clearTable('questions')
+        clearTable('last_questions')
         addRecordsToDB('questions', data.results)
+        addRecordsToDB('last_questions', data.lastQuestions)
       }
     } catch (error: unknown) {
       console.error('Failed to fetch staff:', error)
@@ -218,6 +223,19 @@ const ObjectiveStore = create<ObjectiveState>((set) => ({
       )
       if (response) {
         ObjectiveStore.setState({ questions: response })
+      }
+    } catch (error: unknown) {
+      console.error('Failed to fetch staff:', error)
+    }
+  },
+
+  fetchLastObjectives: async (url) => {
+    try {
+      const response = await apiRequest<FetchResponse>(url)
+      const data = response?.data
+      if (data) {
+        clearTable('last_questions')
+        addRecordsToDB('last_questions', data.results)
       }
     } catch (error: unknown) {
       console.error('Failed to fetch staff:', error)

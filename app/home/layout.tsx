@@ -12,13 +12,15 @@ import { NavStore } from '@/src/zustand/notification/Navigation'
 import MainHeader from '@/components/Home/Navigation/MainHeader'
 import MobileNav from '@/components/Home/Navigation/MobileNav'
 import CommentBottomSheet from '@/components/Home/Comment/CommentBottomSheet'
+import ResponsiveFriendsList from '@/components/Chat/ResponsiveFriendsList'
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const { headerHeight, setShowHeader, setHeaderHeight } = NavStore()
+  const { headerHeight, isMobileFriends, setShowHeader, setHeaderHeight } =
+    NavStore()
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
   const lastScrollY = useRef(0)
   const isOutOfView = useRef(false)
@@ -74,23 +76,28 @@ export default function RootLayout({
           <div className="flex w-full">
             <VerticalNavigation />
 
-            <div className="flex-1 overflow-x-auto sm:overflow-hidden relative sm:ml-5 md:mr-5 flex flex-col">
-              <MainHeader />
+            {!isMobileFriends && (
+              <div className="flex-1 overflow-x-auto sm:overflow-hidden relative sm:ml-5 md:mr-5 flex flex-col">
+                <MainHeader />
 
-              <div
-                style={{
-                  marginTop: `${headerHeight}px`,
-                  minHeight: `calc(100vh - ${headerHeight}px)`,
-                }}
-                className={`flex flex-col flex-1 w-full`}
-              >
-                {children}
+                <div
+                  style={{
+                    marginTop: `${headerHeight}px`,
+                    minHeight: `calc(100vh - ${headerHeight}px)`,
+                  }}
+                  className={`flex flex-col flex-1 w-full`}
+                >
+                  {children}
+                </div>
               </div>
-            </div>
+            )}
             <AsideFriends />
           </div>
         </div>
       </div>
+
+      <ResponsiveFriendsList />
+
       <MobileNav />
     </>
   )

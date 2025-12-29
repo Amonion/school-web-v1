@@ -5,8 +5,10 @@ import { usePathname } from 'next/navigation'
 import FriendStore from '@/src/zustand/chat/Friend'
 import { useTheme } from '@/context/ThemeProvider'
 import { useEffect, useState } from 'react'
+import { NavStore } from '@/src/zustand/notification/Navigation'
 
 export default function MobileNav() {
+  const { isMobileFriends, setMobileFriends } = NavStore()
   const pathname = usePathname()
   const { theme } = useTheme()
   const [unread, setUnread] = useState(0)
@@ -25,7 +27,7 @@ export default function MobileNav() {
   return (
     <>
       {pathname !== '/home/posts/create-post' && (
-        <div className="border-t-2 h-[55px] border-t-[var(--border-color)] flex bg-[var(--white)] justify-between items-center py-2 px-2 fixed bottom-0 w-full left-0 z-20 sm:hidden">
+        <div className="border-t-2 h-[55px] border-t-[var(--border-color)] flex bg-[var(--white)] justify-between items-center py-2 px-2 fixed bottom-0 w-full left-0 z-50 sm:hidden">
           {pathname === '/home' ? (
             <div className="mobile_navs">
               <i
@@ -79,7 +81,10 @@ export default function MobileNav() {
           {/* <span className="mobile_navs">
         <i className="bi bi-music-note-beamed text-lg text-[var(--text-primary)]"></i>
       </span> */}
-          <Link href={`/home/friends/`} className="mobile_navs">
+          <div
+            onClick={() => setMobileFriends(!isMobileFriends)}
+            className="mobile_navs"
+          >
             {unread > 0 && (
               <div
                 className={`${
@@ -98,7 +103,7 @@ export default function MobileNav() {
                   : 'text-[var(--text-primary)]'
               }`}
             ></i>
-          </Link>
+          </div>
         </div>
       )}
     </>

@@ -10,7 +10,8 @@ export default function HomeHeader() {
   const { personalUnread, officialUnread } = UserNotificationStore()
   const { unreadNotifications } = SocialNotificationStore()
   const { user } = AuthStore()
-  const { toggleVNav, toggleAsideVNav, setScrollUp } = NavStore()
+  const { isMobileFriends, toggleVNav, setMobileFriends, setScrollUp } =
+    NavStore()
   const { getSavedPosts } = PostStore()
 
   const refresh = async () => {
@@ -84,7 +85,7 @@ export default function HomeHeader() {
         </Link>
 
         <i
-          onClick={toggleAsideVNav}
+          onClick={() => setMobileFriends(!isMobileFriends)}
           className="bi bi-people text-xl hidden sm:block md:hidden font-bold"
         ></i>
       </div>

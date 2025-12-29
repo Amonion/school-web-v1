@@ -5,6 +5,7 @@ export interface NavState {
   showHeader: boolean
   asideNav: boolean
   displayPostBox: boolean
+  isMobileFriends: boolean
   scrollUp: boolean
   searchedText: string
   page: number
@@ -15,6 +16,7 @@ export interface NavState {
   togglePostBox: () => void
   setScrollUp: () => void
   setShowHeader: (state: boolean) => void
+  setMobileFriends: (state: boolean) => void
   setHeaderHeight: (height: number) => void
   setMainWidth: (height: number) => void
   toggleVNav: () => void
@@ -33,6 +35,7 @@ export const NavStore = create<NavState>((set) => ({
   scrollUp: true,
   asideNav: false,
   displayPostBox: false,
+  isMobileFriends: false,
   isTraceActive: false,
   isSearching: false,
   isMainPageActive: false,
@@ -55,6 +58,9 @@ export const NavStore = create<NavState>((set) => ({
     set((state) => ({
       scrollUp: !state.scrollUp,
     }))
+  },
+  setMobileFriends: (state: boolean) => {
+    set({ isMobileFriends: state })
   },
   setShowHeader: (state: boolean) => {
     set({

@@ -35,8 +35,14 @@ const ExamTestPractice = () => {
     UserExamStore()
   const { bioUser } = AuthStore()
   const { setMessage } = MessageStore()
-  const { count, questions, answeredQuestions, lastQuestions, getQuestions } =
-    ObjectiveStore()
+  const {
+    count,
+    questions,
+    answeredQuestions,
+    lastQuestions,
+    getQuestions,
+    getLastQuestions,
+  } = ObjectiveStore()
   const duration = examForm.duration * 60
   const { setAlert } = AlartStore()
   const { id, page } = useParams()
@@ -171,6 +177,7 @@ const ExamTestPractice = () => {
     const skip = page ? page : 1
     if (skip && examForm.questionsPerPage) {
       getQuestions(examForm.questionsPerPage, Number(skip))
+      getLastQuestions(examForm.questionsPerPage, Number(skip))
     }
   }, [page, examForm])
 
