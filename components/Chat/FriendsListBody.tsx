@@ -2,10 +2,8 @@ import FriendStore from '@/src/zustand/chat/Friend'
 import { useEffect, useRef, useState } from 'react'
 import { AuthStore } from '@/src/zustand/user/AuthStore'
 import { ChatStore } from '@/src/zustand/chat/Chat'
-import Image from 'next/image'
-import CustomBtn from '@/components/CustomBtn'
-import Link from 'next/link'
 import EachFriend from './EachFriend'
+import NoFriends from './NoFriends'
 
 interface Media {
   name: string
@@ -107,23 +105,7 @@ export default function FriendsListBody() {
           <EachFriend key={index} friend={friend} />
         ))}
       </ul>
-      {friendsResults.length === 0 && (
-        <div className="flex-1 overflow-hidden rounded">
-          <div className="my-2 text-center">You have no friends</div>
-          <Image
-            src={'/images/socialize.png'}
-            loading="lazy"
-            sizes="100vw"
-            className="w-full flex-1 object-cover mb-10"
-            width={0}
-            height={0}
-            alt="Schooling Social Logo"
-          />
-          <Link className="flex min-h-[60px]" href={`/home/trace/accounts`}>
-            <CustomBtn label="Search Friends" loading={false} />
-          </Link>
-        </div>
-      )}
+      {friendsResults.length === 0 && <NoFriends />}
     </>
   )
 }

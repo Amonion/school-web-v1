@@ -85,7 +85,6 @@ export const PeopleStore = create<PeopleState>((set, get) => ({
         const fetchedPeople = data.results
         const savedPeople = PeopleStore.getState().people
         const first20Fetched = fetchedPeople.slice(0, 20)
-        const last20Fetched = fetchedPeople.slice(20, 40)
         if (savedPeople.length === 0) {
           set({ people: first20Fetched })
         } else {
@@ -98,7 +97,7 @@ export const PeopleStore = create<PeopleState>((set, get) => ({
           )
           set({ people: uniquePeople })
         }
-        await addRecordsToDB<BioUserSchoolInfo>('people', last20Fetched)
+        await addRecordsToDB<BioUserSchoolInfo>('people', fetchedPeople)
       }
     } catch (error: unknown) {
       console.log(error)

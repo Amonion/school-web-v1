@@ -17,8 +17,10 @@ export default function ResponsiveFriendsList() {
       <div
         onClick={() => setMobileFriends(false)}
         className={`${
-          isMobileFriends ? 'fixed right-0 top-0 md:hidden' : 'hidden'
-        } w-full flex justify-center z-40 `}
+          isMobileFriends
+            ? 'fixed right-0 top-0 md:hidden overflow-auto'
+            : 'hidden'
+        } w-full flex justify-center z-40 overflow-auto`}
       >
         <div
           onClick={(e) => {
@@ -31,7 +33,7 @@ export default function ResponsiveFriendsList() {
               <div className=" v_nav nav" />
             </div>
 
-            <div className="flex-1 bg-[var(--secondary)] p-3 overflow-auto sm:ml-5 md:mr-5 flex flex-col">
+            <div className="flex-1 bg-[var(--secondary)] p-3 sm:ml-5 md:mr-5 flex flex-col">
               <FriendsListBody />
             </div>
           </div>

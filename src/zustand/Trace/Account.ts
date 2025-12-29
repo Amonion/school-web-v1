@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import _debounce from 'lodash/debounce'
 import apiRequest from '@/lib/axios'
 import { User } from '../user/User'
-import { getRecordsFromDB } from '@/lib/indexDB'
+import { addRecordsToDB, getRecordsFromDB } from '@/lib/indexDB'
 
 interface FetchAccountResponse {
   count: number
@@ -72,7 +72,7 @@ export const AccountStore = create<AccountState>((set, get) => ({
         set({ accounts: accounts })
       }
       get().getAccounts(
-        `/users/accounts/?myId=${user.username}&page_size=40&page=1`
+        `/users/accounts/?myId=${user._id}&_id[ne]=${user._id}&page_size=40&page=1`
       )
     } catch (error: unknown) {
       console.log(error)
@@ -84,6 +84,24 @@ export const AccountStore = create<AccountState>((set, get) => ({
       const response = await apiRequest<FetchAccountResponse>(url)
       const data = response?.data
       if (data) {
+        const fetchedAccounts = data.results
+        const savedAccounts = AccountStore.getState().accounts
+        const first20Fetched = fetchedAccounts.slice(0, 20)
+        if (savedAccounts.length > 0 && savedAccounts.length < 20) {
+          set((prev) => {
+            const existingIds = new Set(prev.accounts.map((a) => a._id))
+            const filtered = first20Fetched.filter(
+              (a) => !existingIds.has(a._id)
+            )
+
+            return {
+              accounts: [...prev.accounts, ...filtered],
+            }
+          })
+        } else if (savedAccounts.length === 0) {
+          set({ accounts: first20Fetched })
+        }
+        addRecordsToDB('accounts', data.results)
       }
     } catch (error: unknown) {
       console.log(error)

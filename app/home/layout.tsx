@@ -19,8 +19,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const { headerHeight, isMobileFriends, setShowHeader, setHeaderHeight } =
-    NavStore()
+  const { headerHeight, setShowHeader, setHeaderHeight } = NavStore()
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
   const lastScrollY = useRef(0)
   const isOutOfView = useRef(false)
@@ -75,22 +74,19 @@ export default function RootLayout({
         <div className="custom_container">
           <div className="flex w-full">
             <VerticalNavigation />
+            <div className="flex-1 overflow-x-auto sm:overflow-hidden relative sm:ml-5 md:mr-5 flex flex-col">
+              <MainHeader />
 
-            {!isMobileFriends && (
-              <div className="flex-1 overflow-x-auto sm:overflow-hidden relative sm:ml-5 md:mr-5 flex flex-col">
-                <MainHeader />
-
-                <div
-                  style={{
-                    marginTop: `${headerHeight}px`,
-                    minHeight: `calc(100vh - ${headerHeight}px)`,
-                  }}
-                  className={`flex flex-col flex-1 w-full`}
-                >
-                  {children}
-                </div>
+              <div
+                style={{
+                  marginTop: `${headerHeight}px`,
+                  minHeight: `calc(100vh - ${headerHeight}px)`,
+                }}
+                className={`flex flex-col flex-1 w-full`}
+              >
+                {children}
               </div>
-            )}
+            </div>
             <AsideFriends />
           </div>
         </div>

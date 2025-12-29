@@ -12,6 +12,7 @@ import { usePathname } from 'next/navigation'
 import { MessageStore } from '@/src/zustand/notification/Message'
 import { formatDateToDDMMYY, getPdfPageCount } from '@/lib/helpers'
 import ChatActions from '@/components/Chat/ChatActions'
+import NoFriends from '@/components/Chat/NoFriends'
 
 const Chats = () => {
   const { updateFriendsChat, friendForm } = FriendStore()
@@ -457,9 +458,7 @@ const Chats = () => {
           </div>
         </div>
       ) : (
-        <div className="h-full w-full flex justify-center items-center">
-          Empty Person
-        </div>
+        <NoFriends />
       )}
     </>
   )

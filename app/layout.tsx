@@ -31,6 +31,10 @@ import { ChatProvider } from '@/context/HomeContext/ChatContext'
 import { GeneralProvider } from '@/context/GeneralContext'
 import { GiveawayProvider } from '@/context/GiveawayContext'
 import { QuestionProvider } from '@/context/HomeContext/QuestionContext'
+import { AuthStore } from '@/src/zustand/user/AuthStore'
+import { PostStore } from '@/src/zustand/Trace/TracePosts'
+import { AccountStore } from '@/src/zustand/Trace/Account'
+import { PeopleStore } from '@/src/zustand/Trace/People'
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -55,10 +59,10 @@ export default function RootLayout({
   const { getCompany } = CompanyStore()
   const pathname = usePathname()
   const socket = useSocket()
-
-  useEffect(() => {
-    setBoxVisibility(false)
-  }, [pathname])
+  const { user } = AuthStore()
+  const { getSavedPosts } = PostStore()
+  const { getSavedAccounts } = AccountStore()
+  const { getSavedPeople } = PeopleStore()
 
   const checkInternetAccess = async () => {
     try {
@@ -84,6 +88,18 @@ export default function RootLayout({
       socket.emit('message', form)
     }
   }
+
+  useEffect(() => {
+    setBoxVisibility(false)
+  }, [pathname])
+
+  useEffect(() => {
+    if (user) {
+      getSavedPosts(user)
+      getSavedAccounts(user)
+      getSavedPeople()
+    }
+  }, [user])
 
   useEffect(() => {
     if (counter === 1 && socket) {

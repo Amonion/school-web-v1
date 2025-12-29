@@ -53,7 +53,7 @@ export default function TraceHeader() {
         <div
           className={`rounded-[20px] bg-[var(--secondary)] sm:ml-2 h-[40px] w-full flex items-center px-4`}
         >
-          {/* <i className="bi bi-sliders cursor-pointer mr-3"></i> */}
+          <i className="bi bi-sliders cursor-pointer mr-3"></i>
           <input
             type="search"
             onChange={(e) => {
