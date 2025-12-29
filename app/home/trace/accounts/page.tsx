@@ -24,7 +24,7 @@ export default function PeopleList() {
         return (
           <AccountCard
             key={item._id}
-            user={item}
+            account={item}
             ref={isLast ? lastUserRef : null}
           />
         )

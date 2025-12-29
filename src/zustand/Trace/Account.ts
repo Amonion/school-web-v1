@@ -9,6 +9,8 @@ interface FetchAccountResponse {
   message: string
   page_size: number
   results: User[]
+  id: string
+  isFollowed: boolean
 }
 
 interface AccountState {
@@ -26,7 +28,6 @@ interface AccountState {
   updateItem: (
     url: string,
     updatedItem: FormData | Record<string, unknown>,
-    setMessage: (message: string, isError: boolean) => void,
     refreshUrl?: string
   ) => Promise<void>
   clearSearchedItem: () => void
@@ -142,14 +143,25 @@ export const AccountStore = create<AccountState>((set, get) => ({
     }
   }, 1000),
 
-  updateItem: async (url: string, updatedItem, setMessage) => {
-    set({ loading: true })
+  updateItem: async (url, updatedItem) => {
     const response = await apiRequest<FetchAccountResponse>(url, {
       method: 'PATCH',
       body: updatedItem,
-      setMessage,
     })
-    if (response?.data) {
+    const data = response.data
+    if (data) {
+      set((prev) => {
+        const updatedAccounts = prev.accounts.map((item) =>
+          item._id === data.id ? { ...item, followed: data.isFollowed } : item
+        )
+        const account = updatedAccounts.find((item) => item._id === data.id)
+        if (account) {
+          addRecordsToDB('accounts', [account])
+        }
+        return {
+          accounts: updatedAccounts,
+        }
+      })
     }
   },
 }))

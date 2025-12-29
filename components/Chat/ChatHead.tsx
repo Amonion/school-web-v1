@@ -40,7 +40,7 @@ export default function ChatHead() {
   return (
     <>
       <div className="flex-1 relative flex items-center px-2">
-        <div className="w-8 cursor-pointer flex sm:hidden bg-[var(--secondary)] h-8 rounded-full justify-center items-center mr-2">
+        <div className="w-8 cursor-pointer flex bg-[var(--secondary)] h-8 rounded-full justify-center items-center mr-2">
           <i
             className="bi bi-arrow-left common-icon cursor-pointer"
             onClick={() => router.back()}

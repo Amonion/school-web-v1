@@ -16,13 +16,15 @@ import UserMediaHolder from '@/components/Home/Media/UserMediaHolder'
 import { MessageCircle } from 'lucide-react'
 import FriendStore, { FriendEmpty } from '@/src/zustand/chat/Friend'
 import { ChatStore } from '@/src/zustand/chat/Chat'
+import { AccountStore } from '@/src/zustand/Trace/Account'
 
 const Profile = ({ children }: { children: React.ReactNode }) => {
   const { username } = useParams()
   const { user } = AuthStore()
   const { page_size, currentPage, getPosts } = UserPostStore()
-  const { getUser, setShowProfileSheet, userForm, updateMyUser, loading } =
+  const { getUser, setShowProfileSheet, updateMyUser, userForm, loading } =
     UserStore()
+
   const { setMessage } = MessageStore()
   const [showFollow, setShowFollow] = useState(false)
   const [tab, setTab] = useState('posts')
@@ -31,6 +33,7 @@ const Profile = ({ children }: { children: React.ReactNode }) => {
   const { theme } = useTheme()
   const router = useRouter()
   const { getSavedChats, setConnection, connection } = ChatStore()
+  const { accounts } = AccountStore()
 
   const urls = ['comments', 'exams', 'media']
 
@@ -109,11 +112,13 @@ const Profile = ({ children }: { children: React.ReactNode }) => {
   }, [userForm])
 
   useEffect(() => {
-    if (username && user) {
-      getUser(`/users/${username}`, setMessage)
-      // getUserDetail(`/users/userinfo/${username}`, setMessage);
+    const account = accounts.find((e) => e.username === username)
+    if (account) {
+      UserStore.setState({ userForm: account })
+    } else if (username && user) {
+      getUser(`/users/${username}?userId=${user._id}`, setMessage)
     }
-  }, [username, pathname, user])
+  }, [username, pathname, user, accounts])
 
   useEffect(() => {
     const key = setConnectionKey(String(username), String(user?.username))
