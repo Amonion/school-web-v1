@@ -37,6 +37,7 @@ const AccountCard = forwardRef<HTMLDivElement, AccountCardProps>(
           displayName: account.displayName,
           _id: '',
           isFriends: findFriend?.isFriends,
+          isVerified: account.isVerified,
         },
       })
       getSavedChats(connection)
