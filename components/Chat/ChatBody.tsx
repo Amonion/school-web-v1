@@ -156,7 +156,7 @@ const ChatBody = () => {
     if (!socket) return
 
     if (user) {
-      socket.on(`addCreatedChat${username}`, (data: response) => {
+      socket.on(`addCreatedChat${user.username}`, (data: response) => {
         updateFriendsChat({ ...data.friend })
         if (data.connection === connection) {
           addNewChat(data.chat)

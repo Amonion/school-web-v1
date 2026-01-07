@@ -1,8 +1,8 @@
 import { ChatContent } from '@/src/zustand/chat/Chat'
-import { openDB } from 'idb'
+import { deleteDB, openDB } from 'idb'
 
 const DB_NAME = 'chatDB'
-const DB_VERSION = 12
+const DB_VERSION = 13
 const MESSAGES_STORE = 'messages'
 const FRIENDS_STORE = 'friends'
 const MOMENTS_STORE = 'moments'
@@ -15,6 +15,11 @@ const GIVEAWAY_STORE = 'giveaway'
 const EXAM_STORE = 'exams'
 const QUESTION_STORE = 'questions'
 const Last_QUESTION_STORE = 'last_questions'
+
+export async function resetDB() {
+  await deleteDB(DB_NAME)
+  console.log('Database deleted')
+}
 
 export const initDB = async () => {
   return openDB(DB_NAME, DB_VERSION, {
@@ -228,6 +233,12 @@ export const deleteMessageFromDB = async (timeNumber: number) => {
 
 export const clearTable = async (tableName: string): Promise<void> => {
   const db = await initDB()
+
+  if (!db.objectStoreNames.contains(tableName)) {
+    console.warn(`IndexedDB store "${tableName}" does not exist`)
+    return
+  }
+
   await db.clear(tableName)
 }
 

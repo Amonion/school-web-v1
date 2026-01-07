@@ -5,7 +5,6 @@ import Image from 'next/image'
 import { formatRelativeDate } from '@/lib/helpers'
 import { usePathname, useRouter } from 'next/navigation'
 import { ChatStore } from '@/src/zustand/chat/Chat'
-import { useEffect, useState } from 'react'
 
 interface EachFriendProps {
   friend: Friend
@@ -19,22 +18,20 @@ export default function EachFriend({ friend }: EachFriendProps) {
   const { user } = AuthStore()
   const { friendForm } = FriendStore()
   const { getSavedChats, connection } = ChatStore()
-  const [unread, setUnread] = useState(0)
   const router = useRouter()
   const pathname = usePathname()
-  const isSender = friend.senderUsername === user?.username
+  const isSender = friend.username === user?.username
 
   const selectFriend = () => {
     if (friendForm.connection !== friend.connection) {
       ChatStore.setState({
         chats: [],
-        username: isSender ? friend.receiverUsername : friend.senderUsername,
+        username: friend.username,
         chatUserForm: {
-          username: isSender ? friend.receiverUsername : friend.senderUsername,
-          picture: isSender ? friend.receiverPicture : friend.senderPicture,
-          displayName: isSender
-            ? friend.receiverDisplayName
-            : friend.senderDisplayName,
+          username: friend.username,
+          picture: friend.picture,
+          isVerified: friend.isVerified,
+          displayName: friend.displayName,
           _id: '',
           isFriends: friend.isFriends,
         },
@@ -51,17 +48,6 @@ export default function EachFriend({ friend }: EachFriendProps) {
     }
   }
 
-  useEffect(() => {
-    if (currentFriend.unreadMessages && user) {
-      for (let i = 0; i < currentFriend.unreadMessages.length; i++) {
-        const el = currentFriend.unreadMessages[i]
-        if (el.username === user?.username) {
-          setUnread(el.unread)
-        }
-      }
-    }
-  }, [currentFriend, user])
-
   return (
     <li
       onClick={() => selectFriend()}
@@ -75,11 +61,7 @@ export default function EachFriend({ friend }: EachFriendProps) {
     >
       <div className="rounded-full w-10 h-10 relative overflow-hidden">
         <Image
-          src={
-            isSender
-              ? currentFriend.receiverPicture
-              : currentFriend.senderPicture
-          }
+          src={currentFriend.picture}
           alt="Media"
           fill
           className="object-cover w-full h-full"
@@ -89,9 +71,7 @@ export default function EachFriend({ friend }: EachFriendProps) {
       <div className="flex-1 pl-2">
         <div className="flex w-full items-center mb-1">
           <div className="font-semibold line-clamp-1 text-[var(--text-secondary)] mr-auto">
-            {isSender
-              ? currentFriend.receiverDisplayName
-              : currentFriend.senderDisplayName}
+            {currentFriend.displayName}
           </div>
           <div className="text-[12px] ml-2 block">
             {formatRelativeDate(String(currentFriend.updatedAt))}
@@ -133,15 +113,15 @@ export default function EachFriend({ friend }: EachFriendProps) {
         </div>
       </div>
 
-      {unread > 0 && (
+      {friend.unread > 0 && (
         <div
           className={`${
-            unread >= 100
+            friend.unread >= 100
               ? 'w-[20px] h-[20px] text-[10px]'
               : 'w-[15px] h-[15px] text-[12px]'
           } flex items-center  text-white absolute right-0 bottom-1 z-30 justify-center rounded-full bg-[var(--custom)]`}
         >
-          {unread >= 100 ? '99+' : unread}
+          {friend.unread >= 100 ? '99+' : friend.unread}
         </div>
       )}
     </li>

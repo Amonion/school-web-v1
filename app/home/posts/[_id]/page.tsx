@@ -32,7 +32,7 @@ const MainPost = () => {
   useEffect(() => {
     if (postForm._id && pathname === `/home/posts/${_id}`) {
       getComments(
-        `/posts/comments/?postId=${_id}&level=1&postType=comment&myId=${user?._id}&page_size=30&page=1&ordering=-createdAt`
+        `/comments/?postId=${_id}&level=1&postType=comment&myId=${user?._id}&page_size=30&page=1&ordering=-createdAt`
       )
       setMainPost(postForm)
       setShowComment(true)

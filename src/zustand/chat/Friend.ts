@@ -22,26 +22,21 @@ export const getAllFriendsFromDB = async (): Promise<Friend[]> => {
   return db.getAll('friends')
 }
 
-interface UnreadMessage {
-  username: string
-  unread: number
-}
-
 export interface Friend {
-  senderDisplayName: string
-  senderUsername: string
-  senderPicture: string
-  receiverDisplayName: string
-  receiverUsername: string
-  receiverPicture: string
   content: string
-  status: string
-  media: PreviewFile[]
-  connection: string
-  createdAt: Date | null
-  timeNumber: number
+  username: string
+  bioUserId: string
+  displayName: string
+  picture: string
   isFriends: boolean
-  unreadMessages?: UnreadMessage[]
+  isVerified: boolean
+  connection: string
+  status: string
+  timeNumber: number
+  unread: number
+  media: PreviewFile[]
+  createdAt: Date | null
+  _id?: string
   updatedAt?: Date
   totalUnread?: number
   isOnline?: boolean
@@ -50,16 +45,17 @@ export interface Friend {
 }
 
 export const FriendEmpty = {
-  senderDisplayName: '',
-  senderUsername: '',
-  senderPicture: '',
-  receiverDisplayName: '',
-  receiverUsername: '',
-  receiverPicture: '',
   content: '',
-  media: [],
-  status: '',
+  username: '',
+  bioUserId: '',
+  displayName: '',
+  picture: '',
+  isVerified: false,
   connection: '',
+  status: '',
+  contentType: '',
+  unread: 0,
+  media: [],
   createdAt: null,
   timeNumber: 0,
   totalUnread: 0,
@@ -73,6 +69,7 @@ interface FetchChatResponse {
   page_size: number
   totalUnread: number
   results: Friend[]
+  friend: Friend
 }
 
 interface FriendState {
@@ -87,6 +84,7 @@ interface FriendState {
   searchResult: Friend[]
   isAllChecked: boolean
   getFriends: (url: string) => Promise<void>
+  getFriend: (url: string) => Promise<void>
   getSavedFriends: (user: User) => Promise<void>
   setProcessedResults: (data: Friend[]) => void
   setLoading?: (loading: boolean) => void
@@ -182,7 +180,6 @@ const FriendStore = create<FriendState>((set) => ({
             ...item,
             status: data.status,
             updatedAt: data.updatedAt,
-            unreadMessages: data.unreadMessages,
           }
         }
         return { ...item }
@@ -241,6 +238,20 @@ const FriendStore = create<FriendState>((set) => ({
             }
           }
         })
+      }
+    } catch (error: unknown) {
+      console.log(error)
+    }
+  },
+
+  getFriend: async (url) => {
+    try {
+      const response = await apiRequest<FetchChatResponse>(url, {
+        setLoading: FriendStore.getState().setLoading,
+      })
+      const data = response?.data
+      if (data) {
+        set({ friendForm: data.friend ? data.friend : FriendEmpty })
       }
     } catch (error: unknown) {
       console.log(error)

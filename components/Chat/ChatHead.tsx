@@ -1,41 +1,12 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { useEffect } from 'react'
-import { useParams, usePathname, useRouter } from 'next/navigation'
-import { MessageStore } from '@/src/zustand/notification/Message'
+import { useParams, useRouter } from 'next/navigation'
 import { ChatStore } from '@/src/zustand/chat/Chat'
-import FriendStore, { FriendEmpty } from '@/src/zustand/chat/Friend'
 
 export default function ChatHead() {
-  const { setMessage } = MessageStore()
-  const { friendsResults } = FriendStore()
-  const pathname = usePathname()
-  const { chatUserForm, getChatUser } = ChatStore()
+  const { chatUserForm } = ChatStore()
   const { username } = useParams()
   const router = useRouter()
-
-  useEffect(() => {
-    if (!chatUserForm.username) {
-      getChatUser(`/users/chat/${username}`, setMessage)
-    }
-  }, [chatUserForm, pathname])
-
-  useEffect(() => {
-    if (friendsResults.length > 0 && username) {
-      FriendStore.setState((prev) => {
-        const friend = prev.friendsResults.find(
-          (item) =>
-            item.senderUsername === username ||
-            item.receiverUsername === username
-        )
-        return {
-          friendForm: friend ? friend : FriendEmpty,
-        }
-      })
-    } else {
-      FriendStore.setState({ friendForm: FriendEmpty })
-    }
-  }, [username, friendsResults.length])
 
   return (
     <>
@@ -72,7 +43,9 @@ export default function ChatHead() {
               >
                 {chatUserForm.displayName}
               </Link>
-              <i className="bi bi-shield-check verify_icon"></i>
+              {chatUserForm.isVerified && (
+                <i className="bi bi-shield-check verify_icon ml-2"></i>
+              )}
             </div>
             <div className="flex items-center">
               <Link

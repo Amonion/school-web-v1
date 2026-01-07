@@ -14,7 +14,7 @@ import ProfileBottomSheet from '@/components/Home/Profile/ProfileBottomSheet'
 import UserPostStore from '@/src/zustand/post/UserPost'
 import UserMediaHolder from '@/components/Home/Media/UserMediaHolder'
 import { MessageCircle } from 'lucide-react'
-import FriendStore, { FriendEmpty } from '@/src/zustand/chat/Friend'
+import FriendStore from '@/src/zustand/chat/Friend'
 import { ChatStore } from '@/src/zustand/chat/Chat'
 import { AccountStore } from '@/src/zustand/Trace/Account'
 
@@ -24,7 +24,6 @@ const Profile = ({ children }: { children: React.ReactNode }) => {
   const { page_size, currentPage, getPosts } = UserPostStore()
   const { getUser, setShowProfileSheet, updateMyUser, userForm, loading } =
     UserStore()
-
   const { setMessage } = MessageStore()
   const [showFollow, setShowFollow] = useState(false)
   const [tab, setTab] = useState('posts')
@@ -33,8 +32,8 @@ const Profile = ({ children }: { children: React.ReactNode }) => {
   const { theme } = useTheme()
   const router = useRouter()
   const { getSavedChats, setConnection, connection } = ChatStore()
+  const { friendForm, getFriend } = FriendStore()
   const { accounts } = AccountStore()
-
   const urls = ['comments', 'exams', 'media']
 
   const followAccount = () => {
@@ -52,10 +51,6 @@ const Profile = ({ children }: { children: React.ReactNode }) => {
     )
   }
 
-  const findFriend = FriendStore.getState().friendsResults.find(
-    (item) => item.connection === connection
-  )
-
   const selectFriend = () => {
     ChatStore.setState({
       chats: [],
@@ -64,21 +59,12 @@ const Profile = ({ children }: { children: React.ReactNode }) => {
         username: userForm.username,
         picture: String(userForm.picture),
         displayName: userForm.displayName,
+        isVerified: userForm.isVerified,
         _id: '',
-        isFriends: findFriend?.isFriends,
+        isFriends: friendForm.isFriends,
       },
     })
     getSavedChats(connection)
-
-    FriendStore.setState((prev) => {
-      const friend = prev.friendsResults.find(
-        (item) => item.connection === connection
-      )
-      return {
-        friendForm: friend ? friend : { ...FriendEmpty },
-      }
-    })
-
     router.push(`/chat`)
   }
 
@@ -123,6 +109,7 @@ const Profile = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const key = setConnectionKey(String(username), String(user?.username))
     setConnection(key)
+    getFriend(`/chats/friends/${username}`)
     if (urls.every((word) => !pathname.includes(word))) {
       setTab('posts')
     }
@@ -133,6 +120,12 @@ const Profile = ({ children }: { children: React.ReactNode }) => {
       setTab('media')
     }
   }, [pathname])
+
+  useEffect(() => {
+    if (connection && username) {
+      getFriend(`/chats/friends/${username}?connection=${connection}`)
+    }
+  }, [username, connection])
 
   return (
     <div className="relative">

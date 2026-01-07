@@ -1,12 +1,12 @@
 import { usePathname, useRouter } from 'next/navigation'
 import PostHeader from './PostHeader'
 import Polls from './Polls'
-import TruncatedContent from './TruncatedContent'
 import PostStat from './PostStat'
 import { Post, PostStore } from '@/src/zustand/post/Post'
 import HomePostMedia from '../Media/HomePostMedia'
 import UserPostMedia from '../Media/UserPostMedia'
 import CommentStore from '@/src/zustand/post/Comment'
+import { useState } from 'react'
 
 interface PostCardProps {
   post: Post
@@ -18,6 +18,7 @@ const PostCard: React.FC<
 > = ({ post, lastRef }) => {
   const router = useRouter()
   const pathname = usePathname()
+  const [showFullText, toggleFullText] = useState(false)
   const { page_size, currentPage, getComments } = CommentStore()
   const { mediaResults, setSelectedMedia, setCurrentIndex, setFitMode } =
     PostStore()
@@ -76,9 +77,24 @@ const PostCard: React.FC<
             }}
           ></div>
         ) : (
-          <div className="px-2 cursor-pointer mb-1 text-[16px] text-[var(--text-title-color)]">
-            <TruncatedContent content={post.content} limit={200} post={post} />
-          </div>
+          <>
+            <div
+              className={`${
+                showFullText ? '' : 'overflow-ellipsis line-clamp-3'
+              } px-2 cursor-pointer mb-1 text-[16px] text-[var(--text-title-color)]`}
+              dangerouslySetInnerHTML={{
+                __html: post.content,
+              }}
+            ></div>
+            {!showFullText && post.content.length > 100 && (
+              <span
+                onClick={() => toggleFullText(true)}
+                className="text-[var(--custom)] cursor-pointer mt-4 mb-1 px-2"
+              >
+                Show full text
+              </span>
+            )}
+          </>
         )}
         {post.media.length > 0 && pathname === '/home' ? (
           <HomePostMedia sources={post.media} />

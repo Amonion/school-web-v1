@@ -3,21 +3,25 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import CustomBtn from '@/components/CustomBtn'
+import FriendStore from '@/src/zustand/chat/Friend'
 
 const NoFriends = () => {
   const router = useRouter()
+  const { friendsResults } = FriendStore()
 
   return (
     <>
       <div className="flex-1 flex flex-col items-center justify-center">
         <div className="my-5 text-xl text-[var(--textSecondary)] font-semibold text-center">
-          You have no friends
+          {friendsResults.length
+            ? 'Enjoying Schooling Social?'
+            : ' You have no friends'}
         </div>
         <Image
           src={'/images/socialize.svg'}
           loading="lazy"
           sizes="100vw"
-          className="h-full max-w-[200px] w-auto object-contain"
+          className="h-full max-h-[60%] max-w-[200px] w-auto object-contain"
           width={0}
           height={0}
           alt="Schooling Social Logo"
@@ -32,9 +36,15 @@ const NoFriends = () => {
               Go Back
             </div>
           </div>
-          <Link href={`/home/trace/accounts`}>
-            <CustomBtn label="Search Friends" loading={false} />
-          </Link>
+          {friendsResults.length ? (
+            <div className="flex justify-center">
+              <CustomBtn label="Download The App" loading={false} />
+            </div>
+          ) : (
+            <Link href={`/home/trace/accounts`}>
+              <CustomBtn label="Search Friends" loading={false} />
+            </Link>
+          )}
         </div>
       </div>
     </>

@@ -179,6 +179,7 @@ interface ChatState {
 
 export interface ChatUserForm {
   username: string
+  isVerified: boolean
   displayName: string
   picture: string
   _id: string
@@ -186,6 +187,7 @@ export interface ChatUserForm {
 }
 
 export const ChatUserFormEmpty = {
+  isVerified: false,
   username: '',
   displayName: '',
   picture: '',

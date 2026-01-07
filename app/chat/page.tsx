@@ -220,6 +220,7 @@ const Chats = () => {
   }
 
   const postMessage = async () => {
+    if (!user) return
     if (text.trim().length === 0 && files.length === 0) {
       setMessage(`No message to send to `, false)
       return
@@ -228,14 +229,34 @@ const Chats = () => {
     if (socket) {
       const timeNumber = new Date().getTime()
 
+      const friendChat = {
+        content: text,
+        connection: connection,
+        displayName: String(user?.displayName),
+        username: String(user?.username),
+        picture: String(user?.picture),
+        bioUserId: String(user?.bioUserId),
+        status: 'pending',
+        timeNumber: timeNumber,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        media: files,
+        isFriends: friendForm.isFriends,
+        isOnline: false,
+        isVerified: user?.isVerified,
+        unread: friendForm.unread,
+      }
+
       const form = {
         to: 'chat',
         action: 'post',
         content: text,
         day: formatDateToDDMMYY(new Date()),
-        connection: connection,
-        repliedChat: repliedChat,
+        connection,
+        friendChat,
+        repliedChat,
         isFriends: friendForm.isFriends,
+        senderBioUserId: user?.bioUserId,
         senderDisplayName: String(user?.displayName),
         senderUsername: String(user?.username),
         senderPicture: String(user?.picture),
@@ -245,29 +266,10 @@ const Chats = () => {
         senderTime: new Date().toISOString(),
         time: new Date().getTime(),
         updatedAt: new Date(),
-        timeNumber: timeNumber,
+        timeNumber,
         media: await serializeFiles(
           files.map((f) => f.file).filter((f): f is File => f instanceof File)
         ),
-      }
-
-      const friendChat = {
-        content: text,
-        connection: connection,
-        senderDisplayName: String(user?.displayName),
-        senderUsername: String(user?.username),
-        senderPicture: String(user?.picture),
-        receiverUsername: chatUserForm.username,
-        receiverPicture: String(chatUserForm.picture),
-        receiverDisplayName: chatUserForm.displayName,
-        status: 'pending',
-        senderTime: new Date().toISOString(),
-        timeNumber: timeNumber,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        media: files,
-        isFriends: friendForm.isFriends,
-        isOnline: false,
       }
 
       const saved = {
