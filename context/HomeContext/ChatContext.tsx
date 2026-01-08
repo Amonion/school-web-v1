@@ -69,7 +69,9 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
       socket.on(`updatePendingChat${user.username}`, (data: response) => {
         updatePendingChat(data.chat)
         setChat(data.chat)
-        updatePendingFriendsChat(data.friend)
+        if (data.friend) {
+          updatePendingFriendsChat(data.friend)
+        }
         FriendStore.setState((prev) => {
           return {
             friendForm: {

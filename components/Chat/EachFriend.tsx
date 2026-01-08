@@ -32,6 +32,7 @@ export default function EachFriend({ friend }: EachFriendProps) {
           picture: friend.picture,
           isVerified: friend.isVerified,
           displayName: friend.displayName,
+          bioUserId: friend.bioUserId,
           _id: '',
           isFriends: friend.isFriends,
         },

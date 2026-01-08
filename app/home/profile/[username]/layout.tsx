@@ -60,6 +60,7 @@ const Profile = ({ children }: { children: React.ReactNode }) => {
         picture: String(userForm.picture),
         displayName: userForm.displayName,
         isVerified: userForm.isVerified,
+        bioUserId: userForm.bioUserId,
         _id: '',
         isFriends: friendForm.isFriends,
       },

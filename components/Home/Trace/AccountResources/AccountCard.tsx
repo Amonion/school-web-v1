@@ -35,6 +35,7 @@ const AccountCard = forwardRef<HTMLDivElement, AccountCardProps>(
           username: account.username,
           picture: String(account.picture),
           displayName: account.displayName,
+          bioUserId: account.bioUserId,
           _id: '',
           isFriends: findFriend?.isFriends,
           isVerified: account.isVerified,

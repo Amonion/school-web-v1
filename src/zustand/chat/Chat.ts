@@ -183,6 +183,7 @@ export interface ChatUserForm {
   displayName: string
   picture: string
   _id: string
+  bioUserId: string
   isFriends?: boolean
 }
 
@@ -191,6 +192,7 @@ export const ChatUserFormEmpty = {
   username: '',
   displayName: '',
   picture: '',
+  bioUserId: '',
   _id: '',
 }
 

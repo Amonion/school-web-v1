@@ -8,11 +8,12 @@ import FriendStore from '@/src/zustand/chat/Friend'
 import { AuthStore } from '@/src/zustand/user/AuthStore'
 import { Plus, Smile } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { MessageStore } from '@/src/zustand/notification/Message'
 import { formatDateToDDMMYY, getPdfPageCount } from '@/lib/helpers'
 import ChatActions from '@/components/Chat/ChatActions'
 import NoFriends from '@/components/Chat/NoFriends'
+import Image from 'next/image'
 
 const Chats = () => {
   const { updateFriendsChat, friendForm } = FriendStore()
@@ -36,6 +37,7 @@ const Chats = () => {
   const { user } = AuthStore()
   const [text, setText] = useState('')
   const { setMessage } = MessageStore()
+  const router = useRouter()
   //   const [files, setFiles] = useState<FileType[]>([])
   // const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [isOptions, setOptions] = useState(false)
@@ -51,6 +53,21 @@ const Chats = () => {
       })
     }
   }, [])
+
+  useEffect(() => {
+    if (!user) return
+    const sent = chats.find((item) => item.senderUsername === user.username)
+    const receive = chats.find(
+      (item) => item.receiverUsername === user.username
+    )
+    if (sent && receive) {
+      FriendStore.setState((prev) => {
+        return {
+          friendForm: { ...prev.friendForm, isFriends: true },
+        }
+      })
+    }
+  }, [chats.length])
 
   useEffect(() => {
     if (username && user) {
@@ -232,10 +249,11 @@ const Chats = () => {
       const friendChat = {
         content: text,
         connection: connection,
-        displayName: String(user?.displayName),
-        username: String(user?.username),
-        picture: String(user?.picture),
-        bioUserId: String(user?.bioUserId),
+        senderUsername: user.username,
+        displayName: chatUserForm.displayName,
+        username: chatUserForm.username,
+        picture: chatUserForm.picture,
+        bioUserId: chatUserForm.bioUserId,
         status: 'pending',
         timeNumber: timeNumber,
         createdAt: new Date(),
@@ -243,7 +261,7 @@ const Chats = () => {
         media: files,
         isFriends: friendForm.isFriends,
         isOnline: false,
-        isVerified: user?.isVerified,
+        isVerified: chatUserForm.isVerified,
         unread: friendForm.unread,
       }
 
@@ -256,13 +274,10 @@ const Chats = () => {
         friendChat,
         repliedChat,
         isFriends: friendForm.isFriends,
-        senderBioUserId: user?.bioUserId,
-        senderDisplayName: String(user?.displayName),
-        senderUsername: String(user?.username),
-        senderPicture: String(user?.picture),
+        senderUsername: user.username,
+        senderPicture: String(user.picture),
         receiverUsername: chatUserForm.username,
-        receiverPicture: String(chatUserForm.picture),
-        receiverDisplayName: chatUserForm.displayName,
+        receiverPicture: chatUserForm.picture,
         senderTime: new Date().toISOString(),
         time: new Date().getTime(),
         updatedAt: new Date(),
@@ -460,7 +475,46 @@ const Chats = () => {
           </div>
         </div>
       ) : (
-        <NoFriends />
+        <>
+          <div className="sticky z-30 left-0 py-2 top-0 w-full bg-[var(--primary)] mb-2 h-[65px]">
+            <div className="flex-1 relative flex items-center px-2">
+              <div className="w-8 cursor-pointer flex bg-[var(--secondary)] h-8 rounded-full justify-center items-center mr-2">
+                <i
+                  className="bi bi-arrow-left common-icon cursor-pointer"
+                  onClick={() => router.back()}
+                ></i>
+              </div>
+              <div className="flex items-center flex-1 cursor-default ">
+                {
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 mr-3">
+                    <Image
+                      style={{ height: '100%', objectFit: 'cover' }}
+                      src="/images/active-icon.png"
+                      loading="lazy"
+                      sizes="100vw"
+                      className="w-full h-full object-contain"
+                      width={0}
+                      height={0}
+                      alt={`Schooling Social`}
+                    />
+                  </div>
+                }
+                <div className="flex-1">
+                  <div className="flex items-center">
+                    <div className="account_name line-clamp-1 overflow-ellipsis">
+                      Schooling Social
+                    </div>
+                    <i className="bi bi-shield-check verify_icon ml-2"></i>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="post_username mr-7">@Schooling</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <NoFriends />
+        </>
       )}
     </>
   )

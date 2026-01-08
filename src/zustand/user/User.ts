@@ -48,7 +48,8 @@ interface UserState {
   ) => Promise<void>
   getUser: (
     url: string,
-    setMessage: (message: string, isError: boolean) => void
+    setMessage: (message: string, isError: boolean) => void,
+    redirect?: (user: User) => void
   ) => Promise<void>
   getMyUser: (
     url: string,
@@ -159,11 +160,9 @@ export const UserStore = create<UserState>((set) => ({
     }
   },
 
-  getUser: async (
-    url: string,
-    setMessage: (message: string, isError: boolean) => void
-  ) => {
+  getUser: async (url, setMessage, redirect) => {
     try {
+      set({ loading: true })
       const response = await apiRequest<FetchUserResponse>(url, {
         setMessage,
       })
@@ -174,15 +173,15 @@ export const UserStore = create<UserState>((set) => ({
           loading: false,
         })
       }
+      if (redirect) redirect(data.data)
     } catch (error: unknown) {
       if (error) return
+    } finally {
+      set({ loading: false })
     }
   },
 
-  getMyUser: async (
-    url: string,
-    setMessage: (message: string, isError: boolean) => void
-  ) => {
+  getMyUser: async (url: string, setMessage) => {
     try {
       const response = await apiRequest<FetchUserResponse>(url, {
         setMessage,

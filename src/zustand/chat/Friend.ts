@@ -203,7 +203,7 @@ const FriendStore = create<FriendState>((set) => ({
         set({ friendsResults: friends })
       }
       FriendStore.getState().getFriends(
-        `/chats/friends?username=${user.username}&page=1&page_size=40`
+        `/chats/friends?senderUsername=${user.username}&page=1&page_size=40`
       )
     } catch (error: unknown) {
       console.log(error)
@@ -217,7 +217,7 @@ const FriendStore = create<FriendState>((set) => ({
       })
       const data = response?.data
       if (data) {
-        FriendStore.getState().setProcessedResults(data.results)
+        // FriendStore.getState().setProcessedResults(data.results)
         const results = data.results
         set((prev) => {
           if (results.length === 0) {
